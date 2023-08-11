@@ -18,12 +18,10 @@ export default function Home() {
         </div>
 
         <div>
-        <Paragraph>
-        Your superhuman productivity sidekick
-        </Paragraph>
+          <Paragraph>Your superhuman productivity sidekick</Paragraph>
         </div>
         <form className="flex items-center gap-2">
-          <Input placeholder="e.g user@gmail.com"/>
+          <Input placeholder="e.g user@gmail.com" />
           <Button type="submit">Join the waitlist</Button>
         </form>
       </div>
