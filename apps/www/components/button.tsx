@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
-import { manrope } from "../app/layout";
+import { manrope } from "./font";
 
 export const Button = ({
   children,

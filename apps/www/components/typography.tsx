@@ -1,5 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { manrope } from "../app/layout";
+import { manrope } from "./font";
 
 interface Props
   extends React.DetailedHTMLProps<

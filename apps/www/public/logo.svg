@@ -1,9 +1,7 @@
-<svg width="51" height="50" viewBox="0 0 51 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="logo">
-<circle id="logo_2" cx="25.5" cy="25" r="25" transform="rotate(-90 25.5 25)" fill="url(#paint0_linear_221_293)"/>
-</g>
+<svg width="110" height="110" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="55" cy="55" r="55" transform="rotate(-90 55 55)" fill="url(#paint0_linear_179_219)"/>
 <defs>
-<linearGradient id="paint0_linear_221_293" x1="25.5" y1="-1.90735e-06" x2="25.5" y2="50" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint0_linear_179_219" x1="55" y1="-3.8147e-06" x2="55" y2="110" gradientUnits="userSpaceOnUse">
 <stop stop-color="#0CFFE1"/>
 <stop offset="0.5" stop-color="#FFD6A1"/>
 <stop offset="1" stop-color="#FF3C5B"/>
