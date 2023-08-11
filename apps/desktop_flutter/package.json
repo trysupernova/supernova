@@ -1,0 +1,7 @@
+{
+    "name": "@supernova/desktop-flutter",
+    "version": "0.0.0",
+    "scripts": {
+        "dev": "flutter run"
+    }
+}
