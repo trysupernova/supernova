@@ -40,6 +40,11 @@ dependencies:
   url_launcher: ^6.1.12
   window_to_front:
     path: ../../packages/window_to_front
+  intl: ^0.18.1
+  collection: ^1.17.1
+  provider: ^6.0.5
+  flutter_riverpod: ^2.3.7
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:

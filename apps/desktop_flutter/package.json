@@ -1,7 +1,7 @@
 {
-    "name": "@supernova/desktop-flutter",
+    "name": "@supernova/desktop",
     "version": "0.0.0",
     "scripts": {
-        "dev": "flutter run"
+        "dev": "flutter run -d macos"
     }
 }

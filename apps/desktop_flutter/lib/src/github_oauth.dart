@@ -5,31 +5,31 @@ import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
 import 'package:url_launcher/url_launcher.dart';
 
-final _authorizationEndpoint =
-    Uri.parse('https://github.com/login/oauth/authorize');
-final _tokenEndpoint = Uri.parse('https://github.com/login/oauth/access_token');
-
 typedef AuthenticatedBuilder = Function(
     BuildContext context, oauth2.Client client);
 
-class GithubLoginWidget extends StatefulWidget {
-  const GithubLoginWidget({
+class OAuthLoginWidget extends StatefulWidget {
+  const OAuthLoginWidget({
     required this.builder,
-    required this.githubClientId,
-    required this.githubClientSecret,
-    required this.githubScopes,
+    required this.clientId,
+    required this.clientSecret,
+    required this.scopes,
+    required this.authorizationUrl,
+    required this.tokenEndpoint,
     super.key,
   });
   final AuthenticatedBuilder builder;
-  final String githubClientId;
-  final String githubClientSecret;
-  final List<String> githubScopes;
+  final String clientId;
+  final String clientSecret;
+  final Uri authorizationUrl;
+  final Uri tokenEndpoint;
+  final List<String> scopes;
 
   @override
-  State<StatefulWidget> createState() => _GithubLoginState();
+  State<StatefulWidget> createState() => _OAuthLoginState();
 }
 
-class _GithubLoginState extends State<GithubLoginWidget> {
+class _OAuthLoginState extends State<OAuthLoginWidget> {
   HttpServer? _redirectServer;
   oauth2.Client? _client;
 
@@ -41,37 +41,36 @@ class _GithubLoginState extends State<GithubLoginWidget> {
     }
 
     return Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            await _redirectServer?.close();
-            // Bind to an ephemeral port on localhost
-            _redirectServer = await HttpServer.bind('localhost', 0);
-            var authenticatedHttpClient = await _getOAuth2Client(
-                Uri.parse('http://localhost:${_redirectServer!.port}/auth'));
-            setState(() {
-              _client = authenticatedHttpClient;
-            });
-          },
-          child: const Text('Login to Github'),
-        ),
+      child: ElevatedButton(
+        onPressed: () async {
+          await _redirectServer?.close();
+          // Bind to an ephemeral port on localhost
+          _redirectServer = await HttpServer.bind('localhost', 0);
+          var authenticatedHttpClient = await _getOAuth2Client(
+              Uri.parse('http://localhost:${_redirectServer!.port}/auth'));
+          setState(() {
+            _client = authenticatedHttpClient;
+          });
+        },
+        child: const Text('Login to Github'),
+      ),
     );
   }
 
   Future<oauth2.Client> _getOAuth2Client(Uri redirectUrl) async {
-    if (widget.githubClientId.isEmpty || widget.githubClientSecret.isEmpty) {
-      throw const GithubLoginException(
-          'githubClientId and githubClientSecret must be not empty. '
-          'See `lib/github_oauth_credentials.dart` for more detail.');
+    if (widget.clientId.isEmpty || widget.clientSecret.isEmpty) {
+      throw const OAuthLoginException(
+          'clientId and clientSecret must be not empty.');
     }
     var grant = oauth2.AuthorizationCodeGrant(
-      widget.githubClientId,
-      _authorizationEndpoint,
-      _tokenEndpoint,
-      secret: widget.githubClientSecret,
+      widget.clientId,
+      widget.authorizationUrl,
+      widget.tokenEndpoint,
+      secret: widget.clientSecret,
       httpClient: _JsonAcceptingHttpClient(),
     );
     var authorizationUrl =
-        grant.getAuthorizationUrl(redirectUrl, scopes: widget.githubScopes);
+        grant.getAuthorizationUrl(redirectUrl, scopes: widget.scopes);
 
     await _redirect(authorizationUrl);
     var responseQueryParameters = await _listen();
@@ -84,7 +83,7 @@ class _GithubLoginState extends State<GithubLoginWidget> {
     if (await canLaunchUrl(authorizationUrl)) {
       await launchUrl(authorizationUrl);
     } else {
-      throw GithubLoginException('Could not launch $authorizationUrl');
+      throw OAuthLoginException('Could not launch $authorizationUrl');
     }
   }
 
@@ -110,8 +109,8 @@ class _JsonAcceptingHttpClient extends http.BaseClient {
   }
 }
 
-class GithubLoginException implements Exception {
-  const GithubLoginException(this.message);
+class OAuthLoginException implements Exception {
+  const OAuthLoginException(this.message);
   final String message;
   @override
   String toString() => message;
