@@ -46,15 +46,24 @@ class SupernovaTaskWidget extends ConsumerWidget {
                     spreadRadius: 0,
                   )
                 ]),
+            foregroundDecoration: BoxDecoration(
+              color: task.done
+                  ? Colors.white.withOpacity(0.7)
+                  : Colors.transparent,
+            ),
             child: Row(
               children: [
                 Checkbox(value: task.done, onChanged: onDoneChange),
-                Text(
-                  task.title,
-                  style: CustomTypography.body()
-                      .merge(const TextStyle(fontWeight: FontWeight.bold)),
+                Expanded(
+                  child: Text(
+                    task.title,
+                    style: CustomTypography.body()
+                        .merge(const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
                 ),
-                const Spacer(),
+                Text(task.start != null ? task.start.toString() : "",
+                    style: CustomTypography.body()),
+                const SizedBox(width: 10),
                 ExpectedDurationWidget(
                   expectedDurationSeconds: task.expectedDuration,
                 ),

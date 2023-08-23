@@ -31,5 +31,9 @@ export const Paragraph = (
     HTMLParagraphElement
   >
 ) => {
-  return <p className={twMerge("text-base text-white")}>{props.children}</p>;
+  return (
+    <p className={twMerge("text-base text-white", props.className)}>
+      {props.children}
+    </p>
+  );
 };

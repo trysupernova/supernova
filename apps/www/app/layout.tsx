@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import "./globals.css";
 import { inter } from "../components/font";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Supernova | the open-sourced superhuman productivity experience",
@@ -27,7 +28,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Toaster richColors />
+        {children}
+      </body>
     </html>
   );
 }

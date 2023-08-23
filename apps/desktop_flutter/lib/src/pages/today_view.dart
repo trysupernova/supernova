@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:desktop_flutter/src/components/modals.dart';
+import 'package:desktop_flutter/src/components/my_calendars_widget.dart';
 import 'package:desktop_flutter/src/components/task_widget.dart';
+import 'package:desktop_flutter/src/gapi.dart';
 import 'package:desktop_flutter/src/models/task.dart';
 import 'package:desktop_flutter/src/providers.dart';
 import 'package:desktop_flutter/src/styles/typography.dart';
@@ -29,6 +31,18 @@ class DeleteTaskIntent extends Intent {
   const DeleteTaskIntent();
 }
 
+class MarkCompleteTaskIntent extends Intent {
+  const MarkCompleteTaskIntent();
+}
+
+class GetCalendarEventsIntent extends Intent {
+  const GetCalendarEventsIntent();
+}
+
+class ShowCommandCenterIntent extends Intent {
+  const ShowCommandCenterIntent();
+}
+
 class TodayViewPage extends ConsumerWidget {
   const TodayViewPage({super.key});
 
@@ -37,12 +51,17 @@ class TodayViewPage extends ConsumerWidget {
     final selectedTask = ref.watch(selectedTaskProvider);
     return Scaffold(
       body: Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.keyC): ShowCreateTaskModalIntent(),
-          SingleActivator(LogicalKeyboardKey.enter): ShowEditTaskModalIntent(),
-          SingleActivator(LogicalKeyboardKey.arrowUp): GoUpTaskListIntent(),
-          SingleActivator(LogicalKeyboardKey.arrowDown): GoDownTaskListIntent(),
-          SingleActivator(LogicalKeyboardKey.backspace): DeleteTaskIntent(),
+        shortcuts: <ShortcutActivator, Intent>{
+          const SingleActivator(LogicalKeyboardKey.keyC): const ShowCreateTaskModalIntent(),
+          const SingleActivator(LogicalKeyboardKey.enter): const ShowEditTaskModalIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyK): const GoUpTaskListIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyJ): const GoDownTaskListIntent(),
+          const SingleActivator(LogicalKeyboardKey.backspace): const DeleteTaskIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyD): const MarkCompleteTaskIntent(),
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift,
+              LogicalKeyboardKey.keyC): const GetCalendarEventsIntent(),
+          LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyK):
+              const ShowCommandCenterIntent()
         },
         child: Actions(actions: <Type, Action<Intent>>{
           ShowCreateTaskModalIntent: CallbackAction(
@@ -65,7 +84,7 @@ class TodayViewPage extends ConsumerWidget {
                     ref.read(uncompletedTasksProvider).lastOrNull;
               } else {
                 final index =
-                    ref.read(uncompletedTasksProvider).indexOf(selectedTask!);
+                    ref.read(uncompletedTasksProvider).indexOf(selectedTask);
                 if (index > 0) {
                   ref.read(selectedTaskProvider.notifier).state =
                       ref.read(uncompletedTasksProvider)[index - 1];
@@ -101,6 +120,67 @@ class TodayViewPage extends ConsumerWidget {
             onInvoke: (intent) {
               if (selectedTask == null) return null;
               ref.read(supernovaTasksProvider.notifier).remove(selectedTask);
+              ref.read(userGoogleEventsSupernovaTaskProvider.notifier).state =
+                  ref
+                      .read(userGoogleEventsSupernovaTaskProvider.notifier)
+                      .state
+                      .where((todo) => todo.id != selectedTask.id)
+                      .toList();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Deleted task ${selectedTask.title}'),
+                ),
+              );
+              return null;
+            },
+          ),
+          MarkCompleteTaskIntent: CallbackAction(
+            onInvoke: (intent) {
+              if (selectedTask == null) return null;
+              ref.read(supernovaTasksProvider.notifier).toggle(selectedTask.id);
+              ref.read(userGoogleEventsSupernovaTaskProvider.notifier).state = [
+                for (final todo in ref
+                    .read(userGoogleEventsSupernovaTaskProvider.notifier)
+                    .state)
+                  if (todo.id == selectedTask.id)
+                    SupernovaTask(
+                      id: todo.id,
+                      title: todo.title,
+                      expectedDuration: todo.expectedDuration,
+                      done: !todo.done,
+                    )
+                  else
+                    todo,
+              ];
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Marked task as done'),
+                ),
+              );
+              return null;
+            },
+          ),
+          GetCalendarEventsIntent: CallbackAction(
+            onInvoke: (intent) async {
+              final client = await authenticate();
+              final fetchedCalendars = await getCalendars(client);
+              ref.read(userGoogleCalendarsProvider.notifier).state =
+                  fetchedCalendars;
+              ref.read(userGoogleEventsProvider.notifier).state.clear();
+              for (final calendar in fetchedCalendars) {
+                final fetchedEvents =
+                    await getCalendarEventsToday(client, calendar.id!);
+                ref.read(userGoogleEventsProvider.notifier).state = [
+                  ...ref.read(userGoogleEventsProvider),
+                  ...fetchedEvents
+                ];
+              }
+              return null;
+            },
+          ),
+          ShowCommandCenterIntent: CallbackAction(
+            onInvoke: (intent) async {
+              Modals.showCommandCenter(context, ref);
               return null;
             },
           ),
@@ -126,65 +206,123 @@ class TodayTasksListWidget extends ConsumerWidget {
     final uncompletedTasks = ref.watch(uncompletedTasksProvider);
     final doneTasks = ref.watch(doneTasksProvider);
     final selectedTask = ref.watch(selectedTaskProvider);
-    return Center(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      Wrap(
-        spacing: 8.0,
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text("Today", style: CustomTypography.h1()),
+
+    return SingleChildScrollView(
+        child: Center(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+          OutlinedButton(
+            onPressed: () async {
+              final client = await authenticate();
+              final fetchedCalendars = await getCalendars(client);
+              ref.read(userGoogleCalendarsProvider.notifier).state =
+                  fetchedCalendars;
+              ref.read(userGoogleEventsProvider.notifier).state.clear();
+              for (final calendar in fetchedCalendars) {
+                final fetchedEvents =
+                    await getCalendarEventsToday(client, calendar.id!);
+                ref.read(userGoogleEventsProvider.notifier).state = [
+                  ...ref.read(userGoogleEventsProvider),
+                  ...fetchedEvents
+                ];
+              }
+            },
+            child: const Text("Get Calendar Events"),
+          ),
+          const MyCalendarsWidget(),
+          Wrap(
+            spacing: 8.0,
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text("Today", style: CustomTypography.h1()),
+              Text(
+                formattedDate,
+                style: CustomTypography.body()
+                    .merge(TextStyle(color: Colors.grey.shade400)),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 8.0,
+          ),
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                  children: uncompletedTasks
+                      .mapIndexed((index, task) => Column(children: [
+                            SupernovaTaskWidget(
+                              task: task,
+                              selected: selectedTask?.id == task.id,
+                              onDoneChange: (p0) {
+                                ref
+                                    .read(supernovaTasksProvider.notifier)
+                                    .toggle(task.id);
+                              },
+                            ),
+                            const SizedBox(
+                              height: 8.0,
+                            )
+                          ]))
+                      .toList())),
+          // Container(
+          //     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          //     child: Column(
+          //         children: incompleteUserGoogleEventsTasks
+          //             .mapIndexed((index, task) => Column(children: [
+          //                   SupernovaTaskWidget(
+          //                     task: task,
+          //                     selected: selectedTask?.id == task.id,
+          //                     onDoneChange: (p0) {
+          //                       if (task.id == "") return;
+          //                       // mark it as done
+
+          //                       ref
+          //                           .read(userGoogleEventsSupernovaTaskProvider
+          //                               .notifier)
+          //                           .state = [
+          //                         for (final todo in ref.read(
+          //                             userGoogleEventsSupernovaTaskProvider))
+          //                           if (todo.id == task.id)
+          //                             SupernovaTask(
+          //                               id: todo.id,
+          //                               title: todo.title,
+          //                               expectedDuration: todo.expectedDuration,
+          //                               done: !todo.done,
+          //                             )
+          //                           else
+          //                             todo,
+          //                       ];
+          //                     },
+          //                   ),
+          //                   const SizedBox(
+          //                     height: 8.0,
+          //                   )
+          //                 ]))
+          //             .toList())),
           Text(
-            formattedDate,
-            style: CustomTypography.body()
-                .merge(TextStyle(color: Colors.grey.shade400)),
-          )
-        ],
-      ),
-      const SizedBox(
-        height: 8.0,
-      ),
-      Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-              children: uncompletedTasks
-                  .mapIndexed((index, task) => Column(children: [
-                        SupernovaTaskWidget(
-                          task: task,
-                          selected: selectedTask?.id == task.id,
-                          onDoneChange: (p0) {
-                            ref
-                                .read(supernovaTasksProvider.notifier)
-                                .toggle(task.id);
-                          },
-                        ),
-                        const SizedBox(
-                          height: 8.0,
-                        )
-                      ]))
-                  .toList())),
-      Text(
-        "Done",
-        style: CustomTypography.body(),
-      ),
-      Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-              children: doneTasks
-                  .mapIndexed((index, task) => Column(children: [
-                        SupernovaTaskWidget(
-                          task: task,
-                          onDoneChange: (p0) {
-                            ref
-                                .read(supernovaTasksProvider.notifier)
-                                .toggle(task.id);
-                          },
-                        ),
-                        const SizedBox(
-                          height: 8.0,
-                        )
-                      ]))
-                  .toList())),
-    ]));
+            "Done",
+            style: CustomTypography.body(),
+          ),
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                  children: doneTasks
+                      .mapIndexed((index, task) => Column(children: [
+                            SupernovaTaskWidget(
+                              task: task,
+                              onDoneChange: (p0) {
+                                ref
+                                    .read(supernovaTasksProvider.notifier)
+                                    .toggle(task.id);
+                              },
+                            ),
+                            const SizedBox(
+                              height: 8.0,
+                            )
+                          ]))
+                      .toList())),
+        ])));
   }
 }
