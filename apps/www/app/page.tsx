@@ -4,15 +4,17 @@ import Image from "next/image";
 import { H1, Paragraph } from "../components/typography";
 import { Input } from "../components/input";
 import { Button } from "../components/button";
-import { useBoolean, useMediaQuery, useToggle } from "usehooks-ts";
+import { useBoolean, useWindowSize } from "usehooks-ts";
 import { registerWaitlist } from "@/services/waitlist";
 import { FormEventHandler, useState } from "react";
 
 import { toast } from "sonner";
 
 export default function Home() {
-  const widthLandingProto = "731px";
-  const matches = useMediaQuery(`(max-width: ${widthLandingProto})`);
+  const widthLandingProto = 731;
+  const { width } = useWindowSize();
+
+  const matches = width < widthLandingProto;
 
   const [email, setEmail] = useState("");
   const { value: submitted, setTrue } = useBoolean();
@@ -72,12 +74,21 @@ export default function Home() {
         )}
       </div>
       <div className="absolute bottom-0 right-0 left-0 w-screen md:h-[350px] sm:h-[320px] h-[270px]">
-        <Image
-          src={matches ? "/today-view.svg" : "/landing-proto.svg"}
-          fill
-          objectFit="contain"
-          alt="The prototype showcasing Supernova, a productivity app"
-        />
+        {matches ? (
+          <Image
+            src={"/today-view.svg"}
+            fill
+            objectFit="contain"
+            alt="The prototype showcasing Supernova, a productivity app"
+          />
+        ) : (
+          <Image
+            src={"/landing-proto.svg"}
+            fill
+            objectFit="contain"
+            alt="The prototype showcasing Supernova, a productivity app"
+          />
+        )}
       </div>
     </main>
   );
