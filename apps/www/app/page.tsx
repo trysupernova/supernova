@@ -65,6 +65,7 @@ export default function Home() {
           >
             <Input
               placeholder="e.g user@gmail.com"
+              type="email"
               onChange={(ev) => {
                 setEmail(ev.currentTarget.value);
               }}
@@ -78,14 +79,14 @@ export default function Home() {
           <Image
             src={"/today-view.svg"}
             fill
-            objectFit="contain"
+            style={{ objectFit: "contain" }}
             alt="The prototype showcasing Supernova, a productivity app"
           />
         ) : (
           <Image
             src={"/landing-proto.svg"}
             fill
-            objectFit="contain"
+            style={{ objectFit: "contain" }}
             alt="The prototype showcasing Supernova, a productivity app"
           />
         )}

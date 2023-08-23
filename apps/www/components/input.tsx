@@ -1,8 +1,8 @@
-import { HTMLAttributes } from "react";
+import { InputHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
 type Props = React.DetailedHTMLProps<
-  HTMLAttributes<HTMLInputElement>,
+  InputHTMLAttributes<HTMLInputElement>,
   HTMLInputElement
 >;
 
