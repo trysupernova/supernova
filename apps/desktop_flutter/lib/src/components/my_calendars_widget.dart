@@ -1,4 +1,4 @@
-import 'package:desktop_flutter/src/providers.dart';
+import 'package:desktop_flutter/src/providers/tasks_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as gcal;
@@ -28,13 +28,6 @@ class MyCalendarsWidget extends ConsumerWidget {
       padding: const EdgeInsets.all(10),
       child: Column(
         children: [
-          const Text(
-            "My calendars",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           const SizedBox(height: 10),
           ...calendars.map((e) => CalendarEntryWidget(calendar: e)),
         ],

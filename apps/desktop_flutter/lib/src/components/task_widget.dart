@@ -1,5 +1,5 @@
 import 'package:desktop_flutter/src/components/expected_duration_widget.dart';
-import 'package:desktop_flutter/src/components/modals.dart';
+import 'package:desktop_flutter/src/components/dialogs.dart';
 import 'package:desktop_flutter/src/models/task.dart';
 import 'package:desktop_flutter/src/styles/typography.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class SupernovaTaskWidget extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     return (GestureDetector(
         onTap: () {
-          Modals.showEditTaskDialog(context, ref, task);
+          Dialogs.showEditTaskDialog(context, ref, task);
         },
         child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -61,7 +61,7 @@ class SupernovaTaskWidget extends ConsumerWidget {
                         .merge(const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                Text(task.start != null ? task.start.toString() : "",
+                Text(task.start != null ? task.start!.hour.toString() : "",
                     style: CustomTypography.body()),
                 const SizedBox(width: 10),
                 ExpectedDurationWidget(

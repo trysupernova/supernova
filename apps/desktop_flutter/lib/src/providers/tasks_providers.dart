@@ -1,6 +1,9 @@
+import 'package:desktop_flutter/src/models/appconfig.dart';
+import 'package:desktop_flutter/src/utils/secrets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart';
-import 'models/task.dart';
+import '../models/task.dart';
+
 
 final supernovaTasksProvider =
     StateNotifierProvider<SupernovaList, List<SupernovaTask>>((ref) {

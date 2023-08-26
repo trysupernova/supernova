@@ -1,11 +1,13 @@
-import 'package:desktop_flutter/src/gapi.dart';
+import 'package:desktop_flutter/src/providers/appconfig_providers.dart';
+import 'package:desktop_flutter/src/services/gapi.dart';
 import 'package:desktop_flutter/src/models/task.dart';
-import 'package:desktop_flutter/src/providers.dart';
+import 'package:desktop_flutter/src/providers/tasks_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Modals {
+
+class Dialogs {
   static Future<void> showCreateTaskDialog(
       BuildContext context, WidgetRef ref) async {
     closeModal() {
@@ -202,16 +204,17 @@ class Modals {
                   },
                 ),
                 TextButton(
-                  child: const Text("Get calendar events"),
+                child: const Text("Get calendar events"),
                   onPressed: () async {
-                    final client = await authenticate();
-                    final fetchedCalendars = await getCalendars(client);
+                    final config = ref.read(appConfigProvider);
+                    final client = await authenticate(config);
+                    final fetchedCalendars = await getCalendars(config, client);
                     ref.read(userGoogleCalendarsProvider.notifier).state =
                         fetchedCalendars;
                     ref.read(userGoogleEventsProvider.notifier).state.clear();
                     for (final calendar in fetchedCalendars) {
                       final fetchedEvents =
-                          await getCalendarEventsToday(client, calendar.id!);
+                          await getCalendarEventsToday(config, client, calendar.id!);
                       ref.read(userGoogleEventsProvider.notifier).state = [
                         ...ref.read(userGoogleEventsProvider),
                         ...fetchedEvents

@@ -47,6 +47,7 @@ dependencies:
   uuid: ^3.0.7
   googleapis: ^11.4.0
   googleapis_auth: ^1.4.1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
