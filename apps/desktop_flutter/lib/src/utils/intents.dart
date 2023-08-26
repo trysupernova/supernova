@@ -35,3 +35,7 @@ class ShowCommandCenterIntent extends Intent {
 class GoToSettingsIntent extends Intent {
   const GoToSettingsIntent();
 }
+
+class ShowTransparentWindowIntent extends Intent {
+  const ShowTransparentWindowIntent();
+}

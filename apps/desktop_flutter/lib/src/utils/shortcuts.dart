@@ -16,6 +16,7 @@ final shortcutIntentMapTodayView = <ShortcutActivator, Intent>{
       LogicalKeyboardKey.keyC): const GetCalendarEventsIntent(),
   LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyK):
       const ShowCommandCenterIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.period):
-      const GoToSettingsIntent(),
+  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.comma): const GoToSettingsIntent(),
+  LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.space):
+      const ShowTransparentWindowIntent(),
 };

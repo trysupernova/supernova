@@ -40,6 +40,8 @@ dependencies:
   url_launcher: ^6.1.12
   window_to_front:
     path: ../../packages/window_to_front
+  transparent_window:
+    path: ../../packages/transparent_window
   intl: ^0.18.1
   collection: ^1.17.1
   provider: ^6.0.5

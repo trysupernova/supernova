@@ -7,6 +7,7 @@ import 'package:desktop_flutter/src/services/gapi.dart';
 import 'package:desktop_flutter/src/utils/intents.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:transparent_window/transparent_window.dart';
 
 // ignore: prefer_function_declarations_over_variables
 final intentActionsMapTodayView = (BuildContext context, WidgetRef ref) {
@@ -122,6 +123,11 @@ final intentActionsMapTodayView = (BuildContext context, WidgetRef ref) {
         return null;
       },
     ),
+    ShowTransparentWindowIntent: CallbackAction(
+      onInvoke: (intent) async {
+        return ActionCallbacks.showTransparentWindow(context, ref);
+      },
+    ),
   };
 };
 
@@ -148,6 +154,11 @@ class ActionCallbacks {
     ref.watch(userGoogleEventsSupernovaTaskProvider.notifier).state = [];
     // remove all Google calendars
     ref.watch(userGoogleCalendarsProvider.notifier).state = [];
+    return null;
+  }
+
+  static showTransparentWindow(BuildContext context, WidgetRef ref) async {
+    await TransparentWindow.activate();
     return null;
   }
 }
