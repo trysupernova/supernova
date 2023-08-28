@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 export default function Home() {
-  const widthLandingProto = 731;
+  const widthLandingProto = 1024;
   const { width } = useWindowSize();
 
   const matches = width < widthLandingProto;
@@ -40,7 +40,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex relative h-screen flex-col items-center justify-between p-24 pb-0 bg-dark-teal-gradient">
+    <main className="flex relative h-screen lg:flex-row flex-col gap-5 items-center justify-between p-24 pb-0 bg-dark-teal-gradient">
       <div className="h-full flex flex-col items-center justify-start gap-[5px] pt-[50px]">
         <div className="flex items-center justify-center gap-[10px] py-[10px]">
           <Image
@@ -109,7 +109,7 @@ export default function Home() {
           </Link>
         </div>
       </div>
-      <div className="absolute bottom-0 right-0 left-0 w-screen md:h-[350px] sm:h-[320px] h-[270px]">
+      <div className="relative w-full md:h-[700px] sm:h-[600px] h-[500px]">
         {matches ? (
           <Image
             src={"/today-view.svg"}
@@ -119,9 +119,9 @@ export default function Home() {
           />
         ) : (
           <Image
-            src={"/landing-proto.svg"}
+            src={"/landing-proto-2.svg"}
             fill
-            style={{ objectFit: "contain" }}
+            style={{ objectFit: "contain", bottom: 0, right: 0 }}
             alt="The prototype showcasing Supernova, a productivity app"
           />
         )}
