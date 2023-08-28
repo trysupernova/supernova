@@ -32,6 +32,8 @@ To develop locally:
 
    ```sh
    pnpm i
+   pnpm install:desktop
+   pnpm install:api
    ```
 
 5. Create environment files
@@ -70,7 +72,7 @@ pnpm build
 If you want to build a specific package, you can do so with:
 
 ```bash
-
+turbo build --scope=<package name>
 ```
 
 Please be sure that you can make a full production build before pushing code.

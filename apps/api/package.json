@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Server for Supernova, built with Golang",
   "scripts": {
-    "install": "go install",
     "dev": "ENVIRONMENT=dev go run main.go",
     "build": "go build -o ./bin/supernova-api",
     "start": "ENVIRONMENT=prod ./bin/supernova-api",

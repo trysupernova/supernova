@@ -3,6 +3,6 @@
     "version": "0.0.0",
     "scripts": {
         "dev": "flutter run -d macos",
-        "install": "flutter pub get"
+        "build": "flutter build macos"
     }
 }

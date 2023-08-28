@@ -2,6 +2,8 @@
   "name": "supernova",
   "version": "0.0.0",
   "scripts": {
+    "install:api": "cd apps/api && go install",
+    "install:desktop": "cd apps/desktop && flutter pub get",
     "build": "turbo run build",
     "dev": "yarn dev:api & yarn dev:desktop",
     "dev:api": "turbo run dev --scope=api",
