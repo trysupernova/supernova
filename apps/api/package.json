@@ -1,14 +1,19 @@
 {
-  "name": "api",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@supernova/api",
+  "version": "1.0.0",
+  "description": "Server for Supernova, built with Golang",
   "scripts": {
-    "deploy": "wrangler deploy",
-    "start": "wrangler dev"
+    "install": "go install",
+    "dev": "ENVIRONMENT=dev go run main.go",
+    "build": "go build -o ./bin/supernova-api",
+    "start": "ENVIRONMENT=prod ./bin/supernova-api",
+    "format": "go fmt ./...",
+    "lint": "golangci-lint run",
+    "db:start": "docker-compose up -d",
+    "db:migrate": "go run scripts/migrate.go",
+    "db:diff": "atlas migrate diff --env gorm"
   },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230419.0",
-    "typescript": "^5.0.4",
-    "wrangler": "^3.0.0"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

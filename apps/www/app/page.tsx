@@ -7,8 +7,11 @@ import { Button } from "../components/button";
 import { useBoolean, useWindowSize } from "usehooks-ts";
 import { registerWaitlist } from "@/services/waitlist";
 import { FormEventHandler, useState } from "react";
+import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 
 import { toast } from "sonner";
+import Link from "next/link";
+import { Github } from "lucide-react";
 
 export default function Home() {
   const widthLandingProto = 731;
@@ -54,6 +57,11 @@ export default function Home() {
           Your superhuman productivity sidekick
         </Paragraph>
         <br />
+        <Paragraph className="text-center w-96">
+          Supernova is a productivity app that helps you focus on what matters.
+          Integration-rich, fast, and delightful to use. All open-sourced
+        </Paragraph>
+        <br />
         {submitted ? (
           <Paragraph>
             You{"'"}re on the waitlist! We will send beta release updates soon.
@@ -73,6 +81,22 @@ export default function Home() {
             <Button type="submit">Join the waitlist</Button>
           </form>
         )}
+        <br />
+
+        <div className="flex items-center gap-3">
+          <Link href="https://discord.gg/MUHH7rn2jV" target="_blank">
+            <BsDiscord width={100} height={100} />
+          </Link>
+          <Link
+            href="https://github.com/trysupernova/supernova"
+            target="_blank"
+          >
+            <BsGithub width={100} height={100} />
+          </Link>
+          <Link href="https://x.com/trysupernova_" target="_blank">
+            <BsTwitter width={100} height={100} />
+          </Link>
+        </div>
       </div>
       <div className="absolute bottom-0 right-0 left-0 w-screen md:h-[350px] sm:h-[320px] h-[270px]">
         {matches ? (

@@ -1,8 +1,12 @@
 const GETWAITLIST_BASE_URL = "https://api.getwaitlist.com/api/v1";
 if (process.env.NEXT_PUBLIC_WAITLIST_ID === undefined) {
-  throw new Error("WAITLIST_ID environment variable is not defined");
+  console.warn(
+    "WAITLIST_ID environment variable is not defined; waitlist registrations on www will not work."
+  );
 }
-const WAITLIST_ID = Number.parseInt(process.env.NEXT_PUBLIC_WAITLIST_ID);
+const WAITLIST_ID = Number.parseInt(
+  process.env.NEXT_PUBLIC_WAITLIST_ID || "-1"
+);
 
 /**
  * Registers the user into the waitlist
