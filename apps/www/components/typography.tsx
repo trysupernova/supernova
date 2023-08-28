@@ -11,7 +11,7 @@ export const H1 = (props: Props) => {
   return (
     <h1
       className={twMerge(
-        "text-5xl tracking-[-0.576px]",
+        "text-white text-5xl tracking-[-0.576px]",
         props.className,
         manrope.className
       )}

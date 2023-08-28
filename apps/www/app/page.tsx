@@ -96,16 +96,16 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="https://discord.gg/MUHH7rn2jV" target="_blank">
-            <BsDiscord width={100} height={100} />
+            <BsDiscord width={100} height={100} color="white" />
           </Link>
           <Link
             href="https://github.com/trysupernova/supernova"
             target="_blank"
           >
-            <BsGithub width={100} height={100} />
+            <BsGithub width={100} height={100} color="white" />
           </Link>
           <Link href="https://x.com/trysupernova_" target="_blank">
-            <BsTwitter width={100} height={100} />
+            <BsTwitter width={100} height={100} color="white" />
           </Link>
         </div>
       </div>
