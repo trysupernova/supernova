@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "scripts": {
     "build": "turbo run build",
-    "postinstall": "turbo install",
     "dev": "yarn dev:api & yarn dev:desktop",
     "dev:api": "turbo run dev --scope=api",
     "dev:desktop": "cd apps/desktop && npm run dev",
