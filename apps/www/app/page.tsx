@@ -40,8 +40,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex relative h-screen lg:flex-row flex-col gap-5 items-center justify-between p-24 pb-0 bg-dark-teal-gradient">
-      <div className="h-full flex flex-col items-center justify-start gap-[5px] pt-[50px]">
+    <main className="flex relative min-h-screen lg:flex-row flex-col gap-5 items-center justify-between py-15 px-10 pb-0 bg-dark-teal-gradient">
+      <div className="h-full flex flex-col items-center justify-start gap-[5px] pt-[20px]">
         <div className="flex items-center justify-center gap-[10px] py-[10px]">
           <Image
             src="/logo.svg"
@@ -112,7 +112,12 @@ export default function Home() {
       <div className="relative w-full md:h-[700px] sm:h-[600px] h-[500px]">
         {matches ? (
           <Image
-            src={"/today-view.svg"}
+            // src={"/today-view.svg"}
+            // fill
+            // style={{ objectFit: "contain" }}
+            // alt="The prototype showcasing Supernova, a productivity app"
+
+            src={"/landing-proto-2.svg"}
             fill
             style={{ objectFit: "contain" }}
             alt="The prototype showcasing Supernova, a productivity app"
