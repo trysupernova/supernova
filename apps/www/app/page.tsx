@@ -11,7 +11,6 @@ import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 
 import { toast } from "sonner";
 import Link from "next/link";
-import { Github } from "lucide-react";
 
 export default function Home() {
   const widthLandingProto = 731;
@@ -83,6 +82,18 @@ export default function Home() {
         )}
         <br />
 
+        <div>
+          <Paragraph className="text-center">
+            Made with ❤️ by{" "}
+            <Link
+              href="https://x.com/_vmvu"
+              target="_blank"
+              className="text-white underline"
+            >
+              Vincent
+            </Link>
+          </Paragraph>
+        </div>
         <div className="flex items-center gap-3">
           <Link href="https://discord.gg/MUHH7rn2jV" target="_blank">
             <BsDiscord width={100} height={100} />
