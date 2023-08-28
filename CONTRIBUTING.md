@@ -46,7 +46,7 @@ To develop locally:
 
 6. Start developing and watch for code changes:
 
-   - For the API, you need to run the Postgres database locally, then run the migrations on the database:
+   - For the API, you need to run infra pieces that the project depends locally (e.g the main MySQL database), then run the migrations on the database. Make sure you have Docker installed and running, then run:
 
      ```sh
      pnpm db:start
