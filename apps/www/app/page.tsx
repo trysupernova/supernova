@@ -4,19 +4,30 @@ import Image from "next/image";
 import { H1, Paragraph } from "../components/typography";
 import { Input } from "../components/input";
 import { Button } from "../components/button";
-import { useBoolean, useWindowSize } from "usehooks-ts";
+import { useBoolean } from "usehooks-ts";
 import { registerWaitlist } from "@/services/waitlist";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
 import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 
 import { toast } from "sonner";
 import Link from "next/link";
 
 export default function Home() {
-  const widthLandingProto = 1024;
-  const { width } = useWindowSize();
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
-  const matches = width < widthLandingProto;
+  useEffect(() => {
+    // Check for the navigator object on the client side
+    if (typeof window !== "undefined") {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    }
+  }, []);
+
+  const graphicsFilePath: string =
+    isMobile === null
+      ? ""
+      : isMobile
+      ? "/landing-proto-2-mobile.png"
+      : "/landing-proto-2.svg";
 
   const [email, setEmail] = useState("");
   const { value: submitted, setTrue } = useBoolean();
@@ -40,13 +51,14 @@ export default function Home() {
   };
 
   return (
-    <main className="flex relative min-h-screen lg:flex-row flex-col gap-5 items-center justify-between py-15 px-10 pb-0 bg-dark-teal-gradient">
+    <main className="flex relative min-h-screen lg:flex-row flex-col gap-5 items-center justify-between py-15 px-0 pb-0 bg-dark-teal-gradient">
       <div className="h-full flex flex-col items-center justify-start gap-[5px] pt-[20px]">
         <div className="flex items-center justify-center gap-[10px] py-[10px]">
           <Image
             src="/logo.svg"
             width={50}
             height={50}
+            priority
             alt="Supernova's logo, a ball with linear gradient from left to right, light teal to orange"
           />
           <H1>Supernova</H1>
@@ -110,21 +122,10 @@ export default function Home() {
         </div>
       </div>
       <div className="relative w-full md:h-[700px] sm:h-[600px] h-[500px]">
-        {matches ? (
+        {graphicsFilePath === "" ? null : (
           <Image
-            // src={"/today-view.svg"}
-            // fill
-            // style={{ objectFit: "contain" }}
-            // alt="The prototype showcasing Supernova, a productivity app"
-
-            src={"/landing-proto-2.svg"}
-            fill
-            style={{ objectFit: "contain" }}
-            alt="The prototype showcasing Supernova, a productivity app"
-          />
-        ) : (
-          <Image
-            src={"/landing-proto-2.svg"}
+            src={graphicsFilePath}
+            priority
             fill
             style={{ objectFit: "contain", bottom: 0, right: 0 }}
             alt="The prototype showcasing Supernova, a productivity app"
