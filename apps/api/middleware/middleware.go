@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,13 +17,13 @@ func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		if len(tokenString) == 0 {
-			customHTTP.NewErrorResponse(w, http.StatusUnauthorized, "Authentication failure")
+			customHTTP.NewErrorResponse(w, http.StatusUnauthorized, errors.New("authentication failure"))
 			return
 		}
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 		claims, err := VerifyToken(tokenString)
 		if err != nil {
-			customHTTP.NewErrorResponse(w, http.StatusUnauthorized, "Error verifying JWT token: "+err.Error())
+			customHTTP.NewErrorResponse(w, http.StatusUnauthorized, errors.New("error verifying JWT token: "+err.Error()))
 			return
 		}
 
@@ -36,7 +37,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		// Check if the request method is OPTIONS (preflight request)
