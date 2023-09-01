@@ -21,8 +21,8 @@ func main() {
 		log.Println("🤖 Running in production mode")
 	} else {
 		log.Println("🤖 Running in development mode")
-		log.Println(utils.GetConfig().RESEND_API_KEY)
 	}
+	log.Println(utils.GetConfig().RESEND_API_KEY)
 
 	port := utils.GetConfig().PORT
 	if port == "" {
