@@ -57,7 +57,7 @@ func GetDatabaseDSN() string {
 	dbPort := os.Getenv("DB_PORT")
 
 	//build connection string
-	var dbConnectionString string = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&tls=true&interpolateParams=true", dbUser, dbPassword, dbHost, dbPort, dbName)
+	var dbConnectionString string = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPassword, dbHost, dbPort, dbName)
 
 	return dbConnectionString
 }
