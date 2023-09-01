@@ -8,7 +8,7 @@ import { Button } from "../../components/button";
 import { sendForgotPasswordEmail } from "../../services/backend";
 import { Paragraph } from "../../components/typography";
 
-const RESET_PASSWORD_EMAIL_FROM = "notifications@trysupernova.one";
+const RESET_PASSWORD_EMAIL_FROM = "Supernova <notifications@trysupernova.one>";
 
 const ForgotPasswordPage = () => {
   return (

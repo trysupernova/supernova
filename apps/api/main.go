@@ -17,9 +17,11 @@ import (
 
 func main() {
 	//init router
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("ENVIRONMENT") == "dev" || os.Getenv("ENVIRONMENT") == "" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	port := os.Getenv("PORT")

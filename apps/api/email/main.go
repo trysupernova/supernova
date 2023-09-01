@@ -3,6 +3,7 @@ package email
 import (
 	"bytes"
 	"context"
+	"embed"
 	"os"
 	"text/template"
 
@@ -43,21 +44,16 @@ func (e *EmailClient) SendEmail(send EmailSend) (string, error) {
 	return sent.Id, nil
 }
 
+//go:embed templates/*
+var resources embed.FS
+
+var tmpl = template.Must(template.ParseFS(resources, "templates/*"))
+
 func CompileEmailForgotPassword(resetUrl string) (string, error) {
 	// open a file
 	// read the contents of the file into a string
-	f, err := os.ReadFile("./templates/forgot-password.mjml")
-	if err != nil {
-		return "", utils.NewAppError(ErrEmailSendFailed, "Failed to read email template")
-	}
-
-	tmpl, err := template.New("forgot-password").Parse(string(f))
-	if err != nil {
-		return "", utils.NewAppError(ErrEmailSendFailed, "Failed to parse email template")
-	}
-
 	var result bytes.Buffer
-	err = tmpl.Execute(&result, struct {
+	err := tmpl.Execute(&result, struct {
 		Url string
 	}{
 		Url: resetUrl,
