@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"embed"
-	"os"
 	"text/template"
 
 	"github.com/Boostport/mjml-go"
@@ -27,7 +26,7 @@ type EmailSend struct {
 }
 
 func (e *EmailClient) SendEmail(send EmailSend) (string, error) {
-	apiKey := os.Getenv("RESEND_API_KEY")
+	apiKey := utils.GetConfig().RESEND_API_KEY
 	client := resend.NewClient(apiKey)
 	params := &resend.SendEmailRequest{
 		To:      send.To,
