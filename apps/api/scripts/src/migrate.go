@@ -1,4 +1,4 @@
-package main
+package scripts
 
 import (
 	"context"
@@ -7,9 +7,13 @@ import (
 
 	"ariga.io/atlas-go-sdk/atlasexec"
 	"github.com/trysupernova/supernova-api/db"
+	"github.com/trysupernova/supernova-api/utils"
 )
 
 func Migrate() {
+	// Initialize the configuration.
+	utils.InitConfig()
+
 	// Define the execution context, supplying a migration directory
 	// and potentially an `atlas.hcl` configuration file using `atlasexec.WithHCL`.
 	// Initialize the client.
@@ -34,8 +38,4 @@ func Migrate() {
 	}
 	// show applied migrations and duration in seconds to 2 decimal places
 	fmt.Printf("🚀 Applied %d migrations in %.2f secs", len(res.Applied), res.End.Sub(res.Start).Seconds())
-}
-
-func main() {
-	Migrate()
 }

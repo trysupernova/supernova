@@ -4,12 +4,18 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/trysupernova/supernova-api/utils"
 )
 
+var customLogErr = log.New(os.Stderr, "[Error]: ", log.LstdFlags)
+
 type ErrorResponse struct {
-	Error      bool   `json:"error"`
-	Message    string `json:"message"`
-	StatusCode int    `json:"statusCode"`
+	Error      bool               `json:"error"`
+	Message    string             `json:"message"`
+	StatusCode int                `json:"statusCode"`
+	ErrorCode  utils.AppErrorType `json:"errorCode,omitempty"`
 }
 
 type SuccessResponse[T any] struct {
@@ -22,17 +28,17 @@ type SuccessResponse[T any] struct {
 HTTP Response handling for errors,
 Returns valid JSON with error type and response code
 */
-func NewErrorResponse(w http.ResponseWriter, statusCode int, response string) {
+func NewErrorResponse(w http.ResponseWriter, statusCode int, appErr error) {
 	error := ErrorResponse{
-		true,
-		response,
-		statusCode,
+		Error:      true,
+		Message:    appErr.Error(),
+		StatusCode: statusCode,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	err := json.NewEncoder(w).Encode(&error)
 	if err != nil {
-		log.Println("Error sending encoded JSON response: ", err)
+		customLogErr.Println("Error sending encoded JSON response: ", err)
 		return
 	}
 }
@@ -46,7 +52,7 @@ func NewSuccessResponse[T any](w http.ResponseWriter, statusCode int, resp Succe
 	w.WriteHeader(statusCode)
 	err := json.NewEncoder(w).Encode(&resp)
 	if err != nil {
-		log.Println("Error sending encoded JSON response: ", err)
+		customLogErr.Println("Error sending encoded JSON response: ", err)
 		return
 	}
 }

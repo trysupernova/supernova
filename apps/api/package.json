@@ -2,6 +2,7 @@
   "name": "@supernova/api",
   "version": "1.0.0",
   "description": "Server for Supernova, built with Golang",
+  "type": "module",
   "scripts": {
     "dev": "ENVIRONMENT=dev go run main.go",
     "build": "go build -o ./bin/supernova-api",
@@ -9,10 +10,21 @@
     "format": "go fmt ./...",
     "lint": "golangci-lint run",
     "db:start": "docker-compose up -d",
-    "db:migrate": "go run scripts/migrate.go",
+    "db:migrate": "go run scripts/main.go --tool migrate",
     "db:diff": "atlas migrate diff --env gorm"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "productivity",
+    "golang",
+    "api"
+  ],
+  "author": "Vincent Vu",
+  "dependencies": {
+    "handlebars": "^4.7.8",
+    "mjml": "^4.14.1"
+  },
+  "devDependencies": {
+    "@types/mjml": "^4.7.1",
+    "@types/node": "^20.4.9"
+  }
 }

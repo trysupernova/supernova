@@ -26,5 +26,19 @@ var Routes = router.RoutePrefix{
 			HandlerFunc: LoginHandler,
 			Protected:   false,
 		},
+		{
+			Name:        "ForgotPassword",
+			Method:      "POST",
+			Pattern:     "/forgot-password",
+			HandlerFunc: ForgotPasswordHandler,
+			Protected:   false,
+		},
+		{
+			Name:        "ChangePassword",
+			Method:      "POST",
+			Pattern:     "/forgot-password/verify",
+			HandlerFunc: ChangePasswordHandler,
+			Protected:   false,
+		},
 	},
 }

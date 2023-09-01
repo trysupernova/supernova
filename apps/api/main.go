@@ -3,11 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/trysupernova/supernova-api/db"
 	"github.com/trysupernova/supernova-api/supernova_tasks"
+	"github.com/trysupernova/supernova-api/utils"
 
 	"github.com/gorilla/mux"
 	"github.com/trysupernova/supernova-api/middleware"
@@ -16,13 +15,15 @@ import (
 )
 
 func main() {
-	//init router
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	//init environments
+	utils.InitConfig()
+	if utils.GetConfig().ENVIRONMENT == "prod" {
+		log.Println("🤖 Running in production mode")
+	} else {
+		log.Println("🤖 Running in development mode")
 	}
 
-	port := os.Getenv("PORT")
+	port := utils.GetConfig().PORT
 	if port == "" {
 		port = "8000"
 	}
@@ -34,9 +35,14 @@ func main() {
 	sqlDb, _ := db.DB.DB()
 	defer sqlDb.Close()
 
+	// setup redis
+	db.Redis = db.SetupRedis()
+	defer db.Redis.Close()
+
 	//create http server
 	log.Println("🤖 Starting server on port " + port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	http.Handle("/", middleware.CORSMiddleware(router))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 /*
@@ -48,10 +54,7 @@ func BuildAppRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	// add middlewares
-	router.Use(middleware.CORSMiddleware)
-	router.Use(middleware.LoggingMiddleware)
-
-	//append user routes
+	//append routes
 	customRouter.AppRoutes = append(customRouter.AppRoutes, user.Routes, supernova_tasks.Routes)
 
 	for _, route := range customRouter.AppRoutes {
@@ -64,6 +67,7 @@ func BuildAppRouter() *mux.Router {
 
 			var handler http.Handler
 			handler = r.HandlerFunc
+			handler = middleware.LoggingMiddleware(handler)
 
 			//check to see if route should be protected with jwt
 			if r.Protected {
