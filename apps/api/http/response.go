@@ -29,9 +29,6 @@ HTTP Response handling for errors,
 Returns valid JSON with error type and response code
 */
 func NewErrorResponse(w http.ResponseWriter, statusCode int, appErr error) {
-	// print the error to stderr
-	customLogErr.Println(appErr)
-
 	error := ErrorResponse{
 		Error:      true,
 		Message:    appErr.Error(),

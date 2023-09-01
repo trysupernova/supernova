@@ -3,11 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/trysupernova/supernova-api/db"
 	"github.com/trysupernova/supernova-api/supernova_tasks"
+	"github.com/trysupernova/supernova-api/utils"
 
 	"github.com/gorilla/mux"
 	"github.com/trysupernova/supernova-api/middleware"
@@ -16,15 +15,10 @@ import (
 )
 
 func main() {
-	//init router
-	if os.Getenv("ENVIRONMENT") == "dev" || os.Getenv("ENVIRONMENT") == "" {
-		err := godotenv.Load(".env")
-		if err != nil {
-			log.Fatal("Error loading .env file")
-		}
-	}
+	//init environments
+	utils.InitConfig()
 
-	port := os.Getenv("PORT")
+	port := utils.GetConfig().PORT
 	if port == "" {
 		port = "8000"
 	}

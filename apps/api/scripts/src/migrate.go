@@ -7,9 +7,13 @@ import (
 
 	"ariga.io/atlas-go-sdk/atlasexec"
 	"github.com/trysupernova/supernova-api/db"
+	"github.com/trysupernova/supernova-api/utils"
 )
 
 func Migrate() {
+	// Initialize the configuration.
+	utils.InitConfig()
+
 	// Define the execution context, supplying a migration directory
 	// and potentially an `atlas.hcl` configuration file using `atlasexec.WithHCL`.
 	// Initialize the client.

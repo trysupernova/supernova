@@ -1,17 +1,16 @@
 package db
 
 import (
-	"os"
-
 	"github.com/redis/go-redis/v9"
+	"github.com/trysupernova/supernova-api/utils"
 )
 
 var Redis *redis.Client
 
 func SetupRedis() *redis.Client {
 	Redis = redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_URL"),
-		Password: os.Getenv("REDIS_PASSWORD"),
+		Addr:     utils.GetConfig().REDIS_URL,
+		Password: utils.GetConfig().REDIS_PASSWORD,
 		DB:       0,
 	})
 	return Redis
