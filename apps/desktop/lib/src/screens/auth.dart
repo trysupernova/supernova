@@ -1,9 +1,12 @@
 import 'package:desktop_flutter/src/providers/auth_providers.dart';
 import 'package:desktop_flutter/src/screens/today_view.dart';
 import 'package:desktop_flutter/src/services/sup_backend.dart';
+import 'package:desktop_flutter/src/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AuthScreen extends ConsumerWidget {
   const AuthScreen({super.key});
@@ -131,7 +134,13 @@ class LoginForm extends StatelessWidget {
                     );
                   }
                 },
-                child: const Text("Login"))
+                child: const Text("Login")),
+            TextButton(
+                onPressed: () {
+                  // ignore: use_build_context_synchronously
+                  launchUrlString("$wwwAppBaseUrl/forgot-password");
+                },
+                child: const Text("Forgot password?")),
           ],
         ));
   }

@@ -36,12 +36,15 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//allow all origins
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		//allow all headers
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		//allow all methods
-		w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		// Check if the request method is OPTIONS (preflight request)
+		if r.Method == "OPTIONS" {
+			// Respond with HTTP 200 OK for preflight requests
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }

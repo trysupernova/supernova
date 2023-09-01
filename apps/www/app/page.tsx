@@ -11,6 +11,7 @@ import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 
 import { toast } from "sonner";
 import Link from "next/link";
+import HorizontalLogo from "../components/horizontal-logo";
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
@@ -53,16 +54,7 @@ export default function Home() {
   return (
     <main className="flex relative min-h-screen lg:flex-row flex-col gap-5 items-center justify-between py-15 px-0 pb-0 bg-dark-teal-gradient">
       <div className="h-full flex flex-col items-center justify-start gap-[5px] pt-[20px]">
-        <div className="flex items-center justify-center gap-[10px] py-[10px]">
-          <Image
-            src="/logo.svg"
-            width={50}
-            height={50}
-            priority
-            alt="Supernova's logo, a ball with linear gradient from left to right, light teal to orange"
-          />
-          <H1>Supernova</H1>
-        </div>
+        <HorizontalLogo />
 
         <Paragraph className="text-center">
           Your superhuman productivity sidekick

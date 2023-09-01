@@ -1,4 +1,4 @@
-package main
+package scripts
 
 import (
 	"context"
@@ -34,8 +34,4 @@ func Migrate() {
 	}
 	// show applied migrations and duration in seconds to 2 decimal places
 	fmt.Printf("🚀 Applied %d migrations in %.2f secs", len(res.Applied), res.End.Sub(res.Start).Seconds())
-}
-
-func main() {
-	Migrate()
 }

@@ -34,9 +34,14 @@ func main() {
 	sqlDb, _ := db.DB.DB()
 	defer sqlDb.Close()
 
+	// setup redis
+	db.Redis = db.SetupRedis()
+	defer db.Redis.Close()
+
 	//create http server
 	log.Println("🤖 Starting server on port " + port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	http.Handle("/", middleware.CORSMiddleware(router))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 /*
@@ -48,10 +53,7 @@ func BuildAppRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	// add middlewares
-	router.Use(middleware.CORSMiddleware)
-	router.Use(middleware.LoggingMiddleware)
-
-	//append user routes
+	//append routes
 	customRouter.AppRoutes = append(customRouter.AppRoutes, user.Routes, supernova_tasks.Routes)
 
 	for _, route := range customRouter.AppRoutes {
@@ -64,6 +66,7 @@ func BuildAppRouter() *mux.Router {
 
 			var handler http.Handler
 			handler = r.HandlerFunc
+			handler = middleware.LoggingMiddleware(handler)
 
 			//check to see if route should be protected with jwt
 			if r.Protected {

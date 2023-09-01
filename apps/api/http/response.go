@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/trysupernova/supernova-api/utils"
 )
 
 type ErrorResponse struct {
-	Error      bool   `json:"error"`
-	Message    string `json:"message"`
-	StatusCode int    `json:"statusCode"`
+	Error      bool               `json:"error"`
+	Message    string             `json:"message"`
+	StatusCode int                `json:"statusCode"`
+	ErrorCode  utils.AppErrorType `json:"errorCode,omitempty"`
 }
 
 type SuccessResponse[T any] struct {
@@ -22,11 +25,11 @@ type SuccessResponse[T any] struct {
 HTTP Response handling for errors,
 Returns valid JSON with error type and response code
 */
-func NewErrorResponse(w http.ResponseWriter, statusCode int, response string) {
+func NewErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 	error := ErrorResponse{
-		true,
-		response,
-		statusCode,
+		Error:      true,
+		Message:    message,
+		StatusCode: statusCode,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
