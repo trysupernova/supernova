@@ -19,6 +19,7 @@ type Config struct {
 	BASE_URL_WEB_APP string
 	REDIS_URL        string
 	REDIS_PASSWORD   string
+	ENVIRONMENT      string
 }
 
 var config *Config
@@ -44,6 +45,7 @@ func InitConfig() {
 		BASE_URL_WEB_APP: os.Getenv("BASE_URL_WEB_APP"),
 		REDIS_URL:        os.Getenv("REDIS_URL"),
 		REDIS_PASSWORD:   os.Getenv("REDIS_PASSWORD"),
+		ENVIRONMENT:      os.Getenv("ENVIRONMENT"),
 	}
 }
 

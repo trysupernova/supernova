@@ -17,6 +17,12 @@ import (
 func main() {
 	//init environments
 	utils.InitConfig()
+	if utils.GetConfig().ENVIRONMENT == "prod" {
+		log.Println("🤖 Running in production mode")
+	} else {
+		log.Println("🤖 Running in development mode")
+		log.Println(utils.GetConfig().RESEND_API_KEY)
+	}
 
 	port := utils.GetConfig().PORT
 	if port == "" {
