@@ -28,6 +28,7 @@ export default function Home() {
     error?: string;
   }>({ status: "loading" });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
 
   const handleCheckTask = useCallback(
     (taskId: string) => (value: boolean) => {
@@ -52,6 +53,7 @@ export default function Home() {
         console.log("updating task in backend...");
         LocalDB.markIsCompleteTask(db, taskId, value);
         console.log("updated successfully");
+        setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
         console.error(e);
       }
@@ -71,6 +73,7 @@ export default function Home() {
         console.log("deleting task in backend...");
         LocalDB.deleteTask(db, taskId);
         console.log("deleted successfully");
+        setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
         console.error(e);
       }
@@ -99,6 +102,7 @@ export default function Home() {
           console.log("updating task in backend...");
           await LocalDB.updateTask(db, task);
           console.log("updated successfully");
+          setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
         }
@@ -113,6 +117,7 @@ export default function Home() {
           console.log("inserting task to backend...");
           await LocalDB.insertTask(db, task);
           console.log("inserted successfully");
+          setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
         }
@@ -201,7 +206,6 @@ export default function Home() {
         await LocalDB.createTables(db);
         console.log("created tables");
         const tasks = await LocalDB.getTasks(db);
-        console.log("got tasks: " + JSON.stringify(tasks));
         setTasks(tasks);
         setTaskFetchState({ status: "success" });
       } catch (e: any) {
@@ -209,6 +213,28 @@ export default function Home() {
       }
     })();
   }, []);
+
+  // refetch the tasks whenever there's a task update
+  useEffect(() => {
+    if (db === null) {
+      console.error("Database not initialized");
+      return;
+    }
+    if (!refetchTasks) {
+      return;
+    }
+    (async () => {
+      try {
+        console.log("refetching tasks...");
+        const tasks = await LocalDB.getTasks(db);
+        console.log("refetched successfully");
+        setTasks(tasks);
+        setRefetchTasks(false);
+      } catch (e: any) {
+        console.error(e);
+      }
+    })();
+  }, [db, refetchTasks]);
 
   const handleClickTask = (taskIndex: number) => () => {
     // select task

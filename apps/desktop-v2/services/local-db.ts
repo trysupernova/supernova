@@ -115,23 +115,38 @@ export namespace LocalDB {
         FROM supernova_tasks
       `
     );
-    return (result as any[]).map((row) => {
-      return {
-        id: row.id,
-        title: row.title,
-        originalBuildText: row.originalBuildText,
-        description: row.description === null ? undefined : row.description,
-        expectedDurationSeconds: Number.isNaN(
-          Number.parseInt(row.expectedDurationSeconds)
-        )
-          ? undefined
-          : Number.parseInt(row.expectedDurationSeconds),
-        isComplete: row.isComplete === "true",
-        startTime:
-          row.startTime === null
+    // get the rows and convert them to ISupernovaTask[]
+    return (result as any[])
+      .map((row) => {
+        return {
+          id: row.id,
+          title: row.title,
+          originalBuildText: row.originalBuildText,
+          description: row.description === null ? undefined : row.description,
+          expectedDurationSeconds: Number.isNaN(
+            Number.parseInt(row.expectedDurationSeconds)
+          )
             ? undefined
-            : convertISOStringToDate(row.startTime),
-      };
-    });
+            : Number.parseInt(row.expectedDurationSeconds),
+          isComplete: row.isComplete === "true",
+          startTime:
+            row.startTime === null
+              ? undefined
+              : convertISOStringToDate(row.startTime),
+        };
+      })
+      .sort((a, b) => {
+        // sorted by startTime (earliest first)
+        // completed tasks are at the bottom
+        if (a.isComplete && !b.isComplete) {
+          return 1;
+        } else if (!a.isComplete && b.isComplete) {
+          return -1;
+        } else if (a.startTime && b.startTime) {
+          return a.startTime.getTime() - b.startTime.getTime();
+        } else {
+          return 0;
+        }
+      });
   };
 }

@@ -2,17 +2,9 @@
 
 // this is a task builder dialog which pops up in the center of the screen with an
 // overlay
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  BaseEditor,
-  Editor,
-  Transforms,
-  createEditor,
-  Text,
-  NodeEntry,
-  Element,
-} from "slate";
+import { BaseEditor, Editor, Transforms, createEditor, NodeEntry } from "slate";
 import {
   Slate,
   Editable,
@@ -22,8 +14,15 @@ import {
 } from "slate-react";
 import { Descendant } from "slate";
 import { ISupernovaTask } from "../types/supernova-task";
-import { DurationWidget } from "./supernova-task";
+import { DurationWidget, StartTimeWidget } from "./supernova-task";
 import Image from "next/image";
+import {
+  extractExpectedDuration,
+  START_AT_SLATE_TYPE,
+  getCbRangesFromRegex,
+  EXP_DUR_SLATE_TYPE,
+  extractStartAt,
+} from "../utils/supernova-task";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -35,9 +34,6 @@ declare module "slate" {
     Text: CustomText;
   }
 }
-
-const startAtType = "startAt";
-const expectedDurationType = "expectedDuration";
 
 export const TaskBuilderDialog = (props: {
   isOpen: boolean;
@@ -57,19 +53,31 @@ export const TaskBuilderDialog = (props: {
 
   const handleEditorChange = (value: Descendant[]) => {
     const content = (value[0] as any).children[0].text as string;
-    const extract = extractExpectedDuration(content);
+    const extractedDuration = extractExpectedDuration(content);
     let duration: number | undefined = undefined;
     let newTitle = content;
-    if (extract !== null) {
-      const { unit, value: durationParsed } = extract;
+    if (extractedDuration !== null) {
+      const { unit, value: durationParsed } = extractedDuration;
       if (unit === "m") {
         duration = durationParsed * 60;
       } else if (unit === "h") {
         duration = durationParsed * 60 * 60;
       }
       newTitle =
-        content.slice(0, extract.match.index) +
-        content.slice(extract.match.index + extract.match[0].length);
+        content.slice(0, extractedDuration.match.index) +
+        content.slice(
+          extractedDuration.match.index + extractedDuration.match[0].length
+        );
+    }
+    const extractedStartAt = extractStartAt(newTitle);
+    let startTime: Date | undefined = undefined;
+    if (extractedStartAt !== null) {
+      startTime = extractedStartAt.value;
+      newTitle =
+        newTitle.slice(0, extractedStartAt.match.index) +
+        newTitle.slice(
+          extractedStartAt.match.index + extractedStartAt.match[0].length
+        );
     }
 
     setTaskEdit((prev) => ({
@@ -77,6 +85,7 @@ export const TaskBuilderDialog = (props: {
       expectedDurationSeconds: duration,
       originalBuildText: content,
       title: newTitle,
+      startTime,
     }));
     // clear any current errors until the submission is wrong again
     setError(undefined);
@@ -84,100 +93,56 @@ export const TaskBuilderDialog = (props: {
 
   const handleKeyDownEditor = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
+      e.preventDefault(); // prevent newlines into the task builder
+      e.stopPropagation(); // so that it doesn't bubble up to the page
       // submit instead
       if (props.onSubmit !== undefined) {
         // validate the task field; should not be empty
         if (taskEdit.title === "") {
           setError("Task title cannot be empty.");
-          e.preventDefault(); // prevent newlines into the task builder
-          e.stopPropagation(); // so that it doesn't bubble up to the page
           return;
         }
         props.onSubmit(taskEdit);
       }
-      e.preventDefault(); // prevent newlines into the task builder
-      e.stopPropagation(); // so that it doesn't bubble up to the page
       props.onOpenChange(false); // close the dialog
     }
     if (e.key === "Escape") {
+      e.preventDefault(); // prevent typing into the task builder
+      e.stopPropagation(); // so that it doesn't bubble up to the page
       props.onOpenChange(false); // close the dialog
       // clear the editor
       Transforms.delete(editor, { at: [0, 0], distance: 1, unit: "line" });
-      e.preventDefault(); // prevent typing into the task builder
-      e.stopPropagation(); // so that it doesn't bubble up to the page
     }
-  };
-
-  // extract the expected duration and unit from the text
-  const extractExpectedDuration = (
-    text: string
-  ): { value: number; unit: "m" | "h"; match: RegExpExecArray } | null => {
-    const expectedDurationRegex =
-      /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi;
-    const match = expectedDurationRegex.exec(text);
-    if (match === null) {
-      return null;
-    }
-    const expectedDuration = match[1];
-    const unit = match[2] || match[3];
-    if (unit?.startsWith("m")) {
-      // minutes
-      return { value: parseInt(expectedDuration), unit: "m", match };
-    } else if (unit?.startsWith("h")) {
-      // hours
-      return { value: parseInt(expectedDuration), unit: "h", match };
-    }
-    return null;
   };
 
   // for applying styling
-  const decorate = useCallback(([node, path]: NodeEntry) => {
-    const startAtRegex =
-      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap][Mm]?)?)\b/gi;
+  const decorate = ([node, path]: NodeEntry) => {
+    // TODO: need to fix this local scope problem with the regexs somehow
+
+    const expectedDurationRegex = new RegExp(
+      /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi
+    );
+    const startAtRegex = new RegExp(
+      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap]?[Mm]?))?\b/gi
+    );
     const ranges: any[] = [];
-    const rangesStartAt = createRangesFromRegex(
+    const rangesStartAt = getCbRangesFromRegex(
       startAtRegex,
-      startAtType
+      START_AT_SLATE_TYPE
     )([node, path]);
     if (rangesStartAt.length > 0) {
       ranges.push(...rangesStartAt);
     }
 
-    const expectedDurationRegex =
-      /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi;
-    const rangesExpectedDuration = createRangesFromRegex(
+    const rangesExpectedDuration = getCbRangesFromRegex(
       expectedDurationRegex,
-      expectedDurationType
+      EXP_DUR_SLATE_TYPE
     )([node, path]);
     if (rangesExpectedDuration.length > 0) {
       ranges.push(...rangesExpectedDuration);
     }
     return ranges;
-  }, []);
-
-  const createRangesFromRegex =
-    (regex: RegExp, type: string) =>
-    ([node, path]: NodeEntry): any[] => {
-      const ranges: any[] = [];
-      let match: RegExpExecArray | null = null;
-      if (Text.isText(node)) {
-        const { text } = node;
-        match = regex.exec(text);
-        // need a match to continue
-        if (!match) {
-          return [];
-        }
-        const matchedSubstr = match[0];
-        // basically everything before this is the search string
-        ranges.push({
-          anchor: { path, offset: match.index },
-          focus: { path, offset: match.index + matchedSubstr.length },
-          [type]: true,
-        });
-      }
-
-      return ranges;
-    };
+  };
 
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     return <Leaf {...props} />;
@@ -224,6 +189,9 @@ export const TaskBuilderDialog = (props: {
                     expectedDurationSeconds={taskEdit.expectedDurationSeconds}
                   />
                 )}
+                {taskEdit.startTime !== undefined && (
+                  <StartTimeWidget startTime={taskEdit.startTime} />
+                )}
               </div>
 
               {error !== undefined && (
@@ -244,14 +212,14 @@ const Leaf = (props: RenderLeafProps) => {
     <span
       {...props.attributes}
       className={`inline-flex items-center gap-1 ${
-        (props.leaf as any)[startAtType]
+        (props.leaf as any)[START_AT_SLATE_TYPE]
           ? "text-cyan-600"
-          : (props.leaf as any)[expectedDurationType]
+          : (props.leaf as any)[EXP_DUR_SLATE_TYPE]
           ? "text-green-600"
           : "black"
       }`}
     >
-      {(props.leaf as any)[startAtType] && (
+      {(props.leaf as any)[START_AT_SLATE_TYPE] && (
         <Image
           src="/icons/clock-cyan.svg"
           alt="Play green icon"
@@ -260,7 +228,7 @@ const Leaf = (props: RenderLeafProps) => {
           className="ml-[2px]"
         />
       )}
-      {(props.leaf as any)[expectedDurationType] && (
+      {(props.leaf as any)[EXP_DUR_SLATE_TYPE] && (
         <Image
           src="/icons/play-green.svg"
           alt="Play green icon"

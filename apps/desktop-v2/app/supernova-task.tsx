@@ -32,7 +32,9 @@ export const SupernovaTaskComponent = (props: {
       onClick={props.onClick}
       className={`w-full h-min p-2.5 rounded-sm shadow border-2 ${
         props.focused ? "border-teal-400 bg-teal-50" : ""
-      } justify-start items-start gap-[7px] inline-flex`}
+      } justify-start items-start gap-[7px] inline-flex cursor-pointer
+      ${props.task.isComplete && "opacity-40"}
+      `}
     >
       <div className="h-[17px] justify-start items-center gap-[5px] flex">
         <Checkbox
@@ -49,7 +51,10 @@ export const SupernovaTaskComponent = (props: {
           <div className="grow shrink basis-0 text-black text-base font-medium leading-[14px]">
             {props.task.title}
           </div>
-          <div className="self-stretch flex-col justify-start items-center inline-flex">
+          <div className="self-stretch justify-start items-center inline-flex gap-1">
+            {props.task.startTime && (
+              <StartTimeWidget startTime={props.task.startTime} />
+            )}
             <DurationWidget
               expectedDurationSeconds={props.task.expectedDurationSeconds}
             />
@@ -97,10 +102,22 @@ export const DurationWidget = (props: { expectedDurationSeconds?: number }) => {
 };
 
 export const StartTimeWidget = (props: { startTime: Date }) => {
+  // get the start time date
+  const isToday = moment(props.startTime).isSame(moment(), "day");
+  const dateSection = isToday
+    ? ""
+    : moment(props.startTime).format("dddd DD MMM");
+
   return (
-    <div className="px-[5px] bg-slate-200 rounded-[5px] justify-center items-center gap-2.5 inline-flex">
-      <div className="text-center text-slate-600 text-xs font-normal leading-tight">
-        {props.startTime.toLocaleDateString()}
+    <div className="px-[5px] rounded-[5px] justify-center items-center gap-1 inline-flex">
+      <Image
+        src="/icons/clock-cyan.svg"
+        width={12}
+        height={12}
+        alt="Cyan clock"
+      />
+      <div className="text-center text-xs font-normal text-cyan-600">
+        {dateSection} {moment(props.startTime).format("h:mma")}
       </div>
     </div>
   );
@@ -111,6 +128,8 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { twMerge } from "tailwind-merge";
 import { ISupernovaTask } from "../types/supernova-task";
+import moment from "moment";
+import Image from "next/image";
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
