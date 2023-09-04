@@ -7,6 +7,10 @@ import { TaskBuilderDialog } from "./task-builder-dialog";
 import { ISupernovaTask } from "../types/supernova-task";
 import { LocalDB } from "../services/local-db";
 import Database from "tauri-plugin-sql-api";
+import { GearIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
+import { settingsRoute } from "./settings/meta";
+// import { settingsRoute } from "./settings/meta";
 
 export default function Home() {
   // get today's date in this format: Tue, 26th Aug
@@ -74,6 +78,49 @@ export default function Home() {
     [db, tasks]
   );
 
+  const handleCreateOrUpdateTask = useCallback(
+    async (task: ISupernovaTask) => {
+      if (chosenTaskIndex !== -1) {
+        setTasks(
+          tasks.map((t, i) => {
+            if (i === chosenTaskIndex) {
+              return task;
+            } else {
+              return t;
+            }
+          })
+        );
+        // update task in backend
+        if (db === null) {
+          console.error("Database not initialized");
+          return;
+        }
+        try {
+          console.log("updating task in backend...");
+          await LocalDB.updateTask(db, task);
+          console.log("updated successfully");
+        } catch (e: any) {
+          console.error(e);
+        }
+      } else {
+        setTasks([...tasks, task]);
+        // create task in backend
+        if (db === null) {
+          console.error("Database not initialized");
+          return;
+        }
+        try {
+          console.log("inserting task to backend...");
+          await LocalDB.insertTask(db, task);
+          console.log("inserted successfully");
+        } catch (e: any) {
+          console.error(e);
+        }
+      }
+    },
+    [chosenTaskIndex, db, tasks]
+  );
+
   // register mousetraps
   useEffect(() => {
     // go up
@@ -97,13 +144,13 @@ export default function Home() {
       }
     });
     // delete task
-    Mousetrap.bind("backspace", () => {
+    Mousetrap.bind("backspace", (e) => {
       if (chosenTaskIndex !== -1) {
         handleDeleteTask(tasks[chosenTaskIndex].id)();
         setChosenTaskIndex(-1); // deselect
       }
+      e.preventDefault(); // prevent backspace from going back in history
     });
-
     // create task popup
     Mousetrap.bind("c", (e) => {
       setIsOpen(true);
@@ -154,6 +201,11 @@ export default function Home() {
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
+      <div className="flex items-center justify-end w-full">
+        <Link href={settingsRoute}>
+          <GearIcon width={20} height={20} />
+        </Link>
+      </div>
       {isOpen && (
         <TaskBuilderDialog
           isOpen={isOpen}
@@ -161,45 +213,7 @@ export default function Home() {
           editingTask={
             chosenTaskIndex !== -1 ? tasks[chosenTaskIndex] : createBlankTask()
           }
-          onSubmit={async (task) => {
-            if (chosenTaskIndex !== -1) {
-              setTasks(
-                tasks.map((t, i) => {
-                  if (i === chosenTaskIndex) {
-                    return task;
-                  } else {
-                    return t;
-                  }
-                })
-              );
-              // update task in backend
-              if (db === null) {
-                console.error("Database not initialized");
-                return;
-              }
-              try {
-                console.log("updating task in backend...");
-                await LocalDB.updateTask(db, task);
-                console.log("updated successfully");
-              } catch (e: any) {
-                console.error(e);
-              }
-            } else {
-              setTasks([...tasks, task]);
-              // create task in backend
-              if (db === null) {
-                console.error("Database not initialized");
-                return;
-              }
-              try {
-                console.log("inserting task to backend...");
-                await LocalDB.insertTask(db, task);
-                console.log("inserted successfully");
-              } catch (e: any) {
-                console.error(e);
-              }
-            }
-          }}
+          onSubmit={handleCreateOrUpdateTask}
         />
       )}
       <div className="flex items-center gap-[10px]">

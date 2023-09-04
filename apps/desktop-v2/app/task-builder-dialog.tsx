@@ -2,12 +2,28 @@
 
 // this is a task builder dialog which pops up in the center of the screen with an
 // overlay
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 // Import the Slate editor factory.
-import { BaseEditor, Transforms, createEditor } from "slate";
+import {
+  BaseEditor,
+  Editor,
+  Transforms,
+  createEditor,
+  Element,
+  Location,
+  Text,
+  NodeEntry,
+} from "slate";
 // Import the Slate components and React plugin.
-import { Slate, Editable, withReact, ReactEditor } from "slate-react";
+import {
+  Slate,
+  Editable,
+  withReact,
+  ReactEditor,
+  RenderElementProps,
+  RenderLeafProps,
+} from "slate-react";
 import { Descendant } from "slate";
 import { ISupernovaTask } from "../types/supernova-task";
 
@@ -21,6 +37,9 @@ declare module "slate" {
     Text: CustomText;
   }
 }
+
+const startAtType = "startAt";
+const expectedDurationType = "expectedDuration";
 
 export const TaskBuilderDialog = (props: {
   isOpen: boolean;
@@ -74,6 +93,64 @@ export const TaskBuilderDialog = (props: {
     setError(undefined);
   };
 
+  // for applying styling
+  const decorate = useCallback(([node, path]: NodeEntry) => {
+    const ranges: any[] = [];
+
+    const startAtRegex =
+      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap][Mm]?)?)\b/g;
+    const expectedDurationRegex =
+      /\bfor\s*(\d+)\s*(?:mins?|m|hours?|hrs?|hr|h)\b/g;
+
+    const rangesStartAt = createRangesFromRegex(
+      startAtRegex,
+      startAtType
+    )([node, path]);
+    ranges.push(...rangesStartAt);
+    const rangesExpectedDuration = createRangesFromRegex(
+      expectedDurationRegex,
+      expectedDurationType
+    )([node, path]);
+    ranges.push(...rangesExpectedDuration);
+    return ranges;
+  }, []);
+
+  const createRangesFromRegex =
+    (regex: RegExp, type: string) =>
+    ([node, path]: NodeEntry) => {
+      const ranges: any[] = [];
+      if (Text.isText(node)) {
+        const { text } = node;
+        const match = regex.exec(text);
+        // need a match to continue
+        if (!match) {
+          return [];
+        }
+        const matchedSubstr = match[0];
+        // basically everything before this is the search string
+        ranges.push({
+          anchor: { path, offset: match.index },
+          focus: { path, offset: match.index + matchedSubstr.length },
+          [type]: true,
+        });
+      }
+
+      return ranges;
+    };
+
+  const renderLeaf = useCallback((props: RenderLeafProps) => {
+    return <Leaf {...props} />;
+  }, []);
+
+  // move to the end of the editor when it is opened
+  useEffect(() => {
+    if (props.isOpen) {
+      const path = [0, 0];
+      const end = Editor.end(editor, path);
+      Transforms.select(editor, end);
+    }
+  }, [editor, props.isOpen]);
+
   return (
     <Dialog.Root open={props.isOpen} onOpenChange={props.onOpenChange}>
       <Dialog.Portal>
@@ -92,10 +169,12 @@ export const TaskBuilderDialog = (props: {
                 onChange={handleEditorChange}
               >
                 <Editable
+                  decorate={decorate}
                   className="outline-none"
-                  placeholder="Describe your task with pure English."
+                  placeholder="Describe your task with just English."
                   autoFocus
                   onKeyDown={handleKeyDownEditor}
+                  renderLeaf={renderLeaf}
                 />
               </Slate>
               {error !== undefined && (
@@ -108,5 +187,22 @@ export const TaskBuilderDialog = (props: {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+};
+
+const Leaf = (props: RenderLeafProps) => {
+  return (
+    <span
+      {...props.attributes}
+      className={`${
+        (props.leaf as any)[startAtType]
+          ? "text-cyan-600"
+          : (props.leaf as any)[expectedDurationType]
+          ? "text-green-600"
+          : "black"
+      }`}
+    >
+      {props.children}
+    </span>
   );
 };
