@@ -180,6 +180,16 @@ export default function Home() {
         setChosenTaskIndex(-1);
       }
     });
+
+    return () => {
+      Mousetrap.unbind(["k", "up"]);
+      Mousetrap.unbind(["j", "down"]);
+      Mousetrap.unbind(["e", "d", "x"]);
+      Mousetrap.unbind("backspace");
+      Mousetrap.unbind("c");
+      Mousetrap.unbind("enter");
+      Mousetrap.unbind("esc");
+    };
   }, [chosenTaskIndex, handleCheckTask, handleDeleteTask, isOpen, tasks]);
 
   useEffect(() => {
@@ -191,6 +201,7 @@ export default function Home() {
         await LocalDB.createTables(db);
         console.log("created tables");
         const tasks = await LocalDB.getTasks(db);
+        console.log("got tasks: " + JSON.stringify(tasks));
         setTasks(tasks);
         setTaskFetchState({ status: "success" });
       } catch (e: any) {
@@ -198,6 +209,16 @@ export default function Home() {
       }
     })();
   }, []);
+
+  const handleClickTask = (taskIndex: number) => () => {
+    // select task
+    setChosenTaskIndex(() => {
+      return taskIndex;
+    });
+    setIsOpen(() => {
+      return true;
+    });
+  };
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
@@ -229,7 +250,7 @@ export default function Home() {
         </div>
       )}
       <div className="flex flex-col w-full max-h-full gap-2 overflow-clip">
-        {tasks.map((task) => (
+        {tasks.map((task, index) => (
           <SupernovaTaskComponent
             key={task.id}
             task={task}
@@ -237,6 +258,7 @@ export default function Home() {
               chosenTaskIndex !== -1 && tasks[chosenTaskIndex].id === task.id
             }
             onClickCheck={handleCheckTask(task.id)}
+            onClick={handleClickTask(index)}
           />
         ))}
       </div>

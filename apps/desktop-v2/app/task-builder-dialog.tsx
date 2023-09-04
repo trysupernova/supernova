@@ -4,28 +4,24 @@
 // overlay
 import React, { useCallback, useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-// Import the Slate editor factory.
 import {
   BaseEditor,
   Editor,
   Transforms,
   createEditor,
-  Element,
-  Location,
   Text,
   NodeEntry,
 } from "slate";
-// Import the Slate components and React plugin.
 import {
   Slate,
   Editable,
   withReact,
   ReactEditor,
-  RenderElementProps,
   RenderLeafProps,
 } from "slate-react";
 import { Descendant } from "slate";
 import { ISupernovaTask } from "../types/supernova-task";
+import { DurationWidget } from "./supernova-task";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -52,10 +48,37 @@ export const TaskBuilderDialog = (props: {
   const initialValue: Descendant[] = [
     {
       type: "paragraph",
-      children: [{ text: props.editingTask.title }],
+      children: [{ text: props.editingTask.originalBuildText }],
     },
   ];
-  const [taskEdit, setTaskEdit] = useState(props.editingTask);
+  const [taskEdit, setTaskEdit] = useState(() => props.editingTask);
+
+  const handleEditorChange = (value: Descendant[]) => {
+    const content = (value[0] as any).children[0].text as string;
+    const extract = extractExpectedDuration(content);
+    let duration: number | undefined = undefined;
+    let newTitle = content;
+    if (extract !== null) {
+      const { unit, value: durationParsed } = extract;
+      if (unit === "m") {
+        duration = durationParsed * 60;
+      } else if (unit === "h") {
+        duration = durationParsed * 60 * 60;
+      }
+      newTitle =
+        content.slice(0, extract.match.index) +
+        content.slice(extract.match.index + extract.match[0].length);
+    }
+
+    setTaskEdit((prev) => ({
+      ...prev,
+      expectedDurationSeconds: duration,
+      originalBuildText: content,
+      title: newTitle,
+    }));
+    // clear any current errors until the submission is wrong again
+    setError(undefined);
+  };
 
   const handleKeyDownEditor = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
@@ -83,45 +106,61 @@ export const TaskBuilderDialog = (props: {
     }
   };
 
-  const handleEditorChange = (value: Descendant[]) => {
-    const content = (value[0] as any).children[0].text as string;
-    setTaskEdit((prev) => ({
-      ...prev,
-      title: content,
-    }));
-    // clear any current errors until the submission is wrong again
-    setError(undefined);
+  // extract the expected duration and unit from the text
+  const extractExpectedDuration = (
+    text: string
+  ): { value: number; unit: "m" | "h"; match: RegExpExecArray } | null => {
+    const expectedDurationRegex =
+      /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi;
+    const match = expectedDurationRegex.exec(text);
+    if (match === null) {
+      return null;
+    }
+    const expectedDuration = match[1];
+    const unit = match[2] || match[3];
+    if (unit?.startsWith("m")) {
+      // minutes
+      return { value: parseInt(expectedDuration), unit: "m", match };
+    } else if (unit?.startsWith("h")) {
+      // hours
+      return { value: parseInt(expectedDuration), unit: "h", match };
+    }
+    return null;
   };
 
   // for applying styling
   const decorate = useCallback(([node, path]: NodeEntry) => {
-    const ranges: any[] = [];
-
     const startAtRegex =
-      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap][Mm]?)?)\b/g;
-    const expectedDurationRegex =
-      /\bfor\s*(\d+)\s*(?:mins?|m|hours?|hrs?|hr|h)\b/g;
-
+      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap][Mm]?)?)\b/gi;
+    const ranges: any[] = [];
     const rangesStartAt = createRangesFromRegex(
       startAtRegex,
       startAtType
     )([node, path]);
-    ranges.push(...rangesStartAt);
+    if (rangesStartAt.length > 0) {
+      ranges.push(...rangesStartAt);
+    }
+
+    const expectedDurationRegex =
+      /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi;
     const rangesExpectedDuration = createRangesFromRegex(
       expectedDurationRegex,
       expectedDurationType
     )([node, path]);
-    ranges.push(...rangesExpectedDuration);
+    if (rangesExpectedDuration.length > 0) {
+      ranges.push(...rangesExpectedDuration);
+    }
     return ranges;
   }, []);
 
   const createRangesFromRegex =
     (regex: RegExp, type: string) =>
-    ([node, path]: NodeEntry) => {
+    ([node, path]: NodeEntry): any[] => {
       const ranges: any[] = [];
+      let match: RegExpExecArray | null = null;
       if (Text.isText(node)) {
         const { text } = node;
-        const match = regex.exec(text);
+        match = regex.exec(text);
         // need a match to continue
         if (!match) {
           return [];
@@ -177,6 +216,14 @@ export const TaskBuilderDialog = (props: {
                   renderLeaf={renderLeaf}
                 />
               </Slate>
+              <div className="flex items-center gap-2 flex-wrap">
+                {taskEdit.expectedDurationSeconds !== undefined && (
+                  <DurationWidget
+                    expectedDurationSeconds={taskEdit.expectedDurationSeconds}
+                  />
+                )}
+              </div>
+
               {error !== undefined && (
                 <p className="text-red-500 text-xs font-medium leading-[10px]">
                   {error}

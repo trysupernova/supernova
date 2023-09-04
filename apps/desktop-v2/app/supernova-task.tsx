@@ -12,11 +12,12 @@ const generateRandomID = () => {
 /*
  * Creates a blank task with a random ID
  */
-export const createBlankTask = () => {
+export const createBlankTask = (): ISupernovaTask => {
   return {
     id: generateRandomID(),
     title: "",
     isComplete: false,
+    originalBuildText: "",
   };
 };
 
@@ -24,20 +25,11 @@ export const SupernovaTaskComponent = (props: {
   task: ISupernovaTask;
   focused?: boolean;
   onClickCheck: (value: boolean) => void;
+  onClick: () => void;
 }) => {
-  // get the duration in minutes and seconds (e.g. 1:30)
-  // if the duration was not provided, default to -:--
-  let duration: string;
-  if (props.task.expectedDurationSeconds === undefined) {
-    duration = "-:--";
-  } else {
-    const durationMinutes = Math.floor(props.task.expectedDurationSeconds / 60);
-    const durationSeconds = props.task.expectedDurationSeconds % 60;
-    duration = `${durationMinutes}:${durationSeconds}`;
-  }
-
   return (
     <div
+      onClick={props.onClick}
       className={`w-full h-min p-2.5 rounded-sm shadow border-2 ${
         props.focused ? "border-teal-400 bg-teal-50" : ""
       } justify-start items-start gap-[7px] inline-flex`}
@@ -58,11 +50,9 @@ export const SupernovaTaskComponent = (props: {
             {props.task.title}
           </div>
           <div className="self-stretch flex-col justify-start items-center inline-flex">
-            <div className="px-[5px] bg-slate-200 rounded-[5px] justify-center items-center gap-2.5 inline-flex">
-              <div className="text-center text-slate-600 text-xs font-normal leading-tight">
-                {duration}
-              </div>
-            </div>
+            <DurationWidget
+              expectedDurationSeconds={props.task.expectedDurationSeconds}
+            />
           </div>
         </div>
         {props.task.description && (
@@ -75,6 +65,42 @@ export const SupernovaTaskComponent = (props: {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+export const DurationWidget = (props: { expectedDurationSeconds?: number }) => {
+  // get the duration in minutes and seconds (e.g. 1:30)
+  // if the duration was not provided, default to -:--
+  let duration: string;
+  if (props.expectedDurationSeconds === undefined) {
+    duration = "-:--";
+  } else {
+    const durationHours = Math.floor(props.expectedDurationSeconds / 60 / 60);
+    // make it double digit
+    const durationMinutes = Math.floor(
+      (props.expectedDurationSeconds - durationHours * 60 * 60) / 60
+    )
+      .toString()
+      .padStart(2, "0");
+    duration = `${durationHours}:${durationMinutes}`;
+  }
+
+  return (
+    <div className="px-[5px] bg-slate-200 rounded-[5px] justify-center items-center gap-2.5 inline-flex">
+      <div className="text-center text-slate-600 text-xs font-normal leading-tight">
+        {duration}
+      </div>
+    </div>
+  );
+};
+
+export const StartTimeWidget = (props: { startTime: Date }) => {
+  return (
+    <div className="px-[5px] bg-slate-200 rounded-[5px] justify-center items-center gap-2.5 inline-flex">
+      <div className="text-center text-slate-600 text-xs font-normal leading-tight">
+        {props.startTime.toLocaleDateString()}
       </div>
     </div>
   );
