@@ -80,7 +80,7 @@ export const DurationWidget = (props: { expectedDurationSeconds?: number }) => {
   // if the duration was not provided, default to -:--
   let duration: string;
   if (props.expectedDurationSeconds === undefined) {
-    duration = "-:--";
+    duration = "-:-";
   } else {
     const durationHours = Math.floor(props.expectedDurationSeconds / 60 / 60);
     // make it double digit
@@ -94,9 +94,9 @@ export const DurationWidget = (props: { expectedDurationSeconds?: number }) => {
 
   return (
     <div className="px-[5px] bg-slate-200 rounded-[5px] justify-center items-center gap-2.5 inline-flex">
-      <div className="text-center text-slate-600 text-xs font-normal leading-tight">
+      <p className="text-center text-slate-600 text-xs font-normal leading-tight">
         {duration}
-      </div>
+      </p>
     </div>
   );
 };
@@ -116,9 +116,9 @@ export const StartTimeWidget = (props: { startTime: Date }) => {
         height={12}
         alt="Cyan clock"
       />
-      <div className="text-center text-xs font-normal text-cyan-600">
+      <p className="text-center text-xs font-normal text-cyan-600">
         {dateSection} {moment(props.startTime).format("h:mma")}
-      </div>
+      </p>
     </div>
   );
 };

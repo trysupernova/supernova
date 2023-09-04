@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { SupernovaTaskComponent, createBlankTask } from "./supernova-task";
 import Mousetrap from "mousetrap";
 import { TaskBuilderDialog } from "./task-builder-dialog";
@@ -10,6 +10,12 @@ import Database from "tauri-plugin-sql-api";
 import { GearIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
+import Image from "next/image";
+import { SupernovaCommandCenter } from "./command-center";
+import { SupernovaCommand } from "../types/command";
+import { AlertDialog } from "./alert-dialog";
+import { useRouter } from "next/navigation";
+import { Kbd } from "../components/kbd";
 // import { settingsRoute } from "./settings/meta";
 
 export default function Home() {
@@ -20,6 +26,8 @@ export default function Home() {
     month: "short",
   });
 
+  const router = useRouter();
+
   const [db, setDb] = useState<Database | null>(null);
   const [chosenTaskIndex, setChosenTaskIndex] = useState<number>(-1);
   const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
@@ -29,6 +37,8 @@ export default function Home() {
   }>({ status: "loading" });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
+  const [showAreYouSureDialog, setShowAreYouSureDialog] =
+    useState<boolean>(false);
 
   const handleCheckTask = useCallback(
     (taskId: string) => (value: boolean) => {
@@ -126,6 +136,71 @@ export default function Home() {
     [chosenTaskIndex, db, tasks]
   );
 
+  const commands: SupernovaCommand[] = useMemo(
+    () => [
+      {
+        label: "Create a task",
+        shortcut: "c",
+        cb: (e) => {
+          e?.preventDefault(); // prevent typing into the task builder
+          setIsOpen(true);
+          // deselect task
+          setChosenTaskIndex(-1);
+        },
+      },
+      {
+        label: "Delete task",
+        shortcut: "backspace",
+        cb: (e) => {
+          e?.preventDefault(); // prevent backspace from going back in history
+          if (chosenTaskIndex !== -1) {
+            setShowAreYouSureDialog(true);
+          }
+        },
+      },
+      {
+        label: "Edit task",
+        shortcut: "enter",
+        cb: (e) => {
+          e?.preventDefault(); // prevent typing into the task builder
+          // if modal is open, then don't open another one
+          if (isOpen) {
+            return;
+          }
+
+          if (chosenTaskIndex !== -1) {
+            setIsOpen(true);
+          }
+        },
+      },
+      {
+        label: "Mark done/undone",
+        shortcut: ["e", "x", "d"],
+        cb: () => {
+          if (chosenTaskIndex !== -1) {
+            handleCheckTask(tasks[chosenTaskIndex].id)(
+              !tasks[chosenTaskIndex].isComplete
+            );
+          }
+        },
+      },
+      {
+        label: "Go to settings",
+        shortcut: "mod+,",
+        cb: () => {
+          router.push(settingsRoute);
+        },
+      },
+    ],
+    [chosenTaskIndex, handleCheckTask, isOpen, router, tasks]
+  );
+
+  const handleSubmitAreYouSure = () => {
+    handleDeleteTask(tasks[chosenTaskIndex].id)();
+    setChosenTaskIndex(-1); // deselect
+    setShowAreYouSureDialog(false); // close this alert dialog
+  };
+
   // register mousetraps
   useEffect(() => {
     // go up
@@ -140,41 +215,12 @@ export default function Home() {
         setChosenTaskIndex(chosenTaskIndex + 1);
       }
     });
-    // toggle complete
-    Mousetrap.bind(["e", "d", "x"], () => {
-      if (chosenTaskIndex !== -1) {
-        handleCheckTask(tasks[chosenTaskIndex].id)(
-          !tasks[chosenTaskIndex].isComplete
-        );
-      }
-    });
-    // delete task
-    Mousetrap.bind("backspace", (e) => {
-      if (chosenTaskIndex !== -1) {
-        handleDeleteTask(tasks[chosenTaskIndex].id)();
-        setChosenTaskIndex(-1); // deselect
-      }
-      e.preventDefault(); // prevent backspace from going back in history
-    });
-    // create task popup
-    Mousetrap.bind("c", (e) => {
-      setIsOpen(true);
-      // deselect task
-      setChosenTaskIndex(-1);
-      e.preventDefault(); // prevent typing into the task builder
-    });
-    // edit task popup (if task is selected)
-    Mousetrap.bind("enter", (e) => {
-      // if modal is open, then don't open another one
-      if (isOpen) {
-        return;
-      }
 
-      if (chosenTaskIndex !== -1) {
-        setIsOpen(true);
-      }
-      e.preventDefault(); // prevent typing into the task builder
+    // regiser the shortcuts above
+    commands.forEach((command) => {
+      Mousetrap.bind(command.shortcut, command.cb);
     });
+
     // unselect task (if task is selected)
     Mousetrap.bind("esc", () => {
       // if modal is open, then don't unselect
@@ -189,13 +235,19 @@ export default function Home() {
     return () => {
       Mousetrap.unbind(["k", "up"]);
       Mousetrap.unbind(["j", "down"]);
-      Mousetrap.unbind(["e", "d", "x"]);
-      Mousetrap.unbind("backspace");
-      Mousetrap.unbind("c");
-      Mousetrap.unbind("enter");
       Mousetrap.unbind("esc");
+      commands.forEach((command) => {
+        Mousetrap.unbind(command.shortcut);
+      });
     };
-  }, [chosenTaskIndex, handleCheckTask, handleDeleteTask, isOpen, tasks]);
+  }, [
+    chosenTaskIndex,
+    commands,
+    handleCheckTask,
+    handleDeleteTask,
+    isOpen,
+    tasks,
+  ]);
 
   useEffect(() => {
     // save to db
@@ -244,6 +296,26 @@ export default function Home() {
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
+      <AlertDialog
+        description={
+          <p>
+            Are you sure? Task
+            <span className="px-1 font-bold">
+              {chosenTaskIndex !== -1 && tasks[chosenTaskIndex].title}
+            </span>
+            will be deleted
+          </p>
+        }
+        open={showAreYouSureDialog}
+        setOpen={setShowAreYouSureDialog}
+        handleSubmit={handleSubmitAreYouSure}
+      />
+      <SupernovaCommandCenter
+        commands={commands}
+        context={{
+          chosenTask: chosenTaskIndex !== -1 ? tasks[chosenTaskIndex] : null,
+        }}
+      />
       <div className="flex items-center justify-end w-full">
         <Link href={settingsRoute}>
           <GearIcon width={20} height={20} />
@@ -256,6 +328,7 @@ export default function Home() {
           editingTask={
             chosenTaskIndex !== -1 ? tasks[chosenTaskIndex] : createBlankTask()
           }
+          mode={chosenTaskIndex !== -1 ? "edit" : "create"}
           onSubmit={handleCreateOrUpdateTask}
         />
       )}
@@ -266,12 +339,26 @@ export default function Home() {
       {taskFetchState.status === "loading" && (
         <div className="flex items-center gap-[10px]">
           <div className="w-[25px] h-[25px] relative">
-            <div className="w-[25px] h-[25px] left-0 top-[25px] absolute origin-top-left -rotate-90 bg-gradient-to-b from-cyan-400 via-orange-200 to-rose-500 rounded-full" />
+            <Image
+              src="/supernova-globe.svg"
+              width={25}
+              height={25}
+              alt="Supernova's icon"
+            />
           </div>
           <div className="text-slate-400 text-[16px]">Loading...</div>
         </div>
       )}
-      <div className="flex flex-col w-full max-h-full gap-2 overflow-clip">
+      <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip">
+        <hr className="w-64" />
+        {tasks.length === 0 && (
+          <div className="w-64">
+            <p className="text-slate-400 text-[16px] text-center">
+              No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
+              command center with <Kbd>Cmd+k</Kbd>
+            </p>
+          </div>
+        )}
         {tasks.map((task, index) => (
           <SupernovaTaskComponent
             key={task.id}

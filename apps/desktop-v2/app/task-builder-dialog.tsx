@@ -4,7 +4,14 @@
 // overlay
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { BaseEditor, Editor, Transforms, createEditor, NodeEntry } from "slate";
+import {
+  BaseEditor,
+  Editor,
+  Transforms,
+  createEditor,
+  NodeEntry,
+  Element,
+} from "slate";
 import {
   Slate,
   Editable,
@@ -23,6 +30,10 @@ import {
   EXP_DUR_SLATE_TYPE,
   extractStartAt,
 } from "../utils/supernova-task";
+import { Kbd } from "../components/kbd";
+import { Button } from "../components/button";
+import { twMerge } from "tailwind-merge";
+import { ibmPlexMono } from "../components/fonts";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -40,6 +51,7 @@ export const TaskBuilderDialog = (props: {
   onOpenChange: (open: boolean) => void;
   editingTask: ISupernovaTask;
   onSubmit?: (task: ISupernovaTask) => void;
+  mode: "edit" | "create";
 }) => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [editor] = useState(() => withReact(createEditor()));
@@ -91,20 +103,25 @@ export const TaskBuilderDialog = (props: {
     setError(undefined);
   };
 
+  const handleSubmit = () => {
+    // submit instead
+    if (props.onSubmit !== undefined) {
+      // validate the task field; should not be empty
+      if (taskEdit.title === "") {
+        setError("Task title cannot be empty.");
+        return;
+      }
+      props.onSubmit(taskEdit);
+    }
+    props.onOpenChange(false); // close the dialog
+  };
+
   const handleKeyDownEditor = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault(); // prevent newlines into the task builder
       e.stopPropagation(); // so that it doesn't bubble up to the page
       // submit instead
-      if (props.onSubmit !== undefined) {
-        // validate the task field; should not be empty
-        if (taskEdit.title === "") {
-          setError("Task title cannot be empty.");
-          return;
-        }
-        props.onSubmit(taskEdit);
-      }
-      props.onOpenChange(false); // close the dialog
+      handleSubmit();
     }
     if (e.key === "Escape") {
       e.preventDefault(); // prevent typing into the task builder
@@ -166,32 +183,57 @@ export const TaskBuilderDialog = (props: {
         >
           <div className="w-full h-full px-3 py-2.5 bg-white rounded-[10px] shadow border border-gray-300 justify-start items-start gap-2.5 flex">
             <div className="w-[25px] h-[25px] relative">
-              <div className="w-[25px] h-[25px] left-0 top-[25px] absolute origin-top-left -rotate-90 bg-gradient-to-b from-cyan-400 via-orange-200 to-rose-500 rounded-full" />
+              <Image
+                src="/supernova-globe.svg"
+                width={25}
+                height={25}
+                alt="Supernova's icon"
+              />
             </div>
-            <div className="grow shrink basis-0 overflow-x-clip flex flex-col gap-2">
-              <Slate
-                editor={editor}
-                initialValue={initialValue}
-                onChange={handleEditorChange}
+            <div className="grow shrink basis-0 overflow-x-clip flex flex-col gap-1">
+              <p
+                className={twMerge(
+                  "text-slate-400 text-xs leading-tight",
+                  ibmPlexMono.className
+                )}
               >
-                <Editable
-                  decorate={decorate}
-                  className="outline-none"
-                  placeholder="Describe your task with just English."
-                  autoFocus
-                  onKeyDown={handleKeyDownEditor}
-                  renderLeaf={renderLeaf}
-                />
-              </Slate>
-              <div className="flex items-center gap-2 flex-wrap">
-                {taskEdit.expectedDurationSeconds !== undefined && (
-                  <DurationWidget
-                    expectedDurationSeconds={taskEdit.expectedDurationSeconds}
+                {">"} {props.mode === "edit" ? "Editing task" : "Create a task"}
+              </p>
+              <div className="overflow-x-clip flex flex-col gap-2">
+                <Slate
+                  editor={editor}
+                  initialValue={initialValue}
+                  onChange={handleEditorChange}
+                >
+                  <Editable
+                    decorate={decorate}
+                    className="outline-none"
+                    placeholder="Describe your task with just English."
+                    autoFocus
+                    onKeyDown={handleKeyDownEditor}
+                    renderLeaf={renderLeaf}
                   />
-                )}
-                {taskEdit.startTime !== undefined && (
-                  <StartTimeWidget startTime={taskEdit.startTime} />
-                )}
+                </Slate>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {taskEdit.expectedDurationSeconds !== undefined && (
+                      <DurationWidget
+                        expectedDurationSeconds={
+                          taskEdit.expectedDurationSeconds
+                        }
+                      />
+                    )}
+                    {taskEdit.startTime !== undefined && (
+                      <StartTimeWidget startTime={taskEdit.startTime} />
+                    )}
+                  </div>
+                  <div>
+                    <Button className="gap-1 pb-2" onClick={handleSubmit}>
+                      Save
+                      <Kbd>↵</Kbd>
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               {error !== undefined && (
