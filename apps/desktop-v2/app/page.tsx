@@ -212,12 +212,8 @@ export default function Home() {
 
   const handleClickTask = (taskIndex: number) => () => {
     // select task
-    setChosenTaskIndex(() => {
-      return taskIndex;
-    });
-    setIsOpen(() => {
-      return true;
-    });
+    setChosenTaskIndex(taskIndex);
+    setIsOpen(true);
   };
 
   return (

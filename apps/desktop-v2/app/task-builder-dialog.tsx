@@ -11,6 +11,7 @@ import {
   createEditor,
   Text,
   NodeEntry,
+  Element,
 } from "slate";
 import {
   Slate,
@@ -22,6 +23,7 @@ import {
 import { Descendant } from "slate";
 import { ISupernovaTask } from "../types/supernova-task";
 import { DurationWidget } from "./supernova-task";
+import Image from "next/image";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -241,7 +243,7 @@ const Leaf = (props: RenderLeafProps) => {
   return (
     <span
       {...props.attributes}
-      className={`${
+      className={`inline-flex items-center gap-1 ${
         (props.leaf as any)[startAtType]
           ? "text-cyan-600"
           : (props.leaf as any)[expectedDurationType]
@@ -249,6 +251,24 @@ const Leaf = (props: RenderLeafProps) => {
           : "black"
       }`}
     >
+      {(props.leaf as any)[startAtType] && (
+        <Image
+          src="/icons/clock-cyan.svg"
+          alt="Play green icon"
+          width={13}
+          height={13}
+          className="ml-[2px]"
+        />
+      )}
+      {(props.leaf as any)[expectedDurationType] && (
+        <Image
+          src="/icons/play-green.svg"
+          alt="Play green icon"
+          width={13}
+          height={13}
+          className="ml-[2px]"
+        />
+      )}
       {props.children}
     </span>
   );
