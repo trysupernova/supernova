@@ -253,33 +253,33 @@ const Leaf = (props: RenderLeafProps) => {
   return (
     <span
       {...props.attributes}
-      className={`inline-flex items-center gap-1 ${
+      className={
         (props.leaf as any)[START_AT_SLATE_TYPE]
           ? "text-cyan-600"
-          : (props.leaf as any)[EXP_DUR_SLATE_TYPE]
-          ? "text-green-600"
-          : "black"
-      }`}
+          : (props.leaf as any)[EXP_DUR_SLATE_TYPE] && "text-green-600"
+      }
     >
-      {(props.leaf as any)[START_AT_SLATE_TYPE] && (
-        <Image
-          src="/icons/clock-cyan.svg"
-          alt="Play green icon"
-          width={13}
-          height={13}
-          className="ml-[2px]"
-        />
-      )}
-      {(props.leaf as any)[EXP_DUR_SLATE_TYPE] && (
-        <Image
-          src="/icons/play-green.svg"
-          alt="Play green icon"
-          width={13}
-          height={13}
-          className="ml-[2px]"
-        />
-      )}
-      {props.children}
+      <span className="inline-flex gap-1 items-center">
+        {(props.leaf as any)[START_AT_SLATE_TYPE] && (
+          <Image
+            src="/icons/clock-cyan.svg"
+            alt="Play green icon"
+            width={13}
+            height={13}
+            className="ml-[2px]"
+          />
+        )}
+        {(props.leaf as any)[EXP_DUR_SLATE_TYPE] && (
+          <Image
+            src="/icons/play-green.svg"
+            alt="Play green icon"
+            width={13}
+            height={13}
+            className="ml-[2px]"
+          />
+        )}
+        {props.children}
+      </span>
     </span>
   );
 };

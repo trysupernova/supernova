@@ -300,7 +300,7 @@ export default function Home() {
         description={
           <p>
             Are you sure? Task
-            <span className="px-1 font-bold">
+            <span className="pl-1 font-bold text-red-600">
               {chosenTaskIndex !== -1 && tasks[chosenTaskIndex].title}
             </span>
             will be deleted
@@ -332,6 +332,15 @@ export default function Home() {
           onSubmit={handleCreateOrUpdateTask}
         />
       )}
+      <div>
+        <Image
+          src="/supernova-globe.svg"
+          width={30}
+          height={30}
+          alt="Supernova's icon"
+          priority
+        />
+      </div>
       <div className="flex items-center gap-[10px]">
         <h4 className="text-[20px] font-semibold">Today</h4>
         <p className="text-slate-400 text-[16px]">{today}</p>
