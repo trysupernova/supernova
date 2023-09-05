@@ -9,7 +9,7 @@ export const Kbd = (
     <kbd
       {...props}
       className={twMerge(
-        "bg-slate-100 rounded-[5px] px-[5px] border border-zinc-400 justify-center items-center gap-2.5 inline-flex",
+        "bg-slate-100 rounded-[5px] px-[5px] mb-[2px] border border-zinc-400 justify-center items-center gap-2.5 inline-flex",
         ibmPlexMono.className,
         props.className
       )}

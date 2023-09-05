@@ -16,7 +16,6 @@ import { SupernovaCommand } from "../types/command";
 import { AlertDialog } from "./alert-dialog";
 import { useRouter } from "next/navigation";
 import { Kbd } from "../components/kbd";
-// import { settingsRoute } from "./settings/meta";
 
 export default function Home() {
   // get today's date in this format: Tue, 26th Aug
@@ -140,7 +139,7 @@ export default function Home() {
     () => [
       {
         label: "Create a task",
-        shortcut: "c",
+        shortcut: ["c", "ctrl+space"],
         cb: (e) => {
           e?.preventDefault(); // prevent typing into the task builder
           setIsOpen(true);
@@ -196,7 +195,9 @@ export default function Home() {
   );
 
   const handleSubmitAreYouSure = () => {
-    handleDeleteTask(tasks[chosenTaskIndex].id)();
+    if (chosenTaskIndex !== -1) {
+      handleDeleteTask(tasks[chosenTaskIndex].id)();
+    }
     setChosenTaskIndex(-1); // deselect
     setShowAreYouSureDialog(false); // close this alert dialog
   };
@@ -296,20 +297,22 @@ export default function Home() {
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
-      <AlertDialog
-        description={
-          <p>
-            Are you sure? Task
-            <span className="pl-1 font-bold text-red-600">
-              {chosenTaskIndex !== -1 && tasks[chosenTaskIndex].title}
-            </span>
-            will be deleted
-          </p>
-        }
-        open={showAreYouSureDialog}
-        setOpen={setShowAreYouSureDialog}
-        handleSubmit={handleSubmitAreYouSure}
-      />
+      {showAreYouSureDialog && (
+        <AlertDialog
+          description={
+            <p>
+              Are you sure? Task
+              <span className="px-1 font-bold text-red-600">
+                {chosenTaskIndex !== -1 && tasks[chosenTaskIndex].title}
+              </span>
+              will be deleted
+            </p>
+          }
+          open={showAreYouSureDialog}
+          setOpen={setShowAreYouSureDialog}
+          handleSubmit={handleSubmitAreYouSure}
+        />
+      )}
       <SupernovaCommandCenter
         commands={commands}
         context={{
