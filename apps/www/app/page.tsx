@@ -61,8 +61,8 @@ export default function Home() {
           <br />
           <Paragraph className="text-center max-w-sm">
             Supernova is a productivity app that helps you focus on what matters
-            and focus on only one thing. Manage your tasks, capture them
-            quickly, and take notes seamlessly. Integration-rich, fast, and
+            and focus on only one thing at a time. Manage your tasks, capture
+            them quickly, and take notes seamlessly. Integration-rich, fast, and
             delightful to use. All open-sourced!
           </Paragraph>
           <br />
