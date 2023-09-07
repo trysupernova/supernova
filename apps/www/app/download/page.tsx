@@ -22,7 +22,9 @@ const DownloadPage = () => {
         manrope.className
       )}
     >
-      <HorizontalLogo />
+      <Link href="/">
+        <HorizontalLogo />
+      </Link>
 
       <div className="flex flex-col items-center justify-center gap-3">
         <h2 className="text-xl font-extrabold">Download</h2>

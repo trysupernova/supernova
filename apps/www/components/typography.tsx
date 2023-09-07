@@ -25,6 +25,34 @@ export const H1 = (props: Props) => {
   );
 };
 
+export const H2 = (props: Props) => {
+  return (
+    <h2
+      className={twMerge(
+        "text-white text-4xl tracking-[-0.576px]",
+        props.className,
+        manrope.className
+      )}
+    >
+      {props.children}
+    </h2>
+  );
+};
+
+export const H3 = (props: Props) => {
+  return (
+    <h2
+      className={twMerge(
+        "text-white text-2xl tracking-[-0.576px]",
+        props.className,
+        manrope.className
+      )}
+    >
+      {props.children}
+    </h2>
+  );
+};
+
 export const Paragraph = (
   props: React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLParagraphElement>,
