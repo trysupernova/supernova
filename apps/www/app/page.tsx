@@ -57,7 +57,7 @@ export default function Home() {
       <Navbar />
       <div className="flex relative lg:flex-row flex-col gap-5 items-center justify-between pt-15">
         <div className="flex flex-col items-center justify-start gap-[5px]">
-          <H2 className="text-center">Your superhuman productivity sidekick</H2>
+          <H1 className="text-center">Your superhuman productivity sidekick</H1>
           <br />
           <Paragraph className="text-center max-w-sm">
             Supernova is a productivity app that helps you focus on what matters

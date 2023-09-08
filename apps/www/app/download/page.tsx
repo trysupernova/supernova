@@ -6,6 +6,7 @@ import { Manrope } from "next/font/google";
 import { twMerge } from "tailwind-merge";
 import { Button } from "../../components/button";
 import { BsDownload } from "react-icons/bs";
+import { H2 } from "@/components/typography";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -27,7 +28,7 @@ const DownloadPage = () => {
       </Link>
 
       <div className="flex flex-col items-center justify-center gap-3">
-        <h2 className="text-xl font-extrabold">Download</h2>
+        <H2>Download</H2>
         <hr className="w-4" />
         <div className="flex items-center gap-3">
           <Link href={darwinURL} target="_blank">

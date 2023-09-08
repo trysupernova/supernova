@@ -13,7 +13,14 @@ export const HorizontalLogo = () => {
         priority
         alt="Supernova's logo, a ball with linear gradient from left to right, light teal to orange"
       />
-      <H3>Supernova</H3>
+      <H3
+        className="text-shadow-whiteHalo"
+        style={{
+          textShadow: "0px 4px 10px rgba(255, 255, 255, 0.40)",
+        }}
+      >
+        Supernova
+      </H3>
     </div>
   );
 };
