@@ -3,11 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "install:api": "cd apps/api && go install",
-    "install:desktop": "cd apps/desktop && flutter pub get",
     "build": "turbo run build",
     "dev": "yarn dev:api & yarn dev:desktop",
     "dev:api": "turbo run dev --scope=api",
-    "dev:desktop": "cd apps/desktop && npm run dev",
+    "dev:desktop": "cd apps/desktop-v2 && npm run dev",
     "dev:www": "turbo run dev --scope=www",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
