@@ -1,0 +1,43 @@
+{
+  "name": "api-v2",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "NODE_ENV=development npm run start",
+    "db:migrate": "prisma migrate dev",
+    "schema:generate": "prisma generate",
+    "db:start": "docker-compose up -d"
+  },
+  "keywords": [],
+  "author": "Vincent Vu <vincent@trysupernova.one>",
+  "license": "ISC",
+  "devDependencies": {
+    "@supernova/types": "workspace:*",
+    "@types/cookie-parser": "^1.4.4",
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.17",
+    "@types/express-session": "^1.17.7",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.6.0",
+    "@types/passport-google-oauth20": "^2.0.11",
+    "prisma": "^5.2.0",
+    "tsx": "^3.12.8",
+    "typescript": "5.1.6"
+  },
+  "dependencies": {
+    "@prisma/client": "5.2.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pino-http": "^8.5.0",
+    "pino-pretty": "^10.2.0",
+    "znv": "^0.4.0",
+    "zod": "^3.22.2"
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { withAuth } from "@/hocs/withAuth";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SupernovaTaskComponent, createBlankTask } from "./supernova-task";
 import Mousetrap from "mousetrap";
@@ -16,8 +17,11 @@ import { SupernovaCommand } from "../types/command";
 import { AlertDialog } from "./alert-dialog";
 import { useRouter } from "next/navigation";
 import { Kbd } from "../components/kbd";
+import { supernovaAPI } from "@/services/supernova-api";
+import { useSupernovaToast } from "@/hooks/useSupernovaToast";
+import { Toaster, toast } from "sonner";
 
-export default function Home() {
+export function Home() {
   // get today's date in this format: Tue, 26th Aug
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "short",
@@ -38,9 +42,17 @@ export default function Home() {
   const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
   const [showAreYouSureDialog, setShowAreYouSureDialog] =
     useState<boolean>(false);
+  const { makeToast } = useSupernovaToast();
 
   const handleCheckTask = useCallback(
     (taskId: string) => (value: boolean) => {
+      const foundTask = tasks.find((task) => task.id === taskId);
+      if (foundTask === undefined) {
+        makeToast("Task not found", "error", {
+          description: `This is something on our side. The task you were trying to check was not found.`,
+        });
+        return;
+      }
       setTasks(
         tasks.map((task) => {
           if (taskId === task.id) {
@@ -54,13 +66,19 @@ export default function Home() {
         })
       );
       // mark task complete in backend
-      if (db === null) {
-        console.error("Database not initialized");
-        return;
-      }
+      // if (db === null) {
+      //   console.error("Database not initialized");
+      //   return;
+      // }
       try {
         console.log("updating task in backend...");
-        LocalDB.markIsCompleteTask(db, taskId, value);
+        // LocalDB.markIsCompleteTask(db, taskId, value);
+        if (value === true) {
+          makeToast("Well done!", "success", {
+            description: `Task "${foundTask.title}" marked as done.`,
+            icon: "🎊",
+          });
+        }
         console.log("updated successfully");
         setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
@@ -102,15 +120,16 @@ export default function Home() {
             }
           })
         );
-        // update task in backend
-        if (db === null) {
-          console.error("Database not initialized");
-          return;
-        }
+        // // update task in backend
+        // if (db === null) {
+        //   console.error("Database not initialized");
+        //   return;
+        // }
         try {
           console.log("updating task in backend...");
-          await LocalDB.updateTask(db, task);
+          // await LocalDB.updateTask(db, task);
           console.log("updated successfully");
+          makeToast("Task updated successfully", "success");
           setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
@@ -118,14 +137,15 @@ export default function Home() {
       } else {
         setTasks([...tasks, task]);
         // create task in backend
-        if (db === null) {
-          console.error("Database not initialized");
-          return;
-        }
+        // if (db === null) {
+        //   console.error("Database not initialized");
+        //   return;
+        // }
         try {
           console.log("inserting task to backend...");
-          await LocalDB.insertTask(db, task);
+          // await LocalDB.insertTask(db, task);
           console.log("inserted successfully");
+          makeToast("Task created successfully", "success");
           setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
@@ -254,11 +274,14 @@ export default function Home() {
     // save to db
     (async () => {
       try {
-        const db = await LocalDB.init();
-        setDb(db);
-        await LocalDB.createTables(db);
-        console.log("created tables");
-        const tasks = await LocalDB.getTasks(db);
+        // const db = await LocalDB.init();
+        // setDb(db);
+        // await LocalDB.createTables(db);
+        // // console.log("created tables");
+        const res = await supernovaAPI.getTasks();
+        if (res.type === "error") {
+          setTaskFetchState({ status: "error", error: res.message });
+        }
         setTasks(tasks);
         setTaskFetchState({ status: "success" });
       } catch (e: any) {
@@ -297,6 +320,7 @@ export default function Home() {
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
+      <Toaster richColors />
       {showAreYouSureDialog && (
         <AlertDialog
           description={
@@ -348,41 +372,42 @@ export default function Home() {
         <h4 className="text-[20px] font-semibold">Today</h4>
         <p className="text-slate-400 text-[16px]">{today}</p>
       </div>
-      {taskFetchState.status === "loading" && (
+      {taskFetchState.status === "loading" ? (
         <div className="flex items-center gap-[10px]">
-          <div className="w-[25px] h-[25px] relative">
-            <Image
-              src="/supernova-globe.svg"
-              width={25}
-              height={25}
-              alt="Supernova's icon"
-            />
-          </div>
           <div className="text-slate-400 text-[16px]">Loading...</div>
         </div>
-      )}
-      <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip">
-        <hr className="w-64" />
-        {tasks.length === 0 && (
-          <div className="w-64">
-            <p className="text-slate-400 text-[16px] text-center">
-              No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
-              command center with <Kbd>Cmd+k</Kbd>
-            </p>
+      ) : taskFetchState.status === "success" ? (
+        <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip">
+          <hr className="w-64" />
+          {tasks.length === 0 && (
+            <div className="w-64">
+              <p className="text-slate-400 text-[16px] text-center">
+                No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
+                command center with <Kbd>Cmd+k</Kbd>
+              </p>
+            </div>
+          )}
+          {tasks.map((task, index) => (
+            <SupernovaTaskComponent
+              key={task.id}
+              task={task}
+              focused={
+                chosenTaskIndex !== -1 && tasks[chosenTaskIndex].id === task.id
+              }
+              onClickCheck={handleCheckTask(task.id)}
+              onClick={handleClickTask(index)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center gap-[10px]">
+          <div className="text-slate-400 text-[16px]">
+            {taskFetchState.error}
           </div>
-        )}
-        {tasks.map((task, index) => (
-          <SupernovaTaskComponent
-            key={task.id}
-            task={task}
-            focused={
-              chosenTaskIndex !== -1 && tasks[chosenTaskIndex].id === task.id
-            }
-            onClickCheck={handleCheckTask(task.id)}
-            onClick={handleClickTask(index)}
-          />
-        ))}
-      </div>
+        </div>
+      )}
     </main>
   );
 }
+
+export default withAuth(Home);

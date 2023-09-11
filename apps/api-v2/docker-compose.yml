@@ -11,16 +11,16 @@ services:
       - "3306:3306"
     volumes:
       - db:/var/lib/mysql
-  redis:
-    image: redis:6
-    container_name: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis:/data
-    environment:
-      - REDIS_PASSWORD=example
+  # redis:
+  #   image: redis:6
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis:/data
+  #   environment:
+  #     - REDIS_PASSWORD=example
 
 volumes:
   db:
-  redis:
+  # redis:

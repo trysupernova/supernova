@@ -15,6 +15,7 @@
       "cache": false,
       "persistent": true
     },
-    "install": {"cache": true}
+    "install": {"cache": true},
+    "format": {}
   }
 }

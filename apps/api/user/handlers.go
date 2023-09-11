@@ -14,9 +14,9 @@ import (
 )
 
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
+	var user SupernovaUser
 	db.DB.First(&user, r.Header.Get("userId"))
-	customHTTP.NewSuccessResponse(w, http.StatusOK, customHTTP.SuccessResponse[User]{Message: "User found", StatusCode: http.StatusOK, Data: user})
+	customHTTP.NewSuccessResponse(w, http.StatusOK, customHTTP.SuccessResponse[SupernovaUser]{Message: "User found", StatusCode: http.StatusOK, Data: user})
 }
 
 func CreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func CreateHandler(w http.ResponseWriter, r *http.Request) {
 		customHTTP.NewErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
-	var user User
+	var user SupernovaUser
 	//get password hash
 	user.Email = userBody.Email
 	user.Name = userBody.Name
@@ -39,7 +39,7 @@ func CreateHandler(w http.ResponseWriter, r *http.Request) {
 		customHTTP.NewErrorResponse(w, http.StatusUnauthorized, err)
 		return
 	}
-	customHTTP.NewSuccessResponse(w, http.StatusOK, customHTTP.SuccessResponse[User]{Message: "User created", StatusCode: http.StatusOK, Data: user})
+	customHTTP.NewSuccessResponse(w, http.StatusOK, customHTTP.SuccessResponse[SupernovaUser]{Message: "User created", StatusCode: http.StatusOK, Data: user})
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +52,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		customHTTP.NewErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
-	var user User
+	var user SupernovaUser
 	db.DB.Where("email = ?", userBody.Email).Find(&user)
 	if user.checkPassword(userBody.Password) {
 		token, err := user.generateJWT()
@@ -69,14 +69,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var user User
-	var users []User
+	var user SupernovaUser
+	var users []SupernovaUser
 
 	db.DB.First(&user, params["userId"])
 	db.DB.Delete(&user)
 
 	db.DB.Find(&users)
-	customHTTP.NewSuccessResponse(w, http.StatusOK, customHTTP.SuccessResponse[[]User]{Message: "User deleted", StatusCode: http.StatusOK, Data: users})
+	customHTTP.NewSuccessResponse(w, http.StatusOK, customHTTP.SuccessResponse[[]SupernovaUser]{Message: "User deleted", StatusCode: http.StatusOK, Data: users})
 }
 
 func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		customHTTP.NewErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
-	var user User
+	var user SupernovaUser
 	// if user not found, return error
 	if err := db.DB.Where("email = ?", userBody.Email).Find(&user).Error; err != nil {
 		customHTTP.NewErrorResponse(w, http.StatusUnauthorized, errors.New("User not found"))
@@ -125,7 +125,7 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update their password
-	var user User
+	var user SupernovaUser
 	// find the user first; if not associated to the correct user then
 	// err out
 	if err := db.DB.First(&user, requestingUserId).Error; err != nil {

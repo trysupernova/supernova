@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/trysupernova/supernova-api/auth"
 	"github.com/trysupernova/supernova-api/db"
 	"github.com/trysupernova/supernova-api/supernova_tasks"
 	"github.com/trysupernova/supernova-api/utils"
@@ -55,7 +56,7 @@ func BuildAppRouter() *mux.Router {
 
 	// add middlewares
 	//append routes
-	customRouter.AppRoutes = append(customRouter.AppRoutes, user.Routes, supernova_tasks.Routes)
+	customRouter.AppRoutes = append(customRouter.AppRoutes, user.Routes, supernova_tasks.Routes, auth.Routes)
 
 	for _, route := range customRouter.AppRoutes {
 

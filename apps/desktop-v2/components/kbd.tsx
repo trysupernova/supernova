@@ -17,9 +17,9 @@ export const Kbd = (
         boxShadow: "0px 2px 0px 0px #A1A1AA",
       }}
     >
-      <div className="text-center text-slate-600 text-sm leading-tight">
+      <span className="text-center text-slate-600 text-sm leading-tight">
         {props.children}
-      </div>
+      </span>
     </kbd>
   );
 };
