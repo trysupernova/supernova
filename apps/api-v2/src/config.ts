@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { parseEnv, z } from "znv";
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
   dotenv.config();
 }
 
@@ -13,6 +13,7 @@ const config = parseEnv(process.env, {
   SUPERNOVA_WEB_APP_BASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(1),
   JWT_REFRESH_SECRET: z.string().min(1),
+  REDIS_URL: z.string().min(1),
 });
 
 export default config;

@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "dev": "NODE_ENV=development npm run start",
+    "test": "jest --forceExit",
+    "start": "node dist/index.js",
+    "build": "tsup src/index.ts --format cjs --minify --clean",
+    "prebuild": "npm run clean",
+    "clean": "rm -rf dist",
+    "dev": "NODE_ENV=development tsx src/index.ts",
     "db:migrate": "prisma migrate dev",
     "schema:generate": "prisma generate",
     "db:start": "docker-compose up -d"
@@ -18,10 +22,17 @@
     "@types/cors": "^2.8.14",
     "@types/express": "^4.17.17",
     "@types/express-session": "^1.17.7",
+    "@types/jest": "^29.5.4",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.6.0",
     "@types/passport-google-oauth20": "^2.0.11",
+    "@types/supertest": "^2.0.12",
+    "jest": "^29.6.4",
+    "jest-express": "^1.12.0",
     "prisma": "^5.2.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "tsup": "^7.2.0",
     "tsx": "^3.12.8",
     "typescript": "5.1.6"
   },
@@ -37,6 +48,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pino-http": "^8.5.0",
     "pino-pretty": "^10.2.0",
+    "redis": "^4.6.8",
     "znv": "^0.4.0",
     "zod": "^3.22.2"
   }

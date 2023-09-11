@@ -1,13 +1,24 @@
 import { Converter, SupernovaResponse, ISupernovaTask } from "@supernova/types";
 
-export const supernovaResponseConverter: Converter<any, SupernovaResponse> = {
-  convert: (r) => {
-    if (r.error) return { type: "error", error: r.error, message: r.message };
+export const supernovaResponseConverter: Converter<
+  Response,
+  Promise<SupernovaResponse>
+> = {
+  convert: async (r) => {
+    const json = await r.json();
+    if (json.error)
+      return {
+        type: "error",
+        error: json.error,
+        message: json.message,
+        statusCode: r.status,
+      };
     return {
       type: "data",
-      data: r.data,
-      error: r.error,
-      message: r.message,
+      data: json.data,
+      error: json.error,
+      message: json.message,
+      statusCode: r.status,
     };
   },
 };

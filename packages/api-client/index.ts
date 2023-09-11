@@ -17,9 +17,7 @@ export default class SupernovaAPI {
         "Content-Type": "application/json",
       },
       credentials: "include",
-    })
-      .then((res) => res.json())
-      .then(supernovaResponseConverter.convert);
+    }).then(supernovaResponseConverter.convert);
   }
 
   public authenticate(): Promise<SupernovaResponse> {
@@ -28,8 +26,15 @@ export default class SupernovaAPI {
         "Content-Type": "application/json",
       },
       credentials: "include",
-    })
-      .then((res) => res.json())
-      .then(supernovaResponseConverter.convert);
+    }).then(supernovaResponseConverter.convert);
+  }
+
+  logout(): Promise<SupernovaResponse> {
+    return fetch(`${this.baseUrl}/auth/logout`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }).then(supernovaResponseConverter.convert);
   }
 }

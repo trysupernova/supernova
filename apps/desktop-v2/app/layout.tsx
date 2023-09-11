@@ -1,10 +1,7 @@
 import { withAuth } from "@/hocs/withAuth";
 import "./globals.css";
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
-import { Toaster } from "sonner";
-
-const manrope = Manrope({ subsets: ["latin"] });
+import { manrope } from "@/components/fonts";
 
 export const metadata: Metadata = {
   title: "Supernova",

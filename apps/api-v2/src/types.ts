@@ -1,4 +1,5 @@
 import { Profile } from "passport-google-oauth20";
+import jwt from "jsonwebtoken";
 
 export interface ISupernovaResponse<T extends any> {
   data?: T;
@@ -28,10 +29,11 @@ export class SupernovaResponse<T> implements ISupernovaResponse<T> {
 
 // for storing the auth context passed around in the Passport flows
 export interface IAuthPassportCallbackCtx {
-  accessToken: string;
+  encodedProfileToken: string;
 }
 
+// this is the claims in the encodedProfileToken; decoding it will yield a claim looking like this
+export type EncodedProfileTokenClaims = { user: Profile } & jwt.JwtPayload;
+
 // for storing auth context for the typical request protected by our JWT middleware
-export interface IAuthCtx {
-  user: Profile;
-}
+export type IAuthCtx = jwt.JwtPayload;

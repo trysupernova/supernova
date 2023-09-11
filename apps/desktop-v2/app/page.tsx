@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { Kbd } from "../components/kbd";
 import { supernovaAPI } from "@/services/supernova-api";
 import { useSupernovaToast } from "@/hooks/useSupernovaToast";
-import { Toaster, toast } from "sonner";
+import { Toaster } from "sonner";
 
 export function Home() {
   // get today's date in this format: Tue, 26th Aug
@@ -320,7 +320,7 @@ export function Home() {
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
-      <Toaster richColors />
+      <Toaster richColors position="top-center" />
       {showAreYouSureDialog && (
         <AlertDialog
           description={
@@ -401,9 +401,7 @@ export function Home() {
         </div>
       ) : (
         <div className="flex items-center gap-[10px]">
-          <div className="text-slate-400 text-[16px]">
-            {taskFetchState.error}
-          </div>
+          <div className="text-red-600 text-[16px]">{taskFetchState.error}</div>
         </div>
       )}
     </main>

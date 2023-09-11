@@ -10,6 +10,7 @@ export interface ISupernovaTask {
 
 type ErrorResponse = {
   type: "error";
+  statusCode: number;
   error: string;
   message?: string;
 };
@@ -18,6 +19,7 @@ type DataResponse<T> = {
   type: "data";
   data: T;
   message?: string;
+  statusCode: number;
 };
 
 export type SupernovaResponse<T = any> = ErrorResponse | DataResponse<T>;

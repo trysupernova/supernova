@@ -1,10 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { supernovaAPI } from "@/services/supernova-api";
 import { useEffect, useState } from "react";
+import { authRoute } from "@/app/auth/meta";
 
-export function withAuth<T>(Component: React.ComponentType<T>) {
+export interface WithAuthOptions {
+  redirect: string;
+}
+
+export function withAuth<T>(
+  Component: React.ComponentType<T>,
+  options?: WithAuthOptions
+) {
   return function ProtectedRoute(props: any) {
     const router = useRouter();
     const [fetchState, setFetchState] = useState<"loading" | "done" | "error">(
@@ -16,10 +24,14 @@ export function withAuth<T>(Component: React.ComponentType<T>) {
         // If the user is not authenticated, redirect to login page
         if (res.type === "error") {
           setFetchState("error");
-          router.replace("/auth");
+          router.replace(authRoute);
           return;
         }
         setFetchState("done");
+        // redirect if this option was specified
+        if (options !== undefined) {
+          router.replace(options.redirect);
+        }
       })();
     }, []);
 

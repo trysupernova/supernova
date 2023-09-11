@@ -1,5 +1,7 @@
+import { manrope } from "@/components/fonts";
 import { ReactNode } from "react";
 import { ExternalToast, toast } from "sonner";
+import { twMerge } from "tailwind-merge";
 
 export const useSupernovaToast = () => {
   const makeToast = (
@@ -8,7 +10,24 @@ export const useSupernovaToast = () => {
     data?: ExternalToast
   ) => {
     if (type === "success") {
-      toast.success(message, data);
+      // toast.custom((t) => (
+      //   <div className="flex flex-col p-2 shadow bg-white w-full rounded-md border border-gray-300">
+      //     <p className={twMerge("font-medium inline-flex items-center gap-2", manrope.className)}>
+      //       {data?.icon}
+      //       {message}</p>
+      //   </div>
+      // ));
+      toast.success(
+        <p
+          className={twMerge(
+            "font-medium inline-flex items-center gap-2",
+            manrope.className
+          )}
+        >
+          {data?.icon} {message}
+        </p>,
+        data
+      );
     } else if (type === "error") {
       toast.error(message, data);
     } else {
