@@ -21,7 +21,7 @@ import { supernovaAPI } from "@/services/supernova-api";
 import { useSupernovaToast } from "@/hooks/useSupernovaToast";
 import { Toaster } from "sonner";
 
-export function Home() {
+function Home() {
   // get today's date in this format: Tue, 26th Aug
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "short",

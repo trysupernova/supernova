@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { homeRoute } from "../meta";
 
-export const AuthPage = () => {
+const AuthPage = () => {
   const router = useRouter();
   useEffect(() => {
     (async () => {
