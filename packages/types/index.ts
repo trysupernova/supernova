@@ -27,3 +27,5 @@ export type SupernovaResponse<T = any> = ErrorResponse | DataResponse<T>;
 export interface Converter<T, U> {
   convert: (t: T) => U;
 }
+
+export * from "./schema";

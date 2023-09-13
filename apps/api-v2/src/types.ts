@@ -1,5 +1,6 @@
 import { Profile } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
+import { AnyZodObject, z } from "zod";
 
 export interface ISupernovaResponse<T extends any> {
   data?: T;
@@ -36,4 +37,13 @@ export interface IAuthPassportCallbackCtx {
 export type EncodedProfileTokenClaims = { user: Profile } & jwt.JwtPayload;
 
 // for storing auth context for the typical request protected by our JWT middleware
-export type IAuthCtx = jwt.JwtPayload;
+// sub is the user ID which will be string since the @authenticateJWTMiddleware middleware
+// will verify that the token is valid and has a sub claim
+export type IAuthCtx = jwt.JwtPayload & { sub: string };
+
+// any validation schema
+export type SupernovaRequestValidationSchema = z.ZodObject<{
+  body?: AnyZodObject;
+  query?: AnyZodObject;
+  params?: AnyZodObject;
+}>;

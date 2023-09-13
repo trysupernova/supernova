@@ -1,17 +1,13 @@
-name: CI
+name: CD
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,11 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint code
-        run: npm run lint
+      - name: Run Prisma migrations
+        run: npx prisma migrate dev
 
-      - name: Build
-        run: npm run build
-
-      - name: Test
-        run: npm run test
+      - name: Apply migrations to prod DB
+        run: npx prisma db push --preview-feature

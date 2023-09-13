@@ -23,14 +23,16 @@ export const supernovaResponseConverter: Converter<
   },
 };
 
+const nullToUndefined = (v: any) => (v === null ? undefined : v);
+
 export const supernovaTaskConverter: Converter<any, ISupernovaTask> = {
   convert: (t) => ({
     id: t.id,
-    originalBuildText: t.originalBuildText,
+    originalBuildText: t.title, // TODO: will do this when implementing build text
     title: t.title,
-    description: t.description,
-    expectedDurationSeconds: t.expectedDurationSeconds,
-    startTime: t.startTime,
-    isComplete: t.isComplete,
+    description: nullToUndefined(t.description),
+    expectedDurationSeconds: nullToUndefined(t.expectedDurationSeconds),
+    startTime: t.startAt ? new Date(t.startAt) : undefined,
+    isComplete: t.done,
   }),
 };

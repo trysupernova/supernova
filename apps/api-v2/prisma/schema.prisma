@@ -13,7 +13,6 @@ model User {
   id    String     @id @default(uuid())
   email String  @unique
   name  String?
-  tasks Task[]
 }
 
 model Task {
@@ -24,5 +23,5 @@ model Task {
   startAt DateTime?
   expectedDurationSeconds Int?
   userId String
-  user User @relation(fields: [userId], references: [id])
+  @@index([userId], name: "owner_id_idx") // planetscale doesn't support foreign keys
 }

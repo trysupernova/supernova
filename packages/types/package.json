@@ -5,5 +5,8 @@
   "main": "index.ts",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "zod": "^3.22.2"
+  }
 }

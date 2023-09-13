@@ -35,7 +35,8 @@
     "tailwind-merge": "^1.14.0",
     "tailwindcss": "3.3.3",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#v1",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "@supernova/types": "workspace:*"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",

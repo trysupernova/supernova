@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { SupernovaTaskComponent, createBlankTask } from "./supernova-task";
 import Mousetrap from "mousetrap";
 import { TaskBuilderDialog } from "./task-builder-dialog";
-import { ISupernovaTask } from "../types/supernova-task";
+import { ISupernovaTask } from "@supernova/types";
 import { LocalDB } from "../services/local-db";
 import Database from "tauri-plugin-sql-api";
 import { GearIcon } from "@radix-ui/react-icons";
@@ -144,6 +144,14 @@ function Home() {
         try {
           console.log("inserting task to backend...");
           // await LocalDB.insertTask(db, task);
+          await supernovaAPI.addTask({
+            body: {
+              title: task.title,
+              description: task.description,
+              startAt: task.startTime?.toISOString(),
+              expectedDurationSeconds: task.expectedDurationSeconds,
+            },
+          });
           console.log("inserted successfully");
           makeToast("Task created successfully", "success");
           setRefetchTasks(true); // refetch the tasks
@@ -270,6 +278,7 @@ function Home() {
     tasks,
   ]);
 
+  // fetch the task in the beginning
   useEffect(() => {
     // save to db
     (async () => {
@@ -281,9 +290,10 @@ function Home() {
         const res = await supernovaAPI.getTasks();
         if (res.type === "error") {
           setTaskFetchState({ status: "error", error: res.message });
+        } else {
+          setTasks(res.data);
+          setTaskFetchState({ status: "success" });
         }
-        setTasks(tasks);
-        setTaskFetchState({ status: "success" });
       } catch (e: any) {
         setTaskFetchState({ status: "error", error: e.message });
       }
@@ -292,19 +302,24 @@ function Home() {
 
   // refetch the tasks whenever there's a task update
   useEffect(() => {
-    if (db === null) {
-      console.error("Database not initialized");
-      return;
-    }
+    // if (db === null) {
+    //   console.error("Database not initialized");
+    //   return;
+    // }
     if (!refetchTasks) {
       return;
     }
     (async () => {
       try {
         console.log("refetching tasks...");
-        const tasks = await LocalDB.getTasks(db);
+        // const tasks = await LocalDB.getTasks(db);
+        const res = await supernovaAPI.getTasks();
+        if (res.type === "error") {
+          throw new Error(res.message);
+        }
         console.log("refetched successfully");
-        setTasks(tasks);
+        setTasks(res.data);
+        setTaskFetchState({ status: "success" });
         setRefetchTasks(false);
       } catch (e: any) {
         console.error(e);

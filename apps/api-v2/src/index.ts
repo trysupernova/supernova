@@ -2,20 +2,13 @@ import express from "express";
 import passport from "passport";
 import config from "./config";
 import PinoHTTP from "pino-http";
-import {
-  EncodedProfileTokenClaims,
-  IAuthCtx,
-  IAuthPassportCallbackCtx,
-  SupernovaResponse,
-} from "./types";
-import { ISupernovaTask } from "@supernova/types";
+import { EncodedProfileTokenClaims, IAuthPassportCallbackCtx } from "./types";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { authenticateJWTMiddleware } from "./mws";
-import { prisma } from "./db";
 import { buildAuthRouter } from "./routers/auth";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
+import { buildTasksRouter } from "./routers/tasks";
 
 export const createApp = () => {
   const logger = PinoHTTP();
@@ -29,6 +22,7 @@ export const createApp = () => {
     })
   );
   app.use(cookieParser()); // parses the cookies because apparently express doesn't do this by default
+  app.use(express.json()); // parses the request body
 
   passport.use(
     new GoogleStrategy(
@@ -53,32 +47,9 @@ export const createApp = () => {
     )
   );
 
-  // get all tasks belonging to the user
-  app.get("/tasks", authenticateJWTMiddleware, async (req, res) => {
-    const userId = (req.user as IAuthCtx).sub;
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId,
-      },
-    });
-    res.json(
-      new SupernovaResponse<ISupernovaTask[]>({
-        data: tasks.map((t) => ({
-          id: t.id,
-          originalBuildText: t.title, // TODO: incorporate this into the database schema
-          title: t.title,
-          isComplete: t.done,
-          description: t.description ?? undefined,
-          startAt: t.startAt ?? undefined,
-          expectedDurationSeconds: t.expectedDurationSeconds ?? undefined,
-          userId: t.userId,
-        })),
-      })
-    );
-  });
-
   // use auth router
   app.use(buildAuthRouter());
+  app.use(buildTasksRouter());
 
   return { app };
 };

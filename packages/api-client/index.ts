@@ -1,5 +1,12 @@
-import { ISupernovaTask, SupernovaResponse } from "@supernova/types";
-import { supernovaResponseConverter } from "./converters";
+import {
+  CreateTaskRequest,
+  ISupernovaTask,
+  SupernovaResponse,
+} from "@supernova/types";
+import {
+  supernovaResponseConverter,
+  supernovaTaskConverter,
+} from "./converters";
 
 export default class SupernovaAPI {
   baseUrl: string;
@@ -17,6 +24,29 @@ export default class SupernovaAPI {
         "Content-Type": "application/json",
       },
       credentials: "include",
+    })
+      .then(supernovaResponseConverter.convert)
+      .then((response) => {
+        if (response.type === "data") {
+          return {
+            ...response,
+            data: response.data.map(supernovaTaskConverter.convert),
+          };
+        }
+        return response;
+      });
+  }
+
+  public addTask(
+    request: CreateTaskRequest
+  ): Promise<SupernovaResponse<ISupernovaTask>> {
+    return fetch(`${this.baseUrl}/tasks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(request.body),
     }).then(supernovaResponseConverter.convert);
   }
 

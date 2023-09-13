@@ -1,8 +1,13 @@
-import express from "express";
-import { IAuthCtx, SupernovaResponse } from "./types";
+import express, { Request, Response, NextFunction } from "express";
+import {
+  IAuthCtx,
+  SupernovaRequestValidationSchema,
+  SupernovaResponse,
+} from "./types";
 import jwt from "jsonwebtoken";
 import config from "./config";
 import { redis } from "./db";
+import { AnyZodObject, z } from "zod";
 
 // TODO: redirect to the web app on errors instead of sending a JSON response
 export const authenticateJWTMiddleware = async (
@@ -16,7 +21,7 @@ export const authenticateJWTMiddleware = async (
     // verify if authHeader is valid
     if (token) {
       try {
-        const user = jwt.verify(token, config.JWT_SECRET) as IAuthCtx;
+        const user = jwt.verify(token, config.JWT_SECRET);
         if (user.sub === undefined) {
           return res.status(403).send(
             new SupernovaResponse({
@@ -48,7 +53,7 @@ export const authenticateJWTMiddleware = async (
           );
         }
         // set the user in the request
-        req.user = user;
+        req.user = user as IAuthCtx;
         next();
       } catch (err) {
         return res.status(403).send(
@@ -77,3 +82,39 @@ export const authenticateJWTMiddleware = async (
     );
   }
 };
+
+/**
+ * Validates the request body, query and params against the schema
+ * @param schema s
+ * @returns
+ */
+export const validateRequestSchema =
+  (schema: SupernovaRequestValidationSchema) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await schema.parseAsync({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
+      return next();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json(
+          new SupernovaResponse({
+            message: "Invalid request; failed schema validation",
+            error: error.toString(),
+          })
+        );
+      }
+      // log the error
+      console.error(error);
+      return res.status(500).json(
+        new SupernovaResponse({
+          message: "Internal Server Error",
+          error:
+            "An error occurred while validating the request; this is on us, not you. Please try again later.",
+        })
+      );
+    }
+  };
