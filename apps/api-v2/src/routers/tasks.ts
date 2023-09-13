@@ -5,6 +5,7 @@ import { prisma } from "../db";
 import { SupernovaResponse } from "../types";
 import {
   createTaskRequestSchema,
+  deleteTaskRequestSchema,
   updateTaskRequestSchema,
 } from "@supernova/types";
 
@@ -109,6 +110,40 @@ export const buildTasksRouter = () => {
         return res.status(200).json(
           new SupernovaResponse({
             message: "Task updated successfully",
+            data: task,
+          })
+        );
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(e);
+          return res.status(500).json(
+            new SupernovaResponse({
+              message: e.message,
+              error: "Internal Server Error",
+            })
+          );
+        }
+      }
+    }
+  );
+
+  // delete task
+  router.delete(
+    "/tasks/:id",
+    authenticateJWTMiddleware,
+    validateRequestSchema(deleteTaskRequestSchema),
+    async (req, res) => {
+      try {
+        const authCtx = getAuthContext(req);
+        const task = await prisma.task.delete({
+          where: {
+            id: req.params.id,
+            userId: authCtx.sub,
+          },
+        });
+        return res.status(200).json(
+          new SupernovaResponse({
+            message: "Task deleted successfully",
             data: task,
           })
         );

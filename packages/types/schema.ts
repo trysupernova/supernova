@@ -37,3 +37,10 @@ export const updateTaskRequestSchema = z.object({
   }),
 });
 export type UpdateTaskRequest = z.infer<typeof updateTaskRequestSchema>;
+
+export const deleteTaskRequestSchema = z.object({
+  params: z.object({
+    id: z.string(),
+  }),
+});
+export type DeleteTaskRequest = z.infer<typeof deleteTaskRequestSchema>;

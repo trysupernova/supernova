@@ -38,9 +38,7 @@ export default class SupernovaAPI {
       });
   }
 
-  public addTask(
-    request: CreateTaskRequest
-  ): Promise<SupernovaResponse<ISupernovaTask>> {
+  public addTask(request: CreateTaskRequest): Promise<SupernovaResponse> {
     return fetch(`${this.baseUrl}/tasks`, {
       method: "POST",
       headers: {
@@ -51,9 +49,7 @@ export default class SupernovaAPI {
     }).then(supernovaResponseConverter.convert);
   }
 
-  public updateTask(
-    request: UpdateTaskRequest
-  ): Promise<SupernovaResponse<ISupernovaTask>> {
+  public updateTask(request: UpdateTaskRequest): Promise<SupernovaResponse> {
     return fetch(`${this.baseUrl}/tasks/${request.params.id}`, {
       method: "PUT",
       headers: {
@@ -61,6 +57,16 @@ export default class SupernovaAPI {
       },
       credentials: "include",
       body: JSON.stringify(request.body),
+    }).then(supernovaResponseConverter.convert);
+  }
+
+  public deleteTask(id: string): Promise<SupernovaResponse> {
+    return fetch(`${this.baseUrl}/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
     }).then(supernovaResponseConverter.convert);
   }
 

@@ -83,26 +83,27 @@ function Home() {
         setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
         console.error(e);
+        // TODO: show error toast
       }
     },
     [db, tasks]
   );
 
   const handleDeleteTask = useCallback(
-    (taskId: string) => () => {
+    async (taskId: string) => {
       setTasks(tasks.filter((task) => task.id !== taskId));
       // delete task in backend
-      if (db === null) {
-        console.error("Database not initialized");
-        return;
-      }
       try {
         console.log("deleting task in backend...");
-        LocalDB.deleteTask(db, taskId);
+        const res = await supernovaAPI.deleteTask(taskId);
+        if (res.type === "error") {
+          throw new Error(res.message);
+        }
         console.log("deleted successfully");
         setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
         console.error(e);
+        // TODO: show error toast
       }
     },
     [db, tasks]
@@ -172,6 +173,7 @@ function Home() {
           setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
+          // TODO: show error toast
         }
       }
     },
@@ -239,7 +241,7 @@ function Home() {
 
   const handleSubmitAreYouSure = () => {
     if (chosenTaskIndex !== -1) {
-      handleDeleteTask(tasks[chosenTaskIndex].id)();
+      handleDeleteTask(tasks[chosenTaskIndex].id);
     }
     setChosenTaskIndex(-1); // deselect
     setShowAreYouSureDialog(false); // close this alert dialog
