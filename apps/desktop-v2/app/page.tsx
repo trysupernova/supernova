@@ -111,15 +111,6 @@ function Home() {
   const handleCreateOrUpdateTask = useCallback(
     async (task: ISupernovaTask) => {
       if (chosenTaskIndex !== -1) {
-        setTasks(
-          tasks.map((t, i) => {
-            if (i === chosenTaskIndex) {
-              return task;
-            } else {
-              return t;
-            }
-          })
-        );
         // // update task in backend
         // if (db === null) {
         //   console.error("Database not initialized");
@@ -128,6 +119,30 @@ function Home() {
         try {
           console.log("updating task in backend...");
           // await LocalDB.updateTask(db, task);
+          const oldTask = tasks[chosenTaskIndex];
+          // if a field is defined on oldTask but undefined on task, it means we're deleting it i.e setting to null
+          const res = await supernovaAPI.updateTask({
+            body: {
+              title: task.title,
+              originalBuildText: task.originalBuildText,
+              description: task.description,
+              startAt:
+                oldTask.startTime !== undefined && task.startTime === undefined
+                  ? null
+                  : task.startTime?.toISOString(),
+              expectedDurationSeconds:
+                oldTask.expectedDurationSeconds !== undefined &&
+                task.expectedDurationSeconds === undefined
+                  ? null
+                  : task.expectedDurationSeconds,
+            },
+            params: {
+              id: task.id,
+            },
+          });
+          if (res.type === "error") {
+            throw new Error(res.message);
+          }
           console.log("updated successfully");
           makeToast("Task updated successfully", "success");
           setRefetchTasks(true); // refetch the tasks
@@ -135,7 +150,6 @@ function Home() {
           console.error(e);
         }
       } else {
-        setTasks([...tasks, task]);
         // create task in backend
         // if (db === null) {
         //   console.error("Database not initialized");
@@ -147,6 +161,7 @@ function Home() {
           await supernovaAPI.addTask({
             body: {
               title: task.title,
+              originalBuildText: task.originalBuildText,
               description: task.description,
               startAt: task.startTime?.toISOString(),
               expectedDurationSeconds: task.expectedDurationSeconds,
@@ -392,7 +407,7 @@ function Home() {
           <div className="text-slate-400 text-[16px]">Loading...</div>
         </div>
       ) : taskFetchState.status === "success" ? (
-        <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip">
+        <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip max-w-3xl">
           <hr className="w-64" />
           {tasks.length === 0 && (
             <div className="w-64">

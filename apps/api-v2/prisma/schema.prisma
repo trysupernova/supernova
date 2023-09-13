@@ -9,6 +9,7 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 model User {
   id    String     @id @default(uuid())
   email String  @unique
@@ -17,6 +18,7 @@ model User {
 
 model Task {
   id String @id @default(uuid())
+  originalBuildText String
   title String
   description String?
   done Boolean @default(false)

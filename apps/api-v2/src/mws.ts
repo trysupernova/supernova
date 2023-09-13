@@ -1,13 +1,10 @@
 import express, { Request, Response, NextFunction } from "express";
-import {
-  IAuthCtx,
-  SupernovaRequestValidationSchema,
-  SupernovaResponse,
-} from "./types";
+import { IAuthCtx, SupernovaResponse } from "./types";
 import jwt from "jsonwebtoken";
 import config from "./config";
 import { redis } from "./db";
 import { AnyZodObject, z } from "zod";
+import { SupernovaRequestValidationSchema } from "@supernova/types";
 
 // TODO: redirect to the web app on errors instead of sending a JSON response
 export const authenticateJWTMiddleware = async (

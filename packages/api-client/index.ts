@@ -2,6 +2,7 @@ import {
   CreateTaskRequest,
   ISupernovaTask,
   SupernovaResponse,
+  UpdateTaskRequest,
 } from "@supernova/types";
 import {
   supernovaResponseConverter,
@@ -42,6 +43,19 @@ export default class SupernovaAPI {
   ): Promise<SupernovaResponse<ISupernovaTask>> {
     return fetch(`${this.baseUrl}/tasks`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(request.body),
+    }).then(supernovaResponseConverter.convert);
+  }
+
+  public updateTask(
+    request: UpdateTaskRequest
+  ): Promise<SupernovaResponse<ISupernovaTask>> {
+    return fetch(`${this.baseUrl}/tasks/${request.params.id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },

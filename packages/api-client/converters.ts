@@ -28,7 +28,7 @@ const nullToUndefined = (v: any) => (v === null ? undefined : v);
 export const supernovaTaskConverter: Converter<any, ISupernovaTask> = {
   convert: (t) => ({
     id: t.id,
-    originalBuildText: t.title, // TODO: will do this when implementing build text
+    originalBuildText: t.originalBuildText,
     title: t.title,
     description: nullToUndefined(t.description),
     expectedDurationSeconds: nullToUndefined(t.expectedDurationSeconds),

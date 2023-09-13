@@ -40,10 +40,3 @@ export type EncodedProfileTokenClaims = { user: Profile } & jwt.JwtPayload;
 // sub is the user ID which will be string since the @authenticateJWTMiddleware middleware
 // will verify that the token is valid and has a sub claim
 export type IAuthCtx = jwt.JwtPayload & { sub: string };
-
-// any validation schema
-export type SupernovaRequestValidationSchema = z.ZodObject<{
-  body?: AnyZodObject;
-  query?: AnyZodObject;
-  params?: AnyZodObject;
-}>;
