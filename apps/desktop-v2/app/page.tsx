@@ -6,8 +6,6 @@ import { SupernovaTaskComponent, createBlankTask } from "./supernova-task";
 import Mousetrap from "mousetrap";
 import { TaskBuilderDialog } from "./task-builder-dialog";
 import { ISupernovaTask } from "@supernova/types";
-import { LocalDB } from "../services/local-db";
-import Database from "tauri-plugin-sql-api";
 import { GearIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
@@ -31,7 +29,6 @@ function Home() {
 
   const router = useRouter();
 
-  const [db, setDb] = useState<Database | null>(null);
   const [chosenTaskIndex, setChosenTaskIndex] = useState<number>(-1);
   const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
   const [taskFetchState, setTaskFetchState] = useState<{
@@ -45,34 +42,20 @@ function Home() {
   const { makeToast } = useSupernovaToast();
 
   const handleCheckTask = useCallback(
-    (taskId: string) => (value: boolean) => {
+    (taskId: string) => async (value: boolean) => {
       const foundTask = tasks.find((task) => task.id === taskId);
       if (foundTask === undefined) {
         makeToast("Task not found", "error", {
-          description: `This is something on our side. The task you were trying to check was not found.`,
+          description: `This is something on our side. The task you were trying to mark done was not found.`,
         });
         return;
       }
-      setTasks(
-        tasks.map((task) => {
-          if (taskId === task.id) {
-            return {
-              ...task,
-              isComplete: value,
-            };
-          } else {
-            return task;
-          }
-        })
-      );
-      // mark task complete in backend
-      // if (db === null) {
-      //   console.error("Database not initialized");
-      //   return;
-      // }
       try {
         console.log("updating task in backend...");
-        // LocalDB.markIsCompleteTask(db, taskId, value);
+        const res = await supernovaAPI.toggleCompleteTask(taskId);
+        if (res.type === "error") {
+          throw new Error(res.message);
+        }
         if (value === true) {
           makeToast("Well done!", "success", {
             description: `Task "${foundTask.title}" marked as done.`,
@@ -86,7 +69,7 @@ function Home() {
         // TODO: show error toast
       }
     },
-    [db, tasks]
+    [tasks]
   );
 
   const handleDeleteTask = useCallback(
@@ -106,20 +89,15 @@ function Home() {
         // TODO: show error toast
       }
     },
-    [db, tasks]
+    [tasks]
   );
 
   const handleCreateOrUpdateTask = useCallback(
     async (task: ISupernovaTask) => {
       if (chosenTaskIndex !== -1) {
-        // // update task in backend
-        // if (db === null) {
-        //   console.error("Database not initialized");
-        //   return;
-        // }
+        // update task in backend
         try {
           console.log("updating task in backend...");
-          // await LocalDB.updateTask(db, task);
           const oldTask = tasks[chosenTaskIndex];
           // if a field is defined on oldTask but undefined on task, it means we're deleting it i.e setting to null
           const res = await supernovaAPI.updateTask({
@@ -151,14 +129,8 @@ function Home() {
           console.error(e);
         }
       } else {
-        // create task in backend
-        // if (db === null) {
-        //   console.error("Database not initialized");
-        //   return;
-        // }
         try {
           console.log("inserting task to backend...");
-          // await LocalDB.insertTask(db, task);
           await supernovaAPI.addTask({
             body: {
               title: task.title,
@@ -177,7 +149,7 @@ function Home() {
         }
       }
     },
-    [chosenTaskIndex, db, tasks]
+    [chosenTaskIndex, tasks]
   );
 
   const commands: SupernovaCommand[] = useMemo(
@@ -300,10 +272,6 @@ function Home() {
     // save to db
     (async () => {
       try {
-        // const db = await LocalDB.init();
-        // setDb(db);
-        // await LocalDB.createTables(db);
-        // // console.log("created tables");
         const res = await supernovaAPI.getTasks();
         if (res.type === "error") {
           setTaskFetchState({ status: "error", error: res.message });
@@ -319,17 +287,12 @@ function Home() {
 
   // refetch the tasks whenever there's a task update
   useEffect(() => {
-    // if (db === null) {
-    //   console.error("Database not initialized");
-    //   return;
-    // }
     if (!refetchTasks) {
       return;
     }
     (async () => {
       try {
         console.log("refetching tasks...");
-        // const tasks = await LocalDB.getTasks(db);
         const res = await supernovaAPI.getTasks();
         if (res.type === "error") {
           throw new Error(res.message);
@@ -342,7 +305,7 @@ function Home() {
         console.error(e);
       }
     })();
-  }, [db, refetchTasks]);
+  }, [refetchTasks]);
 
   const handleClickTask = (taskIndex: number) => () => {
     // select task

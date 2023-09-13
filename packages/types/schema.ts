@@ -44,3 +44,12 @@ export const deleteTaskRequestSchema = z.object({
   }),
 });
 export type DeleteTaskRequest = z.infer<typeof deleteTaskRequestSchema>;
+
+export const toggleCompleteTaskRequestSchema = z.object({
+  params: z.object({
+    id: z.string(),
+  }),
+});
+export type ToggleCompleteTaskRequest = z.infer<
+  typeof toggleCompleteTaskRequestSchema
+>;

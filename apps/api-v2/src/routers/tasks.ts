@@ -6,6 +6,7 @@ import { SupernovaResponse } from "../types";
 import {
   createTaskRequestSchema,
   deleteTaskRequestSchema,
+  toggleCompleteTaskRequestSchema,
   updateTaskRequestSchema,
 } from "@supernova/types";
 
@@ -25,6 +26,9 @@ export const buildTasksRouter = () => {
               nulls: "last",
             },
           },
+          {
+            done: "asc",
+          },
         ],
         where: {
           userId: authCtx.sub,
@@ -37,13 +41,15 @@ export const buildTasksRouter = () => {
         })
       );
     } catch (err) {
-      let e = err as Error;
-      return res.status(500).json(
-        new SupernovaResponse({
-          message: e.message,
-          error: "Internal Server Error",
-        })
-      );
+      if (err instanceof Error) {
+        console.error(err);
+        return res.status(500).json(
+          new SupernovaResponse({
+            message: "Something went wrong. Please try again later.",
+            error: "Internal Server Error",
+          })
+        );
+      }
     }
   });
 
@@ -76,7 +82,7 @@ export const buildTasksRouter = () => {
           console.error(e);
           return res.status(500).json(
             new SupernovaResponse({
-              message: e.message,
+              message: "Something went wrong. Please try again later.",
               error: "Internal Server Error",
             })
           );
@@ -118,7 +124,7 @@ export const buildTasksRouter = () => {
           console.error(e);
           return res.status(500).json(
             new SupernovaResponse({
-              message: e.message,
+              message: "Something went wrong. Please try again later.",
               error: "Internal Server Error",
             })
           );
@@ -152,7 +158,60 @@ export const buildTasksRouter = () => {
           console.error(e);
           return res.status(500).json(
             new SupernovaResponse({
-              message: e.message,
+              message: "Something went wrong. Please try again later.",
+              error: "Internal Server Error",
+            })
+          );
+        }
+      }
+    }
+  );
+
+  // toggle done status of the task (if it's done, mark it as not done; if it's not done, mark it as done)
+  router.put(
+    "/tasks/:id/toggle-complete",
+    authenticateJWTMiddleware,
+    validateRequestSchema(toggleCompleteTaskRequestSchema),
+    async (req, res) => {
+      try {
+        const authCtx = getAuthContext(req);
+        // find the task
+        let task = await prisma.task.findUnique({
+          where: {
+            id: req.params.id,
+            userId: authCtx.sub,
+          },
+        });
+        if (task === null) {
+          return res.status(404).json(
+            new SupernovaResponse({
+              message: "Task not found",
+              error: "Not Found",
+            })
+          );
+        }
+
+        task = await prisma.task.update({
+          where: {
+            id: req.params.id,
+            userId: authCtx.sub,
+          },
+          data: {
+            done: !task?.done,
+          },
+        });
+        return res.status(200).json(
+          new SupernovaResponse({
+            message: "Task updated successfully",
+            data: task,
+          })
+        );
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(e);
+          return res.status(500).json(
+            new SupernovaResponse({
+              message: "Something went wrong. Please try again later.",
               error: "Internal Server Error",
             })
           );

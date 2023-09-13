@@ -8,6 +8,7 @@ import {
   supernovaResponseConverter,
   supernovaTaskConverter,
 } from "./converters";
+import { channel } from "diagnostics_channel";
 
 export default class SupernovaAPI {
   baseUrl: string;
@@ -58,6 +59,28 @@ export default class SupernovaAPI {
       credentials: "include",
       body: JSON.stringify(request.body),
     }).then(supernovaResponseConverter.convert);
+  }
+
+  public toggleCompleteTask(
+    id: string
+  ): Promise<SupernovaResponse<ISupernovaTask>> {
+    return fetch(`${this.baseUrl}/tasks/${id}/toggle-complete`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
+      .then(supernovaResponseConverter.convert)
+      .then((res) => {
+        if (res.type === "data") {
+          return {
+            ...res,
+            data: supernovaTaskConverter.convert(res.data),
+          };
+        }
+        return res;
+      });
   }
 
   public deleteTask(id: string): Promise<SupernovaResponse> {
