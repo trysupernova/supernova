@@ -8,10 +8,12 @@
     "build": "tsup src/index.ts --format cjs --minify --clean",
     "prebuild": "npm run clean",
     "clean": "rm -rf dist",
+    "predev": "npm run db:start",
     "dev": "NODE_ENV=development tsx src/index.ts",
     "db:migrate": "prisma migrate dev",
     "schema:generate": "prisma generate",
-    "db:start": "docker-compose up -d"
+    "db:start": "docker-compose up -d",
+    "setup": "npm run db:start && npm run db:migrate"
   },
   "keywords": [],
   "author": "Vincent Vu <vincent@trysupernova.one>",

@@ -32,8 +32,6 @@ To develop locally:
 
    ```sh
    pnpm i
-   pnpm install:desktop
-   pnpm install:api
    ```
 
 5. Create environment files
@@ -41,25 +39,32 @@ To develop locally:
    - For the API, you need to configure the `.env` file. You can copy the example file and edit it. Mostly you need to configure the database connection. Default values of those are in `apps/api/docker-compose.yml`:
 
      ```sh
-     cp .env.example .env
+     cp apps/api-v2/.env.example apps/api-v2/.env
      // then edit .env for the database connection variables as specified
      // see docker-compose.yml
      ```
 
 6. Start developing and watch for code changes:
 
-   - For the API, you need to run infra pieces that the project depends locally (e.g the main MySQL database), then run the migrations on the database. Make sure you have Docker installed and running, then run:
+   - For the API, you need to run infra pieces that the project depends locally (e.g the main MySQL database), then run the migrations on the database. Make sure you have Docker installed and running, then at the project root, run:
 
      ```sh
-     pnpm db:start
-     pnpm db:migrate
+     pnpm setup
      ```
 
      Then run the API:
 
      ```sh
-     pnpm run dev:api
+     pnpm dev:api
      ```
+
+   - For the desktop, just do:
+
+     ```sh
+     pnpm dev:desktop
+     ```
+
+   - or if you like both:
 
 ## Building
 
@@ -86,7 +91,7 @@ More info on how to add new tests coming soon.
 To check the formatting of your code:
 
 ```sh
-yarn lint
+pnpm lint
 ```
 
 If you get errors, be sure to fix them before committing.
