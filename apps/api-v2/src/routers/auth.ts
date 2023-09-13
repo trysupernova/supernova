@@ -1,5 +1,4 @@
 import express from "express";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import passport from "passport";
 import config from "../config";
 import jwt from "jsonwebtoken";
