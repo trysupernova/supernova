@@ -1,5 +1,12 @@
 "use client";
 import { ArrowRightIcon } from "./icons";
+import * as React from "react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { CheckIcon } from "@radix-ui/react-icons";
+import { twMerge } from "tailwind-merge";
+import { ISupernovaTask } from "../types/supernova-task";
+import moment from "moment";
+import Image from "next/image";
 
 const generateRandomID = () => {
   // generate a random ID
@@ -44,6 +51,10 @@ export const SupernovaTaskComponent = (props: {
               value.valueOf().toString() === "true" ? true : false
             )
           }
+          onClick={(e) => {
+            // prevent the click from propagating to the parent
+            e.stopPropagation();
+          }}
         />
       </div>
       <div className="grow shrink basis-0 flex-col justify-start items-start gap-2.5 inline-flex">
@@ -122,14 +133,6 @@ export const StartTimeWidget = (props: { startTime: Date }) => {
     </div>
   );
 };
-
-import * as React from "react";
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { CheckIcon } from "@radix-ui/react-icons";
-import { twMerge } from "tailwind-merge";
-import { ISupernovaTask } from "../types/supernova-task";
-import moment from "moment";
-import Image from "next/image";
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,

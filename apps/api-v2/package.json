@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "test": "jest --forceExit",
+    "pretest": "npm run setup",
     "start": "node dist/index.js",
     "build": "tsup src/index.ts --format cjs --minify --clean",
     "prebuild": "npm run clean",
@@ -13,7 +14,7 @@
     "db:migrate": "prisma migrate dev",
     "schema:generate": "prisma generate",
     "db:start": "docker-compose up -d",
-    "setup": "npm run db:start && npm run db:migrate"
+    "db:setup": "npm run db:start && npm run db:migrate"
   },
   "keywords": [],
   "author": "Vincent Vu <vincent@trysupernova.one>",

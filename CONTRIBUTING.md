@@ -49,7 +49,7 @@ To develop locally:
    - For the API, you need to run infra pieces that the project depends locally (e.g the main MySQL database), then run the migrations on the database. Make sure you have Docker installed and running, then at the project root, run:
 
      ```sh
-     pnpm setup
+     pnpm db:setup
      ```
 
      Then run the API:

@@ -1,10 +1,10 @@
-import { withAuth } from "@/hocs/withAuth";
 import "./globals.css";
 import type { Metadata } from "next";
 import { manrope } from "@/components/fonts";
+import { ToastClientWrapper } from "./toast-client-wrapper";
 
 export const metadata: Metadata = {
-  title: "Supernova",
+  title: "Supernova | Today",
 };
 
 interface RootLayoutProps {
@@ -17,7 +17,7 @@ function RootLayout({ children }: RootLayoutProps) {
       <body className={manrope.className}>
         {/* drag region because titlebar is overlay */}
         <div data-tauri-drag-region="self" className="h-5" />
-        {children}
+        <ToastClientWrapper>{children}</ToastClientWrapper>
       </body>
     </html>
   );

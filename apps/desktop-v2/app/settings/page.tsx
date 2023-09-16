@@ -11,8 +11,8 @@ import Mousetrap from "mousetrap";
 import { supernovaAPI } from "@/services/supernova-api";
 import { withAuth } from "@/hocs/withAuth";
 import { authRoute } from "../auth/meta";
-import { AlertDialog } from "../alert-dialog";
-import { useSupernovaToast } from "@/hooks/useSupernovaToast";
+import { AlertDialog } from "../../components/alert-dialog";
+import useSupernovaToast from "@/hooks/useSupernovaToast";
 
 const SettingsPage = () => {
   const { makeToast } = useSupernovaToast();

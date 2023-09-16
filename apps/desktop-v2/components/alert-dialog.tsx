@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Button } from "../components/button";
-import { Kbd } from "../components/kbd";
+import { Button } from "./button";
+import { Kbd } from "./kbd";
 import Mousetrap from "mousetrap";
 
 export const AlertDialog = ({

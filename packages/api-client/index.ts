@@ -8,7 +8,6 @@ import {
   supernovaResponseConverter,
   supernovaTaskConverter,
 } from "./converters";
-import { channel } from "diagnostics_channel";
 
 export default class SupernovaAPI {
   baseUrl: string;

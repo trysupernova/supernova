@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { ExternalToast, toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 
-export const useSupernovaToast = () => {
+const useSupernovaToast = () => {
   const makeToast = (
     message: ReactNode,
     type?: "success" | "error",
@@ -37,3 +37,5 @@ export const useSupernovaToast = () => {
 
   return { makeToast };
 };
+
+export default useSupernovaToast;

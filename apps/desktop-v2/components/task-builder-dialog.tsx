@@ -30,10 +30,10 @@ import {
   EXP_DUR_SLATE_TYPE,
   extractStartAt,
 } from "../utils/supernova-task";
-import { Kbd } from "../components/kbd";
-import { Button } from "../components/button";
+import { Kbd } from "./kbd";
+import { Button } from "./button";
 import { twMerge } from "tailwind-merge";
-import { ibmPlexMono } from "../components/fonts";
+import { ibmPlexMono } from "./fonts";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };

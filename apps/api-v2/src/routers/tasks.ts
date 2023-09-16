@@ -21,13 +21,13 @@ export const buildTasksRouter = () => {
       const tasks = await prisma.task.findMany({
         orderBy: [
           {
+            done: "asc",
+          },
+          {
             startAt: {
               sort: "asc",
               nulls: "last",
             },
-          },
-          {
-            done: "asc",
           },
         ],
         where: {

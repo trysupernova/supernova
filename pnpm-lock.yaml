@@ -170,6 +170,9 @@ importers:
       googleapis:
         specifier: ^126.0.1
         version: 126.0.1
+      jotai:
+        specifier: ^2.4.2
+        version: 2.4.2(@types/react@18.2.20)(react@18.2.0)
       moment:
         specifier: ^2.29.4
         version: 2.29.4
@@ -5987,6 +5990,22 @@ packages:
   /jiti@1.20.0:
     resolution: {integrity: sha512-3TV69ZbrvV6U5DfQimop50jE9Dl6J8O1ja1dvBbMba/sZ3YBEQqJ2VZRoQPVnhlzjNtU1vaXRZVrVjU4qtm8yA==}
     hasBin: true
+    dev: false
+
+  /jotai@2.4.2(@types/react@18.2.20)(react@18.2.0):
+    resolution: {integrity: sha512-90jXVOd9h6gi5JXk558M+wnJfaaVN2WegcNOCfiFbWboNaDl6DkRgiY/K1oeqTfYJmq8yM7XPsL99LAvcOPqhw==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 18.2.20
+      react: 18.2.0
     dev: false
 
   /joycon@3.1.1:

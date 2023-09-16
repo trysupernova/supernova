@@ -3,11 +3,11 @@ import { Command } from "cmdk";
 import Mousetrap from "mousetrap";
 import Image from "next/image";
 import React from "react";
-import { Kbd } from "../components/kbd";
+import { Kbd } from "./kbd";
 import { SupernovaCommand } from "../types/command";
 import { ISupernovaTask } from "../types/supernova-task";
 import { twMerge } from "tailwind-merge";
-import { ibmPlexMono } from "../components/fonts";
+import { ibmPlexMono } from "./fonts";
 
 export const SupernovaCommandCenter = ({
   commands,

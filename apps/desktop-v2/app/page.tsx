@@ -1,23 +1,29 @@
 "use client";
 
 import { withAuth } from "@/hocs/withAuth";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { SupernovaTaskComponent, createBlankTask } from "./supernova-task";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import {
+  SupernovaTaskComponent,
+  createBlankTask,
+} from "../components/supernova-task";
 import Mousetrap from "mousetrap";
-import { TaskBuilderDialog } from "./task-builder-dialog";
+import { TaskBuilderDialog } from "../components/task-builder-dialog";
 import { ISupernovaTask } from "@supernova/types";
 import { GearIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
 import Image from "next/image";
-import { SupernovaCommandCenter } from "./command-center";
+import { SupernovaCommandCenter } from "../components/command-center";
 import { SupernovaCommand } from "../types/command";
-import { AlertDialog } from "./alert-dialog";
+import { AlertDialog } from "../components/alert-dialog";
 import { useRouter } from "next/navigation";
 import { Kbd } from "../components/kbd";
 import { supernovaAPI } from "@/services/supernova-api";
-import { useSupernovaToast } from "@/hooks/useSupernovaToast";
-import { Toaster } from "sonner";
+import useSupernovaToast from "@/hooks/useSupernovaToast";
+import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
+import { useAtom } from "jotai";
+import { chosenTaskIndexGlobal } from "@/store/ui";
+import useOutsideClick from "@/hooks/useOutsideClick";
 
 function Home() {
   // get today's date in this format: Tue, 26th Aug
@@ -26,16 +32,16 @@ function Home() {
     day: "numeric",
     month: "short",
   });
-
   const router = useRouter();
+  const taskListRef = useRef<HTMLDivElement>(null);
 
-  const [chosenTaskIndex, setChosenTaskIndex] = useState<number>(-1);
+  const [chosenTaskIndex, setChosenTaskIndex] = useAtom(chosenTaskIndexGlobal);
   const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
   const [taskFetchState, setTaskFetchState] = useState<{
     status: "loading" | "error" | "success";
     error?: string;
   }>({ status: "loading" });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [taskBuilderIsOpen, setTaskBuilderIsOpen] = useState<boolean>(false);
   const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
   const [showAreYouSureDialog, setShowAreYouSureDialog] =
     useState<boolean>(false);
@@ -71,6 +77,12 @@ function Home() {
     },
     [tasks]
   );
+
+  const handleClickTask = (taskIndex: number) => () => {
+    // select task
+    setChosenTaskIndex(taskIndex);
+    setTaskBuilderIsOpen(true);
+  };
 
   const handleDeleteTask = useCallback(
     async (taskId: string) => {
@@ -152,17 +164,19 @@ function Home() {
     [chosenTaskIndex, tasks]
   );
 
+  const openTaskBuilder = useCallback((e?: Mousetrap.ExtendedKeyboardEvent) => {
+    e?.preventDefault(); // prevent typing into the task builder
+    setTaskBuilderIsOpen(true);
+    // deselect task
+    setChosenTaskIndex(-1);
+  }, []);
+
   const commands: SupernovaCommand[] = useMemo(
     () => [
       {
         label: "Create a task",
         shortcut: ["c", "ctrl+space"],
-        cb: (e) => {
-          e?.preventDefault(); // prevent typing into the task builder
-          setIsOpen(true);
-          // deselect task
-          setChosenTaskIndex(-1);
-        },
+        cb: openTaskBuilder,
       },
       {
         label: "Delete task",
@@ -180,12 +194,12 @@ function Home() {
         cb: (e) => {
           e?.preventDefault(); // prevent typing into the task builder
           // if modal is open, then don't open another one
-          if (isOpen) {
+          if (taskBuilderIsOpen) {
             return;
           }
 
           if (chosenTaskIndex !== -1) {
-            setIsOpen(true);
+            setTaskBuilderIsOpen(true);
           }
         },
       },
@@ -208,7 +222,7 @@ function Home() {
         },
       },
     ],
-    [chosenTaskIndex, handleCheckTask, isOpen, router, tasks]
+    [chosenTaskIndex, handleCheckTask, taskBuilderIsOpen, router, tasks]
   );
 
   const handleSubmitAreYouSure = () => {
@@ -241,8 +255,9 @@ function Home() {
 
     // unselect task (if task is selected)
     Mousetrap.bind("esc", () => {
-      // if modal is open, then don't unselect
-      if (isOpen) {
+      // if any modal is open, then don't unselect
+      const modalOpen = taskBuilderIsOpen || showAreYouSureDialog;
+      if (modalOpen) {
         return;
       }
       if (chosenTaskIndex !== -1) {
@@ -263,7 +278,7 @@ function Home() {
     commands,
     handleCheckTask,
     handleDeleteTask,
-    isOpen,
+    taskBuilderIsOpen,
     tasks,
   ]);
 
@@ -307,15 +322,13 @@ function Home() {
     })();
   }, [refetchTasks]);
 
-  const handleClickTask = (taskIndex: number) => () => {
-    // select task
-    setChosenTaskIndex(taskIndex);
-    setIsOpen(true);
-  };
+  // if the user press outside of the task list (i.e the task builder), then unselect the task
+  useOutsideClick(taskListRef, () => {
+    setChosenTaskIndex(-1);
+  });
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
-      <Toaster richColors position="top-center" />
       {showAreYouSureDialog && (
         <AlertDialog
           description={
@@ -343,10 +356,10 @@ function Home() {
           <GearIcon width={20} height={20} />
         </Link>
       </div>
-      {isOpen && (
+      {taskBuilderIsOpen && (
         <TaskBuilderDialog
-          isOpen={isOpen}
-          onOpenChange={setIsOpen}
+          isOpen={taskBuilderIsOpen}
+          onOpenChange={setTaskBuilderIsOpen}
           editingTask={
             chosenTaskIndex !== -1 ? tasks[chosenTaskIndex] : createBlankTask()
           }
@@ -372,7 +385,10 @@ function Home() {
           <div className="text-slate-400 text-[16px]">Loading...</div>
         </div>
       ) : taskFetchState.status === "success" ? (
-        <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip max-w-3xl">
+        <div
+          className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip max-w-xl"
+          ref={taskListRef}
+        >
           <hr className="w-64" />
           {tasks.length === 0 && (
             <div className="w-64">
@@ -399,6 +415,11 @@ function Home() {
           <div className="text-red-600 text-[16px]">{taskFetchState.error}</div>
         </div>
       )}
+      <CreateTaskPlaceholder
+        onClick={() => {
+          openTaskBuilder();
+        }}
+      />
     </main>
   );
 }

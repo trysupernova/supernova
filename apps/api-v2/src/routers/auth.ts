@@ -11,6 +11,8 @@ import {
 import { authenticateJWTMiddleware } from "../mws";
 import { prisma, redis } from "../db";
 
+const FOREVER_IN_MS = 1000 * 60 * 60 * 24 * 365 * 10;
+
 export const buildAuthRouter = () => {
   const router = express.Router();
 
@@ -69,10 +71,12 @@ export const buildAuthRouter = () => {
                 })
               );
             }
-            // send back the access token
+            // send back the access token in a cookie
+            // lasts forever
             res.cookie("accessToken", jwtAccessToken, {
               httpOnly: true,
               secure: process.env.NODE_ENV === "production",
+              expires: new Date(Date.now() + FOREVER_IN_MS),
             });
             res.redirect(config.SUPERNOVA_WEB_APP_BASE_URL);
           } catch (err) {
