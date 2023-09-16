@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "production") {
   };
 }
 
-let logger: pino.Logger;
+export let logger: pino.Logger;
 if (process.env.NODE_ENV === "production") {
   logger = pino({ level: "info" }, pino.transport(loggerOptions.transport)); // send to axiom on production
 } else {
