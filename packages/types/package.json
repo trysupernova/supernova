@@ -1,0 +1,12 @@
+{
+  "name": "@supernova/types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "zod": "^3.22.2"
+  }
+}

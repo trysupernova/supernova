@@ -1,151 +1,182 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { SupernovaTaskComponent, createBlankTask } from "./supernova-task";
+import { withAuth } from "@/hocs/withAuth";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import {
+  SupernovaTaskComponent,
+  createBlankTask,
+} from "../components/supernova-task";
 import Mousetrap from "mousetrap";
-import { TaskBuilderDialog } from "./task-builder-dialog";
-import { ISupernovaTask } from "../types/supernova-task";
-import { LocalDB } from "../services/local-db";
-import Database from "tauri-plugin-sql-api";
+import { TaskBuilderDialog } from "../components/task-builder-dialog";
+import { ISupernovaTask } from "@supernova/types";
 import { GearIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
 import Image from "next/image";
-import { SupernovaCommandCenter } from "./command-center";
+import { SupernovaCommandCenter } from "../components/command-center";
 import { SupernovaCommand } from "../types/command";
-import { AlertDialog } from "./alert-dialog";
+import { AlertDialog } from "../components/alert-dialog";
 import { useRouter } from "next/navigation";
 import { Kbd } from "../components/kbd";
+import { supernovaAPI } from "@/services/supernova-api";
+import useSupernovaToast from "@/hooks/useSupernovaToast";
+import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
+import { useAtom } from "jotai";
+import { chosenTaskIndexGlobal } from "@/store/ui";
+import useOutsideClick from "@/hooks/useOutsideClick";
 
-export default function Home() {
+function Home() {
   // get today's date in this format: Tue, 26th Aug
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "short",
     day: "numeric",
     month: "short",
   });
-
   const router = useRouter();
+  const taskListRef = useRef<HTMLDivElement>(null);
 
-  const [db, setDb] = useState<Database | null>(null);
-  const [chosenTaskIndex, setChosenTaskIndex] = useState<number>(-1);
+  const [chosenTaskIndex, setChosenTaskIndex] = useAtom(chosenTaskIndexGlobal);
   const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
   const [taskFetchState, setTaskFetchState] = useState<{
     status: "loading" | "error" | "success";
     error?: string;
   }>({ status: "loading" });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [taskBuilderIsOpen, setTaskBuilderIsOpen] = useState<boolean>(false);
   const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
   const [showAreYouSureDialog, setShowAreYouSureDialog] =
     useState<boolean>(false);
+  const { makeToast } = useSupernovaToast();
 
   const handleCheckTask = useCallback(
-    (taskId: string) => (value: boolean) => {
-      setTasks(
-        tasks.map((task) => {
-          if (taskId === task.id) {
-            return {
-              ...task,
-              isComplete: value,
-            };
-          } else {
-            return task;
-          }
-        })
-      );
-      // mark task complete in backend
-      if (db === null) {
-        console.error("Database not initialized");
+    (taskId: string) => async (value: boolean) => {
+      const foundTask = tasks.find((task) => task.id === taskId);
+      if (foundTask === undefined) {
+        makeToast("Task not found", "error", {
+          description: `This is something on our side. The task you were trying to mark done was not found.`,
+        });
         return;
       }
       try {
         console.log("updating task in backend...");
-        LocalDB.markIsCompleteTask(db, taskId, value);
+        const res = await supernovaAPI.toggleCompleteTask(taskId);
+        if (res.type === "error") {
+          throw new Error(res.message);
+        }
+        if (value === true) {
+          makeToast("Well done!", "success", {
+            description: `Task "${foundTask.title}" marked as done.`,
+            icon: "🎊",
+          });
+        }
         console.log("updated successfully");
         setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
         console.error(e);
+        // TODO: show error toast
       }
     },
-    [db, tasks]
+    [tasks]
   );
 
+  const handleClickTask = (taskIndex: number) => () => {
+    // select task
+    setChosenTaskIndex(taskIndex);
+    setTaskBuilderIsOpen(true);
+  };
+
   const handleDeleteTask = useCallback(
-    (taskId: string) => () => {
+    async (taskId: string) => {
       setTasks(tasks.filter((task) => task.id !== taskId));
       // delete task in backend
-      if (db === null) {
-        console.error("Database not initialized");
-        return;
-      }
       try {
         console.log("deleting task in backend...");
-        LocalDB.deleteTask(db, taskId);
+        const res = await supernovaAPI.deleteTask(taskId);
+        if (res.type === "error") {
+          throw new Error(res.message);
+        }
         console.log("deleted successfully");
         setRefetchTasks(true); // refetch the tasks
       } catch (e: any) {
         console.error(e);
+        // TODO: show error toast
       }
     },
-    [db, tasks]
+    [tasks]
   );
 
   const handleCreateOrUpdateTask = useCallback(
     async (task: ISupernovaTask) => {
       if (chosenTaskIndex !== -1) {
-        setTasks(
-          tasks.map((t, i) => {
-            if (i === chosenTaskIndex) {
-              return task;
-            } else {
-              return t;
-            }
-          })
-        );
         // update task in backend
-        if (db === null) {
-          console.error("Database not initialized");
-          return;
-        }
         try {
           console.log("updating task in backend...");
-          await LocalDB.updateTask(db, task);
+          const oldTask = tasks[chosenTaskIndex];
+          // if a field is defined on oldTask but undefined on task, it means we're deleting it i.e setting to null
+          const res = await supernovaAPI.updateTask({
+            body: {
+              title: task.title,
+              originalBuildText: task.originalBuildText,
+              description: task.description,
+              startAt:
+                oldTask.startTime !== undefined && task.startTime === undefined
+                  ? null
+                  : task.startTime?.toISOString(),
+              expectedDurationSeconds:
+                oldTask.expectedDurationSeconds !== undefined &&
+                task.expectedDurationSeconds === undefined
+                  ? null
+                  : task.expectedDurationSeconds,
+            },
+            params: {
+              id: task.id,
+            },
+          });
+          if (res.type === "error") {
+            throw new Error(res.message);
+          }
           console.log("updated successfully");
+          makeToast("Task updated successfully", "success");
           setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
         }
       } else {
-        setTasks([...tasks, task]);
-        // create task in backend
-        if (db === null) {
-          console.error("Database not initialized");
-          return;
-        }
         try {
           console.log("inserting task to backend...");
-          await LocalDB.insertTask(db, task);
+          await supernovaAPI.addTask({
+            body: {
+              title: task.title,
+              originalBuildText: task.originalBuildText,
+              description: task.description,
+              startAt: task.startTime?.toISOString(),
+              expectedDurationSeconds: task.expectedDurationSeconds,
+            },
+          });
           console.log("inserted successfully");
+          makeToast("Task created successfully", "success");
           setRefetchTasks(true); // refetch the tasks
         } catch (e: any) {
           console.error(e);
+          // TODO: show error toast
         }
       }
     },
-    [chosenTaskIndex, db, tasks]
+    [chosenTaskIndex, tasks]
   );
+
+  const openTaskBuilder = useCallback((e?: Mousetrap.ExtendedKeyboardEvent) => {
+    e?.preventDefault(); // prevent typing into the task builder
+    setTaskBuilderIsOpen(true);
+    // deselect task
+    setChosenTaskIndex(-1);
+  }, []);
 
   const commands: SupernovaCommand[] = useMemo(
     () => [
       {
         label: "Create a task",
         shortcut: ["c", "ctrl+space"],
-        cb: (e) => {
-          e?.preventDefault(); // prevent typing into the task builder
-          setIsOpen(true);
-          // deselect task
-          setChosenTaskIndex(-1);
-        },
+        cb: openTaskBuilder,
       },
       {
         label: "Delete task",
@@ -163,12 +194,12 @@ export default function Home() {
         cb: (e) => {
           e?.preventDefault(); // prevent typing into the task builder
           // if modal is open, then don't open another one
-          if (isOpen) {
+          if (taskBuilderIsOpen) {
             return;
           }
 
           if (chosenTaskIndex !== -1) {
-            setIsOpen(true);
+            setTaskBuilderIsOpen(true);
           }
         },
       },
@@ -191,12 +222,12 @@ export default function Home() {
         },
       },
     ],
-    [chosenTaskIndex, handleCheckTask, isOpen, router, tasks]
+    [chosenTaskIndex, handleCheckTask, taskBuilderIsOpen, router, tasks]
   );
 
   const handleSubmitAreYouSure = () => {
     if (chosenTaskIndex !== -1) {
-      handleDeleteTask(tasks[chosenTaskIndex].id)();
+      handleDeleteTask(tasks[chosenTaskIndex].id);
     }
     setChosenTaskIndex(-1); // deselect
     setShowAreYouSureDialog(false); // close this alert dialog
@@ -224,8 +255,9 @@ export default function Home() {
 
     // unselect task (if task is selected)
     Mousetrap.bind("esc", () => {
-      // if modal is open, then don't unselect
-      if (isOpen) {
+      // if any modal is open, then don't unselect
+      const modalOpen = taskBuilderIsOpen || showAreYouSureDialog;
+      if (modalOpen) {
         return;
       }
       if (chosenTaskIndex !== -1) {
@@ -246,21 +278,22 @@ export default function Home() {
     commands,
     handleCheckTask,
     handleDeleteTask,
-    isOpen,
+    taskBuilderIsOpen,
     tasks,
   ]);
 
+  // fetch the task in the beginning
   useEffect(() => {
     // save to db
     (async () => {
       try {
-        const db = await LocalDB.init();
-        setDb(db);
-        await LocalDB.createTables(db);
-        console.log("created tables");
-        const tasks = await LocalDB.getTasks(db);
-        setTasks(tasks);
-        setTaskFetchState({ status: "success" });
+        const res = await supernovaAPI.getTasks();
+        if (res.type === "error") {
+          setTaskFetchState({ status: "error", error: res.message });
+        } else {
+          setTasks(res.data);
+          setTaskFetchState({ status: "success" });
+        }
       } catch (e: any) {
         setTaskFetchState({ status: "error", error: e.message });
       }
@@ -269,31 +302,30 @@ export default function Home() {
 
   // refetch the tasks whenever there's a task update
   useEffect(() => {
-    if (db === null) {
-      console.error("Database not initialized");
-      return;
-    }
     if (!refetchTasks) {
       return;
     }
     (async () => {
       try {
         console.log("refetching tasks...");
-        const tasks = await LocalDB.getTasks(db);
+        const res = await supernovaAPI.getTasks();
+        if (res.type === "error") {
+          throw new Error(res.message);
+        }
         console.log("refetched successfully");
-        setTasks(tasks);
+        setTasks(res.data);
+        setTaskFetchState({ status: "success" });
         setRefetchTasks(false);
       } catch (e: any) {
         console.error(e);
       }
     })();
-  }, [db, refetchTasks]);
+  }, [refetchTasks]);
 
-  const handleClickTask = (taskIndex: number) => () => {
-    // select task
-    setChosenTaskIndex(taskIndex);
-    setIsOpen(true);
-  };
+  // if the user press outside of the task list (i.e the task builder), then unselect the task
+  useOutsideClick(taskListRef, () => {
+    setChosenTaskIndex(-1);
+  });
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
@@ -324,10 +356,10 @@ export default function Home() {
           <GearIcon width={20} height={20} />
         </Link>
       </div>
-      {isOpen && (
+      {taskBuilderIsOpen && (
         <TaskBuilderDialog
-          isOpen={isOpen}
-          onOpenChange={setIsOpen}
+          isOpen={taskBuilderIsOpen}
+          onOpenChange={setTaskBuilderIsOpen}
           editingTask={
             chosenTaskIndex !== -1 ? tasks[chosenTaskIndex] : createBlankTask()
           }
@@ -348,41 +380,48 @@ export default function Home() {
         <h4 className="text-[20px] font-semibold">Today</h4>
         <p className="text-slate-400 text-[16px]">{today}</p>
       </div>
-      {taskFetchState.status === "loading" && (
+      {taskFetchState.status === "loading" ? (
         <div className="flex items-center gap-[10px]">
-          <div className="w-[25px] h-[25px] relative">
-            <Image
-              src="/supernova-globe.svg"
-              width={25}
-              height={25}
-              alt="Supernova's icon"
-            />
-          </div>
           <div className="text-slate-400 text-[16px]">Loading...</div>
         </div>
+      ) : taskFetchState.status === "success" ? (
+        <div
+          className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip max-w-xl"
+          ref={taskListRef}
+        >
+          <hr className="w-64" />
+          {tasks.length === 0 && (
+            <div className="w-64">
+              <p className="text-slate-400 text-[16px] text-center">
+                No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
+                command center with <Kbd>Cmd+k</Kbd>
+              </p>
+            </div>
+          )}
+          {tasks.map((task, index) => (
+            <SupernovaTaskComponent
+              key={task.id}
+              task={task}
+              focused={
+                chosenTaskIndex !== -1 && tasks[chosenTaskIndex].id === task.id
+              }
+              onClickCheck={handleCheckTask(task.id)}
+              onClick={handleClickTask(index)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center gap-[10px]">
+          <div className="text-red-600 text-[16px]">{taskFetchState.error}</div>
+        </div>
       )}
-      <div className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip">
-        <hr className="w-64" />
-        {tasks.length === 0 && (
-          <div className="w-64">
-            <p className="text-slate-400 text-[16px] text-center">
-              No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
-              command center with <Kbd>Cmd+k</Kbd>
-            </p>
-          </div>
-        )}
-        {tasks.map((task, index) => (
-          <SupernovaTaskComponent
-            key={task.id}
-            task={task}
-            focused={
-              chosenTaskIndex !== -1 && tasks[chosenTaskIndex].id === task.id
-            }
-            onClickCheck={handleCheckTask(task.id)}
-            onClick={handleClickTask(index)}
-          />
-        ))}
-      </div>
+      <CreateTaskPlaceholder
+        onClick={() => {
+          openTaskBuilder();
+        }}
+      />
     </main>
   );
 }
+
+export default withAuth(Home);

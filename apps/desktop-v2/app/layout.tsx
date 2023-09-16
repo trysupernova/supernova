@@ -1,25 +1,26 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
-
-const manrope = Manrope({ subsets: ["latin"] });
+import { manrope } from "@/components/fonts";
+import { ToastClientWrapper } from "./toast-client-wrapper";
 
 export const metadata: Metadata = {
-  title: "Supernova",
+  title: "Supernova | Today",
 };
 
-export default function RootLayout({
-  children,
-}: {
+interface RootLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body className={manrope.className}>
         {/* drag region because titlebar is overlay */}
         <div data-tauri-drag-region="self" className="h-5" />
-        {children}
+        <ToastClientWrapper>{children}</ToastClientWrapper>
       </body>
     </html>
   );
 }
+
+export default RootLayout;

@@ -6,6 +6,7 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
+    "test": {},
     "lint": {},
     "dev": {
       "cache": false,
@@ -15,6 +16,7 @@
       "cache": false,
       "persistent": true
     },
-    "install": {"cache": true}
+    "install": {"cache": true},
+    "format": {}
   }
 }

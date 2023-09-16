@@ -2,16 +2,21 @@
   "name": "supernova",
   "version": "0.0.0",
   "scripts": {
-    "install:api": "cd apps/api && go install",
-    "install:desktop": "cd apps/desktop && flutter pub get",
+    "test": "turbo run test",
     "build": "turbo run build",
-    "dev": "yarn dev:api & yarn dev:desktop",
-    "dev:api": "turbo run dev --scope=api",
-    "dev:desktop": "cd apps/desktop && npm run dev",
+    "db:start": "cd apps/api-v2 && npm run db:start",
+    "db:diff": "cd apps/api-v2 && npm run db:diff",
+    "db:migrate": "cd apps/api-v2 && npm run db:migrate",
+    "build:api": "turbo build --scope=api-v2",
+    "dev": "npm run dev:api & npm run dev:desktop",
+    "setup:api": "cd apps/api-v2 && npm run setup",
+    "dev:api": "turbo run dev --scope=api-v2",
+    "dev:desktop": "turbo run dev --scope=desktop-v2",
     "dev:www": "turbo run dev --scope=www",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "dockerize:api": "docker build -f apps/api-v2/Dockerfile -t supernova-api-v2:latest ."
   },
   "devDependencies": {
     "@turbo/gen": "^1.9.7",
