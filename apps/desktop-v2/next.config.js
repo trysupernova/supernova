@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output:"export",
+    output: process.env.ENV==="desktop" ? "export" : "standalone",
     transpilePackages: ["@supernova/api-client"],
 }
 
