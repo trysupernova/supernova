@@ -4,6 +4,9 @@
   "scripts": {
     "test": "turbo run test",
     "build": "turbo run build",
+    "db:start": "cd apps/api-v2 && npm run db:start",
+    "db:diff": "cd apps/api-v2 && npm run db:diff",
+    "db:migrate": "cd apps/api-v2 && npm run db:migrate",
     "build:api": "turbo build --scope=api-v2",
     "dev": "npm run dev:api & npm run dev:desktop",
     "setup:api": "cd apps/api-v2 && npm run setup",

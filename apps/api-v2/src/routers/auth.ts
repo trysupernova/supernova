@@ -10,6 +10,7 @@ import {
 } from "../types";
 import { authenticateJWTMiddleware } from "../mws";
 import { prisma, redis } from "../db";
+import { logger } from "../logging";
 
 const FOREVER_IN_MS = 1000 * 60 * 60 * 24 * 365 * 10;
 
@@ -80,7 +81,7 @@ export const buildAuthRouter = () => {
             });
             res.redirect(config.SUPERNOVA_WEB_APP_BASE_URL);
           } catch (err) {
-            console.error(err);
+            logger.error(err);
             return res.status(500).send(
               new SupernovaResponse({
                 error: "Internal Server Error",
@@ -89,7 +90,7 @@ export const buildAuthRouter = () => {
             );
           }
         } catch (err) {
-          console.error(err);
+          logger.error(err);
           res.status(500).send(
             new SupernovaResponse({
               error: "Internal Server Error",
@@ -118,7 +119,7 @@ export const buildAuthRouter = () => {
     console.log(userAuthCtx);
     // delete the refresh token from redis (stored as a KV pair of user ID -> refresh token)
     if (userAuthCtx.sub === undefined) {
-      console.error("userAuthCtx.sub is undefined");
+      logger.error("userAuthCtx.sub is undefined");
       return res.status(400).send(
         new SupernovaResponse({
           error: "Internal Server Error",

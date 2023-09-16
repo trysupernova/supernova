@@ -9,11 +9,13 @@ import { buildAuthRouter } from "./routers/auth";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
 import { buildTasksRouter } from "./routers/tasks";
+import { loggerOptions } from "./logging";
 
 export const createApp = () => {
-  const logger = PinoHTTP();
   const app = express();
-  app.use(logger);
+
+  const mwLogger = PinoHTTP(loggerOptions);
+  app.use(mwLogger);
   app.use(passport.initialize());
   app.use(
     cors({

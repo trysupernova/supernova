@@ -7,11 +7,12 @@
     "pretest": "npm run setup",
     "start": "node dist/index.js",
     "build": "tsup src/index.ts --format cjs --minify --clean",
-    "prebuild": "npm run clean",
+    "prebuild": "npm run clean && npm run schema:generate",
     "clean": "rm -rf dist",
     "predev": "npm run db:start",
     "dev": "NODE_ENV=development tsx src/index.ts",
-    "db:migrate": "prisma migrate dev",
+    "db:diff": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
     "schema:generate": "prisma generate",
     "db:start": "docker-compose up -d",
     "db:setup": "npm run db:start && npm run db:migrate"
@@ -41,6 +42,7 @@
     "typescript": "5.1.6"
   },
   "dependencies": {
+    "@axiomhq/pino": "^0.1.3",
     "@prisma/client": "5.2.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -50,6 +52,7 @@
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
+    "pino": "^8.15.1",
     "pino-http": "^8.5.0",
     "pino-pretty": "^10.2.0",
     "redis": "^4.6.8",
