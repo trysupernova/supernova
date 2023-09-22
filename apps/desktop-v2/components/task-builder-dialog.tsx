@@ -34,6 +34,7 @@ import { Kbd } from "./kbd";
 import { Button } from "./button";
 import { twMerge } from "tailwind-merge";
 import { ibmPlexMono } from "./fonts";
+import { SupernovaGlobeLogoImage } from "./icons";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -183,12 +184,7 @@ export const TaskBuilderDialog = (props: {
         >
           <div className="w-full h-full px-3 py-2.5 bg-white rounded-[10px] shadow border border-gray-300 justify-start items-start gap-2.5 flex">
             <div className="w-[25px] h-[25px] relative">
-              <Image
-                src="/supernova-globe.svg"
-                width={25}
-                height={25}
-                alt="Supernova's icon"
-              />
+              <SupernovaGlobeLogoImage width={25} height={25} />
             </div>
             <div className="grow shrink basis-0 overflow-x-clip flex flex-col gap-1">
               <p

@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { homeRoute } from "../meta";
+import { GlobeIcon } from "@radix-ui/react-icons";
+import { SupernovaGlobeLogoImage } from "@/components/icons";
 
 const AuthPage = () => {
   const router = useRouter();
@@ -20,10 +22,20 @@ const AuthPage = () => {
   }, []);
 
   return (
-    <main className="flex flex-col items-center justify-center max-h-screen">
-      <div className="flex flex-col">
+    <main className="flex flex-col items-center justify-center h-screen max-h-screen bg-dark-teal-gradient">
+      <div className="flex flex-col items-center gap-2">
+        <SupernovaGlobeLogoImage
+          priority
+          className="animate-slideInFromTopFast"
+        />
+        <div className="h-1" />
+        <h1 className="text-xl text-white">Sign in</h1>
+        <div className="h-1" />
         <Link href={supernovaAPI.getGoogleOAuthUrl()}>
-          <Button>Login with Google</Button>
+          {/* TODO: replace with Google logo */}
+          <Button bgVariant="white" className="gap-1">
+            <GlobeIcon /> Sign in with Google
+          </Button>
         </Link>
       </div>
     </main>

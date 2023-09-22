@@ -8,6 +8,7 @@ import { SupernovaCommand } from "../types/command";
 import { ISupernovaTask } from "../types/supernova-task";
 import { twMerge } from "tailwind-merge";
 import { ibmPlexMono } from "./fonts";
+import { SupernovaGlobeLogoImage } from "./icons";
 
 export const SupernovaCommandCenter = ({
   commands,
@@ -57,13 +58,7 @@ export const SupernovaCommandCenter = ({
               </div>
             )}
             <div className="flex items-center gap-2">
-              <Image
-                src={"/supernova-globe.svg"}
-                width={20}
-                height={20}
-                alt="Supernova's logo"
-                priority
-              />
+              <SupernovaGlobeLogoImage width={20} height={20} priority />
               <Command.Input
                 placeholder="Find a command..."
                 className="outline-none"

@@ -14,6 +14,7 @@ const config = parseEnv(process.env, {
   REDIS_URL: z.string().min(1),
   AXIOM_TOKEN: z.string().min(1).optional(),
   AXIOM_DATASET: z.string().min(1).optional(),
+  THIS_URL: z.string().min(1),
 });
 
 export default config;

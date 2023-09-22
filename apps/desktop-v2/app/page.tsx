@@ -24,6 +24,7 @@ import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
 import { useAtom } from "jotai";
 import { chosenTaskIndexGlobal } from "@/store/ui";
 import useOutsideClick from "@/hooks/useOutsideClick";
+import { SupernovaGlobeLogoImage } from "@/components/icons";
 
 function Home() {
   // get today's date in this format: Tue, 26th Aug
@@ -368,13 +369,7 @@ function Home() {
         />
       )}
       <div>
-        <Image
-          src="/supernova-globe.svg"
-          width={30}
-          height={30}
-          alt="Supernova's icon"
-          priority
-        />
+        <SupernovaGlobeLogoImage width={30} height={30} priority />
       </div>
       <div className="flex items-center gap-[10px]">
         <h4 className="text-[20px] font-semibold">Today</h4>

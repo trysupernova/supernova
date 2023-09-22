@@ -31,7 +31,7 @@ export const createApp = () => {
       {
         clientID: config.GOOGLE_CLIENT_ID,
         clientSecret: config.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/auth/google/callback",
+        callbackURL: `${config.THIS_URL}/auth/google/callback`,
       },
       (_accessToken, _refreshToken, profile, cb) => {
         // generate a JWT that encodes the user's OAuth profile

@@ -16,7 +16,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky install",
-    "dockerize:api": "docker build -f apps/api-v2/Dockerfile -t supernova-api-v2:latest ."
+    "dockerize:api": "docker build -f apps/api-v2/Dockerfile -t supernova-api-v2:latest .",
+    "prisma-studio": "cd apps/api-v2 && npx prisma studio"
   },
   "devDependencies": {
     "@turbo/gen": "^1.9.7",
