@@ -47,7 +47,7 @@ export function extractStartAt(
 ): { value: Date; match: RegExpExecArray } | null {
   // TODO: need to fix this local scope problem with the regexs somehow
   const startAtRegex = new RegExp(
-    /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap]?[Mm]?))?\b/gi
+    /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:[APap]?[Mm]?))?\b/gi
   );
   const match = startAtRegex.exec(text);
   if (match === null || match[1] === undefined) {

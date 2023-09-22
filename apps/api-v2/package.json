@@ -31,6 +31,7 @@
     "@types/node": "^20.6.0",
     "@types/passport": "^1.0.12",
     "@types/passport-google-oauth20": "^2.0.11",
+    "@types/response-time": "^2.3.5",
     "@types/supertest": "^2.0.12",
     "jest": "^29.6.4",
     "jest-express": "^1.12.0",
@@ -56,6 +57,7 @@
     "pino-http": "^8.5.0",
     "pino-pretty": "^10.2.0",
     "redis": "^4.6.8",
+    "response-time": "^2.3.2",
     "znv": "^0.4.0",
     "zod": "^3.22.2"
   }

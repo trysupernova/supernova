@@ -10,6 +10,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
 import { buildTasksRouter } from "./routers/tasks";
 import { loggerOptions } from "./logging";
+import responseTime from "response-time";
 
 export const createApp = () => {
   const app = express();
@@ -25,6 +26,8 @@ export const createApp = () => {
   );
   app.use(cookieParser()); // parses the cookies because apparently express doesn't do this by default
   app.use(express.json()); // parses the request body
+  const responseTimeMws = responseTime();
+  app.use(responseTimeMws);
 
   passport.use(
     new GoogleStrategy(

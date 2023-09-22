@@ -141,7 +141,7 @@ export const TaskBuilderDialog = (props: {
       /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi
     );
     const startAtRegex = new RegExp(
-      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?(?:[APap]?[Mm]?))?\b/gi
+      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:[APap]?[Mm]?))?\b/gi
     );
     const ranges: any[] = [];
     const rangesStartAt = getCbRangesFromRegex(

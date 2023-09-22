@@ -64,6 +64,9 @@ importers:
       redis:
         specifier: ^4.6.8
         version: 4.6.8
+      response-time:
+        specifier: ^2.3.2
+        version: 2.3.2
       znv:
         specifier: ^0.4.0
         version: 0.4.0(zod@3.22.2)
@@ -101,6 +104,9 @@ importers:
       '@types/passport-google-oauth20':
         specifier: ^2.0.11
         version: 2.0.11
+      '@types/response-time':
+        specifier: ^2.3.5
+        version: 2.3.5
       '@types/supertest':
         specifier: ^2.0.12
         version: 2.0.12
@@ -214,7 +220,7 @@ importers:
         version: 3.3.3
       tauri-plugin-sql-api:
         specifier: github:tauri-apps/tauri-plugin-sql#v1
-        version: github.com/tauri-apps/tauri-plugin-sql/b8fd19dac907cc8c3d78681cd4803a326b8b861e
+        version: github.com/tauri-apps/tauri-plugin-sql/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0
       typescript:
         specifier: 5.1.6
         version: 5.1.6
@@ -2418,6 +2424,13 @@ packages:
       csstype: 3.1.2
     dev: false
 
+  /@types/response-time@2.3.5:
+    resolution: {integrity: sha512-4ANzp+I3K7sztFFAGPALWBvSl4ayaDSKzI2Bok+WNz+en2eB2Pvk6VCjR47PBXBWOkEg2r4uWpZOlXA5DNINOQ==}
+    dependencies:
+      '@types/express': 4.17.17
+      '@types/node': 20.6.0
+    dev: true
+
   /@types/scheduler@0.16.3:
     resolution: {integrity: sha512-5cJ8CB4yAx7BH1oMvdU0Jh9lrEXyPkar6F9G/ERswkCuvP4KQZfZkSjcMbAICCpQTN4OuZn8tz0HiKv9TGZgrQ==}
     dev: false
@@ -3631,6 +3644,11 @@ packages:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
     dev: true
+
+  /depd@1.1.2:
+    resolution: {integrity: sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==}
+    engines: {node: '>= 0.6'}
+    dev: false
 
   /depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
@@ -7484,6 +7502,14 @@ packages:
       supports-preserve-symlinks-flag: 1.0.0
     dev: false
 
+  /response-time@2.3.2:
+    resolution: {integrity: sha512-MUIDaDQf+CVqflfTdQ5yam+aYCkXj1PY8fjlPDQ6ppxJlmgZb864pHtA750mayywNg8tx4rS7qH9JXd/OF+3gw==}
+    engines: {node: '>= 0.8.0'}
+    dependencies:
+      depd: 1.1.2
+      on-headers: 1.0.2
+    dev: false
+
   /restore-cursor@3.1.0:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}
     engines: {node: '>=8'}
@@ -8838,8 +8864,8 @@ packages:
     resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-sql/b8fd19dac907cc8c3d78681cd4803a326b8b861e:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-sql/tar.gz/b8fd19dac907cc8c3d78681cd4803a326b8b861e}
+  github.com/tauri-apps/tauri-plugin-sql/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-sql/tar.gz/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0}
     name: tauri-plugin-sql-api
     version: 0.0.0
     dependencies:
