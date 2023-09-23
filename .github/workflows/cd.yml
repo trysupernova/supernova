@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  migrate:
+  db-migrate-n-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -44,3 +44,10 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy API
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
