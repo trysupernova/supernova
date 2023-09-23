@@ -29,6 +29,14 @@ export default function useSupernovaTasksUI() {
 
   const [taskBuilderIsOpen, setTaskBuilderIsOpen] = useState<boolean>(false);
   const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
+  const [accordionValue, setAccordionValue] = useState<string | undefined>(
+    undefined
+  );
+  const doneAccordionOpened = accordionValue === "supernova-dones";
+
+  const undoneTasks = memoizedTasksView.filter((task) => !task.isComplete);
+  const doneTasks = memoizedTasksView.filter((task) => task.isComplete);
+
   const anyModalOpen = useMemo(() => {
     return taskBuilderIsOpen || showAreYouSureDialog;
   }, [showAreYouSureDialog, taskBuilderIsOpen]);
@@ -252,7 +260,7 @@ export default function useSupernovaTasksUI() {
       },
       {
         label: "Mark done/undone",
-        shortcut: "d",
+        shortcut: ["d", "e"],
         cb: () => {
           if (chosenTaskIndex !== -1) {
             handleCheckTask(tasks[chosenTaskIndex].id)(
@@ -297,6 +305,11 @@ export default function useSupernovaTasksUI() {
     });
     // go down
     Mousetrap.bind(["j", "down"], () => {
+      // if modal isn't opened and it's at the last undone task,
+      // then don't go down more (will go into the done tasks)
+      if (chosenTaskIndex === undoneTasks.length - 1 && !doneAccordionOpened) {
+        return;
+      }
       if (chosenTaskIndex < tasks.length - 1) {
         setChosenTaskIndex(chosenTaskIndex + 1);
       }
@@ -330,12 +343,14 @@ export default function useSupernovaTasksUI() {
   }, [
     chosenTaskIndex,
     commands,
+    doneAccordionOpened,
     handleCheckTask,
     handleDeleteTask,
     setChosenTaskIndex,
     showAreYouSureDialog,
     taskBuilderIsOpen,
     tasks,
+    undoneTasks.length,
   ]);
 
   // fetch the task in the beginning
@@ -405,5 +420,10 @@ export default function useSupernovaTasksUI() {
     handleSubmitAreYouSure,
     taskListRef,
     memoizedTasksView,
+    accordionValue,
+    setAccordionValue,
+    doneAccordionOpened,
+    undoneTasks,
+    doneTasks,
   };
 }

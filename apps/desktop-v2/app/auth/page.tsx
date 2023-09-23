@@ -18,7 +18,7 @@ const AuthPage = () => {
       }
       router.replace(homeRoute);
     })();
-  }, []);
+  }, [router]);
 
   return (
     <main className="flex flex-col items-center justify-center h-screen max-h-screen bg-dark-teal-gradient">

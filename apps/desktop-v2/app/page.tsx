@@ -1,15 +1,12 @@
 "use client";
 
 import { withAuth } from "@/hocs/withAuth";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   SupernovaTaskComponent,
   createBlankTask,
 } from "../components/supernova-task";
-import Mousetrap from "mousetrap";
 import { TaskBuilderDialog } from "../components/task-builder-dialog";
-import { ISupernovaTask } from "@supernova/types";
-import { GearIcon } from "@radix-ui/react-icons";
+import { ChevronDownIcon, GearIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
 import { SupernovaCommandCenter } from "../components/command-center";
@@ -18,6 +15,8 @@ import { Kbd } from "../components/kbd";
 import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
 import { SupernovaGlobeLogoImage } from "@/components/icons";
 import useSupernovaTasksUI from "@/hooks/useSupernovaTasksUI";
+import * as Accordion from "@radix-ui/react-accordion";
+import React from "react";
 
 function Home() {
   // get today's date in this format: Tue, 26th Aug
@@ -27,8 +26,9 @@ function Home() {
     month: "short",
   });
   const {
+    accordionValue,
+    setAccordionValue,
     taskFetchState,
-    setTasks,
     taskBuilderIsOpen,
     setTaskBuilderIsOpen,
     chosenTaskIndex,
@@ -42,6 +42,8 @@ function Home() {
     taskListRef,
     commands,
     handleClickTask,
+    doneTasks,
+    undoneTasks,
   } = useSupernovaTasksUI();
 
   return (
@@ -113,7 +115,7 @@ function Home() {
               </p>
             </div>
           )}
-          {memoizedTasksView.map((task, index) => (
+          {undoneTasks.map((task, undoneIndex) => (
             <SupernovaTaskComponent
               key={task.id}
               task={task}
@@ -122,7 +124,7 @@ function Home() {
                 memoizedTasksView[chosenTaskIndex].id === task.id
               }
               onClickCheck={handleCheckTask(task.id)}
-              onClick={handleClickTask(index)}
+              onClick={handleClickTask(undoneIndex)}
             />
           ))}
         </div>
@@ -131,11 +133,45 @@ function Home() {
           <div className="text-red-600 text-[16px]">{taskFetchState.error}</div>
         </div>
       )}
+
       <CreateTaskPlaceholder
         onClick={() => {
           openTaskBuilder();
         }}
       />
+      <Accordion.Root
+        className="w-full max-w-xl"
+        type="single"
+        value={accordionValue}
+        onValueChange={setAccordionValue}
+        collapsible
+      >
+        <Accordion.AccordionItem value="supernova-dones">
+          <Accordion.AccordionTrigger className="flex items-center justify-between w-full hover:bg-gray-100 rounded px-1">
+            <p className="text-xs text-teal-800">Dones ({doneTasks.length})</p>{" "}
+            <ChevronDownIcon className="text-teal-800" />
+          </Accordion.AccordionTrigger>
+          <Accordion.AccordionContent className="py-2">
+            <div
+              className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip"
+              ref={taskListRef}
+            >
+              {doneTasks.map((task, doneIndex) => (
+                <SupernovaTaskComponent
+                  key={task.id}
+                  task={task}
+                  focused={
+                    chosenTaskIndex !== -1 &&
+                    memoizedTasksView[chosenTaskIndex].id === task.id
+                  }
+                  onClickCheck={handleCheckTask(task.id)}
+                  onClick={handleClickTask(undoneTasks.length + doneIndex)}
+                />
+              ))}
+            </div>
+          </Accordion.AccordionContent>
+        </Accordion.AccordionItem>
+      </Accordion.Root>
     </main>
   );
 }
