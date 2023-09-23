@@ -12,7 +12,6 @@ import { ISupernovaTask } from "@supernova/types";
 import { GearIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
-import Image from "next/image";
 import { SupernovaCommandCenter } from "../components/command-center";
 import { SupernovaCommand } from "../types/command";
 import { AlertDialog } from "../components/alert-dialog";
@@ -48,6 +47,10 @@ function Home() {
     useState<boolean>(false);
   const { makeToast } = useSupernovaToast();
 
+  const anyModalOpen = useMemo(() => {
+    return taskBuilderIsOpen || showAreYouSureDialog;
+  }, [showAreYouSureDialog, taskBuilderIsOpen]);
+
   const handleCheckTask = useCallback(
     (taskId: string) => async (value: boolean) => {
       const foundTask = tasks.find((task) => task.id === taskId);
@@ -76,7 +79,7 @@ function Home() {
         // TODO: show error toast
       }
     },
-    [tasks]
+    [makeToast, tasks]
   );
 
   const handleClickTask = (taskIndex: number) => () => {
@@ -162,15 +165,18 @@ function Home() {
         }
       }
     },
-    [chosenTaskIndex, tasks]
+    [chosenTaskIndex, makeToast, tasks]
   );
 
-  const openTaskBuilder = useCallback((e?: Mousetrap.ExtendedKeyboardEvent) => {
-    e?.preventDefault(); // prevent typing into the task builder
-    setTaskBuilderIsOpen(true);
-    // deselect task
-    setChosenTaskIndex(-1);
-  }, []);
+  const openTaskBuilder = useCallback(
+    (e?: Mousetrap.ExtendedKeyboardEvent) => {
+      e?.preventDefault(); // prevent typing into the task builder
+      setTaskBuilderIsOpen(true);
+      // deselect task
+      setChosenTaskIndex(-1);
+    },
+    [setChosenTaskIndex]
+  );
 
   const commands: SupernovaCommand[] = useMemo(
     () => [
@@ -195,7 +201,7 @@ function Home() {
         cb: (e) => {
           e?.preventDefault(); // prevent typing into the task builder
           // if modal is open, then don't open another one
-          if (taskBuilderIsOpen) {
+          if (anyModalOpen) {
             return;
           }
 
@@ -279,6 +285,8 @@ function Home() {
     commands,
     handleCheckTask,
     handleDeleteTask,
+    setChosenTaskIndex,
+    showAreYouSureDialog,
     taskBuilderIsOpen,
     tasks,
   ]);
@@ -324,7 +332,11 @@ function Home() {
   }, [refetchTasks]);
 
   // if the user press outside of the task list (i.e the task builder), then unselect the task
+  // only unselect if no modal is open since we don't want to unselect when the user clicks into any modal
   useOutsideClick(taskListRef, () => {
+    if (anyModalOpen) {
+      return;
+    }
     setChosenTaskIndex(-1);
   });
 
