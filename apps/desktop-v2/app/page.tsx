@@ -199,11 +199,12 @@ function Home() {
         label: "Edit task",
         shortcut: "enter",
         cb: (e) => {
-          e?.preventDefault(); // prevent typing into the task builder
-          // if modal is open, then don't open another one
+          // if the alert dialog is open, then don't open another one
           if (anyModalOpen) {
             return;
           }
+
+          e?.preventDefault(); // prevent typing into the task builder
 
           if (chosenTaskIndex !== -1) {
             setTaskBuilderIsOpen(true);
@@ -229,7 +230,14 @@ function Home() {
         },
       },
     ],
-    [chosenTaskIndex, handleCheckTask, taskBuilderIsOpen, router, tasks]
+    [
+      openTaskBuilder,
+      chosenTaskIndex,
+      anyModalOpen,
+      handleCheckTask,
+      tasks,
+      router,
+    ]
   );
 
   const handleSubmitAreYouSure = () => {
