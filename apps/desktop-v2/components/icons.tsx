@@ -30,3 +30,15 @@ export const SupernovaGlobeLogoImage = (props: ImageProps) => (
     {...props}
   />
 );
+
+export const googleIconPath = "/icons/google-icon.png";
+
+export const GoogleIcon = (props: ImageProps) => (
+  <Image
+    src={googleIconPath}
+    width={20}
+    height={20}
+    alt="Google icon"
+    {...props}
+  />
+);
