@@ -11,6 +11,7 @@ import jwt from "jsonwebtoken";
 import { buildTasksRouter } from "./routers/tasks";
 import { loggerOptions } from "./logging";
 import responseTime from "response-time";
+import buildStatsRouter from "./routers/stats";
 
 export const createApp = () => {
   const app = express();
@@ -55,6 +56,7 @@ export const createApp = () => {
   // use auth router
   app.use(buildAuthRouter());
   app.use(buildTasksRouter());
+  app.use(buildStatsRouter());
 
   return { app };
 };
