@@ -1,5 +1,6 @@
 import { NodeEntry, Text } from "slate";
 import moment from "moment";
+import { ISupernovaTask } from "@supernova/types";
 
 export const START_AT_SLATE_TYPE = "startAt";
 export const EXP_DUR_SLATE_TYPE = "expectedDuration";
@@ -109,4 +110,29 @@ export function getCbRangesFromRegex(regex: RegExp, type: string) {
 
     return ranges;
   };
+}
+
+/**
+ * Sort by earliest one first; ones with no start time last
+ * and the ones that are done last
+ * @param tasks tasks list
+ * @returns a reordered task list
+ */
+export function reorderTaskList(tasks: ISupernovaTask[]) {
+  return tasks.sort((a, b) => {
+    if (a.isComplete && !b.isComplete) {
+      return 1;
+    } else if (!a.isComplete && b.isComplete) {
+      return -1;
+    } else if (!a.startTime && !b.startTime) {
+      return 0;
+    } else if (!a.startTime && b.startTime) {
+      return 1;
+    } else if (a.startTime && !b.startTime) {
+      return -1;
+    } else if (a.startTime && b.startTime) {
+      return moment(a.startTime).diff(moment(b.startTime));
+    }
+    return 0;
+  });
 }
