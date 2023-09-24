@@ -107,7 +107,7 @@ function Home() {
           ref={taskListRef}
         >
           <hr className="w-64" />
-          {memoizedTasksView.length === 0 && (
+          {undoneTasks.length === 0 && (
             <div className="w-64">
               <p className="text-slate-400 text-[16px] text-center">
                 No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the

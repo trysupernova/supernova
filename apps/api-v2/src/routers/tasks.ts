@@ -18,6 +18,8 @@ export const buildTasksRouter = () => {
       const authCtx = getAuthContext(req);
       // get all tasks for the user
       // sort by earliest one first; ones with no start time last
+      // also put all the done ones at the end
+      // do not include deleted tasks (i.e those with deletedAt not null)
       const tasks = await prisma.task.findMany({
         orderBy: [
           {
@@ -32,6 +34,7 @@ export const buildTasksRouter = () => {
         ],
         where: {
           userId: authCtx.sub,
+          deletedAt: null,
         },
       });
       return res.status(200).json(
@@ -141,10 +144,13 @@ export const buildTasksRouter = () => {
     async (req, res) => {
       try {
         const authCtx = getAuthContext(req);
-        const task = await prisma.task.delete({
+        const task = await prisma.task.update({
           where: {
             id: req.params.id,
             userId: authCtx.sub,
+          },
+          data: {
+            deletedAt: new Date(),
           },
         });
         return res.status(200).json(
