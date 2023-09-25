@@ -1,7 +1,7 @@
 import {
   CreateTaskRequest,
   ISupernovaTask,
-  SupernovaResponse,
+  TSupernovaResponse,
   UpdateTaskRequest,
 } from "@supernova/types";
 import {
@@ -19,7 +19,7 @@ export default class SupernovaAPI {
     return `${this.baseUrl}/auth/google`;
   }
 
-  public getTasks(): Promise<SupernovaResponse<ISupernovaTask[]>> {
+  public getTasks(): Promise<TSupernovaResponse<ISupernovaTask[]>> {
     return fetch(`${this.baseUrl}/tasks`, {
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export default class SupernovaAPI {
       });
   }
 
-  public addTask(request: CreateTaskRequest): Promise<SupernovaResponse> {
+  public addTask(request: CreateTaskRequest): Promise<TSupernovaResponse> {
     return fetch(`${this.baseUrl}/tasks`, {
       method: "POST",
       headers: {
@@ -49,7 +49,7 @@ export default class SupernovaAPI {
     }).then(supernovaResponseConverter.convert);
   }
 
-  public updateTask(request: UpdateTaskRequest): Promise<SupernovaResponse> {
+  public updateTask(request: UpdateTaskRequest): Promise<TSupernovaResponse> {
     return fetch(`${this.baseUrl}/tasks/${request.params.id}`, {
       method: "PUT",
       headers: {
@@ -62,7 +62,7 @@ export default class SupernovaAPI {
 
   public toggleCompleteTask(
     id: string
-  ): Promise<SupernovaResponse<ISupernovaTask>> {
+  ): Promise<TSupernovaResponse<ISupernovaTask>> {
     return fetch(`${this.baseUrl}/tasks/${id}/toggle-complete`, {
       method: "PUT",
       headers: {
@@ -82,7 +82,7 @@ export default class SupernovaAPI {
       });
   }
 
-  public deleteTask(id: string): Promise<SupernovaResponse> {
+  public deleteTask(id: string): Promise<TSupernovaResponse> {
     return fetch(`${this.baseUrl}/tasks/${id}`, {
       method: "DELETE",
       headers: {
@@ -92,7 +92,7 @@ export default class SupernovaAPI {
     }).then(supernovaResponseConverter.convert);
   }
 
-  public authenticate(): Promise<SupernovaResponse> {
+  public authenticate(): Promise<TSupernovaResponse> {
     return fetch(`${this.baseUrl}/auth`, {
       headers: {
         "Content-Type": "application/json",
@@ -101,7 +101,7 @@ export default class SupernovaAPI {
     }).then(supernovaResponseConverter.convert);
   }
 
-  logout(): Promise<SupernovaResponse> {
+  logout(): Promise<TSupernovaResponse> {
     return fetch(`${this.baseUrl}/auth/logout`, {
       headers: {
         "Content-Type": "application/json",

@@ -2,16 +2,13 @@ import express from "express";
 import passport from "passport";
 import config from "./config";
 import PinoHTTP from "pino-http";
-import { EncodedProfileTokenClaims, IAuthPassportCallbackCtx } from "./types";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { buildAuthRouter } from "./routers/auth";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import jwt from "jsonwebtoken";
-import { buildTasksRouter } from "./routers/tasks";
+import buildAuthRouter from "./routers/auth";
+import buildTasksRouter from "./routers/tasks";
+import buildStatsRouter from "./routers/stats";
 import { loggerOptions } from "./logging";
 import responseTime from "response-time";
-import buildStatsRouter from "./routers/stats";
 
 export const createApp = () => {
   const app = express();
@@ -29,29 +26,6 @@ export const createApp = () => {
   app.use(express.json()); // parses the request body
   const responseTimeMws = responseTime();
   app.use(responseTimeMws);
-
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: config.GOOGLE_CLIENT_ID,
-        clientSecret: config.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${config.THIS_URL}/auth/google/callback`,
-      },
-      (_accessToken, _refreshToken, profile, cb) => {
-        // generate a JWT that encodes the user's OAuth profile
-        // so that we can use it later in the callback to create / update the user
-        const encodedProfileToken = jwt.sign(
-          { user: profile } as EncodedProfileTokenClaims,
-          config.JWT_SECRET
-        );
-
-        // Send tokens towards provider for callback later
-        return cb(null, <IAuthPassportCallbackCtx>{
-          encodedProfileToken,
-        });
-      }
-    )
-  );
 
   // use auth router
   app.use(buildAuthRouter());

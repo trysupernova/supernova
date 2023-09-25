@@ -10,7 +10,7 @@ import {
   updateTaskRequestSchema,
 } from "@supernova/types";
 
-export const buildTasksRouter = () => {
+export default function buildTasksRouter(): Router {
   const router = Router();
 
   router.get("/tasks", authenticateJWTMiddleware, async (req, res) => {
@@ -227,4 +227,4 @@ export const buildTasksRouter = () => {
   );
 
   return router;
-};
+}

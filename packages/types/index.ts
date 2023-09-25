@@ -8,21 +8,21 @@ export interface ISupernovaTask {
   isComplete: boolean;
 }
 
-type ErrorResponse = {
+type TErrorResponse = {
   type: "error";
   statusCode: number;
   error: string;
   message?: string;
 };
 
-type DataResponse<T> = {
+type TDataResponse<T> = {
   type: "data";
   data: T;
   message?: string;
   statusCode: number;
 };
 
-export type SupernovaResponse<T = any> = ErrorResponse | DataResponse<T>;
+export type TSupernovaResponse<T = any> = TErrorResponse | TDataResponse<T>;
 
 export interface Converter<T, U> {
   convert: (t: T) => U;

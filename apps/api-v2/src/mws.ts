@@ -5,6 +5,7 @@ import config from "./config";
 import { redis } from "./db";
 import { z } from "zod";
 import { SupernovaRequestValidationSchema } from "@supernova/types";
+import { logger } from "./logging";
 
 // TODO: redirect to the web app on errors instead of sending a JSON response
 export const authenticateJWTMiddleware = async (
@@ -82,8 +83,8 @@ export const authenticateJWTMiddleware = async (
 
 /**
  * Validates the request body, query and params against the schema
- * @param schema s
- * @returns
+ * @param schema the schema validating the request
+ * @returns Express middleware
  */
 export const validateRequestSchema =
   (schema: SupernovaRequestValidationSchema) =>
@@ -104,8 +105,8 @@ export const validateRequestSchema =
           })
         );
       }
-      // log the error
-      console.error(error);
+      // log the error because this is unknown
+      logger.error(error);
       return res.status(500).json(
         new SupernovaResponse({
           message: "Internal Server Error",

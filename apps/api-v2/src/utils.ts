@@ -1,6 +1,11 @@
 import { Request } from "express";
 import { IAuthCtx } from "./types";
 
-export const getAuthContext = (req: Request): IAuthCtx => {
+/**
+ * Get the auth context which contains information about requesting user.
+ * @param req Express-like request object
+ * @returns auth context object
+ */
+export function getAuthContext(req: Request): IAuthCtx {
   return req.user as IAuthCtx;
-};
+}

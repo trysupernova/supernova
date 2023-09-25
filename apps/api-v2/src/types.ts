@@ -1,6 +1,5 @@
 import { Profile } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
-import { AnyZodObject, z } from "zod";
 
 export interface ISupernovaResponse<T extends any> {
   data?: T;

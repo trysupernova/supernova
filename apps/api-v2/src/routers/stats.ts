@@ -1,7 +1,7 @@
-import express from "express";
+import { Router } from "express";
 
-export default function buildStatsRouter() {
-  const router = express.Router();
+export default function buildStatsRouter(): Router {
+  const router = Router();
 
   router.get("/", async (_, res) => {
     return res.send({
