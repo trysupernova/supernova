@@ -13,7 +13,7 @@ import {
 export default function buildTasksRouter(): Router {
   const router = Router();
 
-  router.get("/tasks", authenticateJWTMiddleware, async (req, res) => {
+  router.get("/tasks", authenticateJWTMiddleware, async (req, res, next) => {
     try {
       const authCtx = getAuthContext(req);
       // get all tasks for the user
@@ -43,16 +43,14 @@ export default function buildTasksRouter(): Router {
           data: tasks,
         })
       );
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(err);
-        return res.status(500).json(
-          new SupernovaResponse({
-            message: "Something went wrong. Please try again later.",
-            error: "Internal Server Error",
-          })
-        );
-      }
+    } catch (e) {
+      res.status(500).json(
+        new SupernovaResponse({
+          message: "Something went wrong. Please try again later.",
+          error: "Internal Server Error",
+        })
+      );
+      next(e);
     }
   });
 
@@ -61,7 +59,7 @@ export default function buildTasksRouter(): Router {
     "/tasks",
     authenticateJWTMiddleware,
     validateRequestSchema(createTaskRequestSchema),
-    async (req, res) => {
+    async (req, res, next) => {
       try {
         const authCtx = getAuthContext(req);
         const task = await prisma.task.create({
@@ -81,15 +79,13 @@ export default function buildTasksRouter(): Router {
           })
         );
       } catch (e) {
-        if (e instanceof Error) {
-          console.error(e);
-          return res.status(500).json(
-            new SupernovaResponse({
-              message: "Something went wrong. Please try again later.",
-              error: "Internal Server Error",
-            })
-          );
-        }
+        res.status(500).json(
+          new SupernovaResponse({
+            message: "Something went wrong. Please try again later.",
+            error: "Internal Server Error",
+          })
+        );
+        next(e);
       }
     }
   );
@@ -100,7 +96,7 @@ export default function buildTasksRouter(): Router {
     "/tasks/:id",
     authenticateJWTMiddleware,
     validateRequestSchema(updateTaskRequestSchema),
-    async (req, res) => {
+    async (req, res, next) => {
       try {
         const authCtx = getAuthContext(req);
         const task = await prisma.task.update({
@@ -123,15 +119,13 @@ export default function buildTasksRouter(): Router {
           })
         );
       } catch (e) {
-        if (e instanceof Error) {
-          console.error(e);
-          return res.status(500).json(
-            new SupernovaResponse({
-              message: "Something went wrong. Please try again later.",
-              error: "Internal Server Error",
-            })
-          );
-        }
+        res.status(500).json(
+          new SupernovaResponse({
+            message: "Something went wrong. Please try again later.",
+            error: "Internal Server Error",
+          })
+        );
+        next(e);
       }
     }
   );
@@ -141,7 +135,7 @@ export default function buildTasksRouter(): Router {
     "/tasks/:id",
     authenticateJWTMiddleware,
     validateRequestSchema(deleteTaskRequestSchema),
-    async (req, res) => {
+    async (req, res, next) => {
       try {
         const authCtx = getAuthContext(req);
         const task = await prisma.task.update({
@@ -160,15 +154,13 @@ export default function buildTasksRouter(): Router {
           })
         );
       } catch (e) {
-        if (e instanceof Error) {
-          console.error(e);
-          return res.status(500).json(
-            new SupernovaResponse({
-              message: "Something went wrong. Please try again later.",
-              error: "Internal Server Error",
-            })
-          );
-        }
+        res.status(500).json(
+          new SupernovaResponse({
+            message: "Something went wrong. Please try again later.",
+            error: "Internal Server Error",
+          })
+        );
+        next(e);
       }
     }
   );
@@ -178,7 +170,7 @@ export default function buildTasksRouter(): Router {
     "/tasks/:id/toggle-complete",
     authenticateJWTMiddleware,
     validateRequestSchema(toggleCompleteTaskRequestSchema),
-    async (req, res) => {
+    async (req, res, next) => {
       try {
         const authCtx = getAuthContext(req);
         // find the task
@@ -213,15 +205,13 @@ export default function buildTasksRouter(): Router {
           })
         );
       } catch (e) {
-        if (e instanceof Error) {
-          console.error(e);
-          return res.status(500).json(
-            new SupernovaResponse({
-              message: "Something went wrong. Please try again later.",
-              error: "Internal Server Error",
-            })
-          );
-        }
+        res.status(500).json(
+          new SupernovaResponse({
+            message: "Something went wrong. Please try again later.",
+            error: "Internal Server Error",
+          })
+        );
+        next(e);
       }
     }
   );

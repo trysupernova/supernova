@@ -79,8 +79,7 @@ export default function useSupernovaTasksUI() {
           });
         }
         console.log("updated successfully");
-      } catch (e: any) {
-        console.error(e);
+      } catch (e) {
         // TODO: show error toast
         makeToast("Something went wrong", "error", {
           description: `This is something on our side.`,
@@ -143,29 +142,31 @@ export default function useSupernovaTasksUI() {
         };
         // optimistically update the task in the frontend
         setTasks(
-          tasks.map((task) => {
-            if (task.id === chosenTask.id) {
-              return {
-                ...task,
-                title: newTask.title,
-                originalBuildText: newTask.originalBuildText,
-                description: newTask.description,
-                startTime:
-                  updatePayload.startAt === null
-                    ? undefined
-                    : updatePayload.startAt === undefined
-                    ? chosenTask.startTime
-                    : newTask.startTime, // if it's null, then cleared, else if undefined then don't update
-                expectedDurationSeconds:
-                  updatePayload.expectedDurationSeconds === null
-                    ? undefined
-                    : updatePayload.expectedDurationSeconds === undefined
-                    ? chosenTask.expectedDurationSeconds
-                    : newTask.expectedDurationSeconds, // if it's null, then cleared, else if undefined then don't update
-              };
-            }
-            return task;
-          })
+          reorderTaskList(
+            tasks.map((task) => {
+              if (task.id === chosenTask.id) {
+                return {
+                  ...task,
+                  title: newTask.title,
+                  originalBuildText: newTask.originalBuildText,
+                  description: newTask.description,
+                  startTime:
+                    updatePayload.startAt === null
+                      ? undefined
+                      : updatePayload.startAt === undefined
+                      ? chosenTask.startTime
+                      : newTask.startTime, // if it's null, then cleared, else if undefined then don't update
+                  expectedDurationSeconds:
+                    updatePayload.expectedDurationSeconds === null
+                      ? undefined
+                      : updatePayload.expectedDurationSeconds === undefined
+                      ? chosenTask.expectedDurationSeconds
+                      : newTask.expectedDurationSeconds, // if it's null, then cleared, else if undefined then don't update
+                };
+              }
+              return task;
+            })
+          )
         );
         makeToast("Task updated successfully", "success");
 

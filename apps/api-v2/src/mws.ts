@@ -70,7 +70,7 @@ export const authenticateJWTMiddleware = async (
       );
     }
   } catch (err) {
-    console.error("Could not connect to Redis: " + err);
+    logger.error("Could not connect to Redis: " + err);
     return res.status(500).send(
       new SupernovaResponse({
         error: "Internal Server Error",
@@ -106,13 +106,31 @@ export const validateRequestSchema =
         );
       }
       // log the error because this is unknown
-      logger.error(error);
-      return res.status(500).json(
+      res.status(500).json(
         new SupernovaResponse({
           message: "Internal Server Error",
           error:
             "An error occurred while validating the request; this is on us, not you. Please try again later.",
         })
       );
+      next(error);
     }
   };
+
+/**
+ * Generic error handler for the application.
+ * Expect to have handled error response before this middleware
+ * @param err
+ * @param req
+ * @param res
+ * @param next
+ */
+export function errorHandler(
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  logger.error(err);
+  next();
+}

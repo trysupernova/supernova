@@ -9,6 +9,7 @@ import buildTasksRouter from "./routers/tasks";
 import buildStatsRouter from "./routers/stats";
 import { loggerOptions } from "./logging";
 import responseTime from "response-time";
+import { errorHandler } from "./mws";
 
 export const createApp = () => {
   const app = express();
@@ -22,6 +23,7 @@ export const createApp = () => {
       credentials: true, // accept cookies from clients
     })
   );
+  app.use(errorHandler);
   app.use(cookieParser()); // parses the cookies because apparently express doesn't do this by default
   app.use(express.json()); // parses the request body
   const responseTimeMws = responseTime();
