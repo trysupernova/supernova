@@ -30,12 +30,21 @@ import {
   EXP_DUR_SLATE_TYPE,
   extractStartAt,
   extractDate,
+  getExpectedDurationRegex,
+  getStartAtRegex,
+  getDateRegex,
+  DATE_SLATE_TYPE,
 } from "../utils/supernova-task";
 import { Kbd } from "./kbd";
 import { Button } from "./button";
 import { twMerge } from "tailwind-merge";
 import { ibmPlexMono } from "./fonts";
-import { SupernovaGlobeLogoImage } from "./icons";
+import {
+  CalendarYellowIcon,
+  ClockCyanIcon,
+  PlayGreenIcon,
+  SupernovaGlobeLogoImage,
+} from "./icons";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -97,7 +106,21 @@ export const TaskBuilderDialog = (props: {
     }
     // extract the date if any
     const extractedDate = extractDate(newTitle);
+    let date: Date | undefined = undefined;
+    if (extractedDate !== null) {
+      date = extractedDate.value;
+      newTitle =
+        newTitle.slice(0, extractedDate.match.index) +
+        newTitle.slice(
+          extractedDate.match.index + extractedDate.match[0].length
+        );
+    }
+    // modify the actual start time with the date
+    if (date !== undefined && startTime !== undefined) {
+      startTime.setDate(date.getDate());
+    }
 
+    // update the task edit
     setTaskEdit((prev) => ({
       ...prev,
       expectedDurationSeconds: duration,
@@ -140,14 +163,8 @@ export const TaskBuilderDialog = (props: {
 
   // for applying styling
   const decorate = ([node, path]: NodeEntry) => {
-    // TODO: need to fix this local scope problem with the regexs somehow
-
-    const expectedDurationRegex = new RegExp(
-      /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi
-    );
-    const startAtRegex = new RegExp(
-      /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:[APap]?[Mm]?))?\b/gi
-    );
+    // start at
+    const startAtRegex = getStartAtRegex();
     const ranges: any[] = [];
     const rangesStartAt = getCbRangesFromRegex(
       startAtRegex,
@@ -157,12 +174,24 @@ export const TaskBuilderDialog = (props: {
       ranges.push(...rangesStartAt);
     }
 
+    // expected duration
+    const expectedDurationRegex = getExpectedDurationRegex();
     const rangesExpectedDuration = getCbRangesFromRegex(
       expectedDurationRegex,
       EXP_DUR_SLATE_TYPE
     )([node, path]);
     if (rangesExpectedDuration.length > 0) {
       ranges.push(...rangesExpectedDuration);
+    }
+
+    // date
+    const dateRegex = getDateRegex();
+    const rangesDate = getCbRangesFromRegex(
+      dateRegex,
+      DATE_SLATE_TYPE
+    )([node, path]);
+    if (rangesDate.length > 0) {
+      ranges.push(...rangesDate);
     }
     return ranges;
   };
@@ -257,28 +286,15 @@ const Leaf = (props: RenderLeafProps) => {
       className={
         (props.leaf as any)[START_AT_SLATE_TYPE]
           ? "text-cyan-600"
-          : (props.leaf as any)[EXP_DUR_SLATE_TYPE] && "text-green-600"
+          : (props.leaf as any)[EXP_DUR_SLATE_TYPE]
+          ? "text-green-600"
+          : (props.leaf as any)[DATE_SLATE_TYPE] && "text-yellow-600"
       }
     >
       <span className="inline-flex gap-1 items-center">
-        {(props.leaf as any)[START_AT_SLATE_TYPE] && (
-          <Image
-            src="/icons/clock-cyan.svg"
-            alt="Play green icon"
-            width={13}
-            height={13}
-            className="ml-[2px]"
-          />
-        )}
-        {(props.leaf as any)[EXP_DUR_SLATE_TYPE] && (
-          <Image
-            src="/icons/play-green.svg"
-            alt="Play green icon"
-            width={13}
-            height={13}
-            className="ml-[2px]"
-          />
-        )}
+        {(props.leaf as any)[START_AT_SLATE_TYPE] && <ClockCyanIcon />}
+        {(props.leaf as any)[EXP_DUR_SLATE_TYPE] && <PlayGreenIcon />}
+        {(props.leaf as any)[DATE_SLATE_TYPE] && <CalendarYellowIcon />}
         {props.children}
       </span>
     </span>

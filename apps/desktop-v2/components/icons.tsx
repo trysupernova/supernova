@@ -42,3 +42,40 @@ export const GoogleIcon = (props: ImageProps) => (
     {...props}
   />
 );
+
+export const playGreenPath = "/icons/play-green.svg";
+
+export const PlayGreenIcon = (props: ImageProps) => (
+  <Image
+    src={playGreenPath}
+    alt="Play green icon"
+    width={13}
+    height={13}
+    className="ml-[2px]"
+    {...props}
+  />
+);
+
+export const clockCyanPath = "/icons/clock-cyan.svg";
+export const ClockCyanIcon = (props: ImageProps) => (
+  <Image
+    src={clockCyanPath}
+    alt="Play green icon"
+    width={13}
+    height={13}
+    className="ml-[2px]"
+    {...props}
+  />
+);
+
+export const calendarYellowPath = "/icons/calendar-yellow.svg";
+
+export const CalendarYellowIcon = (props: ImageProps) => (
+  <Image
+    src={calendarYellowPath}
+    width={13}
+    height={13}
+    alt="Calendar icon"
+    {...props}
+  />
+);

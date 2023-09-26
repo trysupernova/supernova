@@ -4,6 +4,7 @@ import { ISupernovaTask } from "@supernova/types";
 
 export const START_AT_SLATE_TYPE = "startAt";
 export const EXP_DUR_SLATE_TYPE = "expectedDuration";
+export const DATE_SLATE_TYPE = "date";
 
 /**
  * gets the regex for expected duration
@@ -78,23 +79,25 @@ export function extractStartAt(
   }
   const startAt = match[1];
   const date = new Date();
+  let hours: number | undefined = undefined;
+  let minutes: number = 0;
   // if there's no colon, assume it's just hours
   if (!startAt.includes(":")) {
-    date.setHours(parseInt(startAt));
-    date.setMinutes(0);
+    hours = parseInt(startAt);
   } else {
     // if there's a colon and it's 4 characters long, assume it's hours and minutes
-    const hours = parseInt(startAt.substring(0, 1));
-
-    const minutes = parseInt(startAt.substring(2, 5));
-    date.setHours(hours);
-    date.setMinutes(minutes);
+    const splitted = startAt.split(":");
+    hours = parseInt(splitted[0]);
+    minutes = parseInt(splitted[1]);
   }
+  date.setHours(hours);
+  date.setMinutes(minutes);
   // check if it's PM or any variation including lowercase and single letter
   if (
-    startAt.includes("PM") ||
-    startAt.includes("pm") ||
-    startAt.includes("p")
+    (startAt.includes("PM") ||
+      startAt.includes("pm") ||
+      startAt.includes("p")) &&
+    hours < 12
   ) {
     date.setHours(date.getHours() + 12);
   } else {
@@ -113,7 +116,6 @@ export function extractDate(
   if (match === null) {
     return null;
   }
-  console.log(match);
   const date = new Date();
   switch (match[0]) {
     case "tomorrow":
