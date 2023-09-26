@@ -1,8 +1,12 @@
-import { Converter, SupernovaResponse, ISupernovaTask } from "@supernova/types";
+import {
+  Converter,
+  TSupernovaResponse,
+  ISupernovaTask,
+} from "@supernova/types";
 
 export const supernovaResponseConverter: Converter<
   Response,
-  Promise<SupernovaResponse>
+  Promise<TSupernovaResponse>
 > = {
   convert: async (r) => {
     const json = await r.json();

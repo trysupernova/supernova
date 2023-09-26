@@ -6,6 +6,32 @@ export const START_AT_SLATE_TYPE = "startAt";
 export const EXP_DUR_SLATE_TYPE = "expectedDuration";
 
 /**
+ * gets the regex for expected duration
+ * @returns the regex for expected duration
+ */
+export function getExpectedDurationRegex(): RegExp {
+  return new RegExp(
+    /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi
+  );
+}
+
+/**
+ * gets the regex for start at
+ * @returns the regex for start at
+ */
+export function getStartAtRegex(): RegExp {
+  return new RegExp(
+    /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:[APap]?[Mm]?))?\b/gi
+  );
+}
+
+export function getDateRegex(): RegExp {
+  return new RegExp(
+    /\b(?:tmr|tom|today|in (\d+) days|next week|in (\d+) weeks|tomorrow)\b/gi
+  );
+}
+
+/**
  * Extracts the expected duration from a text string.
  * @param text The text to extract the expected duration from.
  * @returns The expected duration in minutes or hours, or null if no expected duration was found.
@@ -19,9 +45,7 @@ export function extractExpectedDuration(
   text: string
 ): { value: number; unit: "m" | "h"; match: RegExpExecArray } | null {
   // TODO: need to fix this local scope problem with the regexs somehow
-  const expectedDurationRegex = new RegExp(
-    /\bfor\s*(\d+)\s*(?:(mins?|m|minutes?)|(hours?|hrs?|h))\s*\b\s*/gi
-  );
+  const expectedDurationRegex = getExpectedDurationRegex();
   const match = expectedDurationRegex.exec(text);
   if (match === null) {
     return null;
@@ -47,9 +71,7 @@ export function extractStartAt(
   text: string
 ): { value: Date; match: RegExpExecArray } | null {
   // TODO: need to fix this local scope problem with the regexs somehow
-  const startAtRegex = new RegExp(
-    /\b(?:start at|at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:[APap]?[Mm]?))?\b/gi
-  );
+  const startAtRegex = getStartAtRegex();
   const match = startAtRegex.exec(text);
   if (match === null || match[1] === undefined) {
     return null;
@@ -80,6 +102,36 @@ export function extractStartAt(
     date.setHours(date.getHours());
   }
 
+  return { value: date, match };
+}
+
+export function extractDate(
+  text: string
+): { value: Date; match: RegExpExecArray } | null {
+  const dateRegex = getDateRegex();
+  const match = dateRegex.exec(text);
+  if (match === null) {
+    return null;
+  }
+  console.log(match);
+  const date = new Date();
+  switch (match[0]) {
+    case "tomorrow":
+    case "tmr":
+    case "tom":
+      date.setDate(date.getDate() + 1);
+      break;
+    case "today":
+      date.setDate(date.getDate());
+      break;
+    case "next week":
+      date.setDate(date.getDate() + 7);
+      break;
+    default:
+      const days = parseInt(match[1]);
+      date.setDate(date.getDate() + days);
+      break;
+  }
   return { value: date, match };
 }
 

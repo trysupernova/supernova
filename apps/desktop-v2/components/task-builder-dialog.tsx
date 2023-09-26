@@ -29,6 +29,7 @@ import {
   getCbRangesFromRegex,
   EXP_DUR_SLATE_TYPE,
   extractStartAt,
+  extractDate,
 } from "../utils/supernova-task";
 import { Kbd } from "./kbd";
 import { Button } from "./button";
@@ -66,6 +67,7 @@ export const TaskBuilderDialog = (props: {
 
   const handleEditorChange = (value: Descendant[]) => {
     const content = (value[0] as any).children[0].text as string;
+    // extract the duration if any
     const extractedDuration = extractExpectedDuration(content);
     let duration: number | undefined = undefined;
     let newTitle = content;
@@ -82,6 +84,7 @@ export const TaskBuilderDialog = (props: {
           extractedDuration.match.index + extractedDuration.match[0].length
         );
     }
+    // extract the start at time if any
     const extractedStartAt = extractStartAt(newTitle);
     let startTime: Date | undefined = undefined;
     if (extractedStartAt !== null) {
@@ -92,6 +95,8 @@ export const TaskBuilderDialog = (props: {
           extractedStartAt.match.index + extractedStartAt.match[0].length
         );
     }
+    // extract the date if any
+    const extractedDate = extractDate(newTitle);
 
     setTaskEdit((prev) => ({
       ...prev,
