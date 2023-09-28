@@ -98,7 +98,7 @@ function Home() {
         </div>
       ) : taskFetchState.status === "success" ? (
         <div
-          className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip max-w-xl"
+          className="flex flex-col items-center w-full max-h-full gap-2 max-w-xl"
           ref={taskListRef}
         >
           <hr className="w-64" />
@@ -148,7 +148,7 @@ function Home() {
           </Accordion.AccordionTrigger>
           <Accordion.AccordionContent className="py-2">
             <div
-              className="flex flex-col items-center w-full max-h-full gap-2 overflow-clip"
+              className="flex flex-col items-center w-full max-h-full gap-2 overflow-scroll"
               ref={taskListRef}
             >
               {doneTasks.map((task, doneIndex) => (

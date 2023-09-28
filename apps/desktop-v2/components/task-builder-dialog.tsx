@@ -95,8 +95,14 @@ export const TaskBuilderDialog = (props: {
     }
     // extract the start at time if any
     const extractedStartAt = extractStartAt(newTitle);
+    // if the start at time is present, then set the start time to the start at time
     let startTime: Date | undefined = props.editingTask.startTime;
     if (extractedStartAt !== null) {
+      // start time input is present -> init start time
+      // if initially the start time was not set
+      if (startTime === undefined) {
+        startTime = new Date();
+      }
       // set only the interdate part
       startTime?.setHours(extractedStartAt.value.getHours());
       startTime?.setMinutes(extractedStartAt.value.getMinutes());
@@ -105,6 +111,9 @@ export const TaskBuilderDialog = (props: {
         newTitle.slice(
           extractedStartAt.match.index + extractedStartAt.match[0].length
         );
+    } else {
+      // start time input is not present -> remove the start time
+      startTime = undefined;
     }
 
     // extract the date if any
