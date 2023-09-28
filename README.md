@@ -23,9 +23,8 @@ Our goal is to make Supernova the best productivity app on the market. We're bui
 
 ### Built with
 
-- Flutter
-- Next.js
-- Golang
+- Next.js w/ Tailwind
+- Node.js
 
 ## Contributing
 
