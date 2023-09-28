@@ -57,30 +57,32 @@ export const SupernovaTaskComponent = (props: {
           }}
         />
       </div>
-      <div className="grow shrink basis-0 flex-col justify-start items-start gap-2.5 inline-flex">
+      <div className="grow shrink basis-0 flex flex-col justify-start items-start gap-2.5">
         <div className="self-stretch justify-start items-center inline-flex">
-          <div className="grow shrink basis-0 text-black text-base font-medium leading-[14px]">
+          <p className="grow shrink basis-0 text-black text-base font-medium leading-[14px]">
             {props.task.title}
-          </div>
-          <div className="self-stretch justify-start items-center inline-flex gap-1">
-            {props.task.startTime && (
-              <StartTimeWidget startTime={props.task.startTime} />
-            )}
-            <DurationWidget
-              expectedDurationSeconds={props.task.expectedDurationSeconds}
-            />
-          </div>
+          </p>
         </div>
         {props.task.description && (
           <div className="w-full justify-start items-center gap-0.5 inline-flex">
             <div className="w-3 h-3 relative">
               <ArrowRightIcon />
             </div>
-            <div className="grow shrink basis-0 text-slate-400 text-[10px] font-medium leading-[10px]">
+            <p className="grow shrink basis-0 text-slate-400 text-[10px] font-medium leading-[10px]">
               {props.task.description}
-            </div>
+            </p>
           </div>
         )}
+        <div className="self-stretch justify-start items-center inline-flex gap-1">
+          {props.task.startTime && (
+            <StartTimeWidget startTime={props.task.startTime} />
+          )}
+          {props.task.expectedDurationSeconds && (
+            <DurationWidget
+              expectedDurationSeconds={props.task.expectedDurationSeconds}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -114,10 +116,28 @@ export const DurationWidget = (props: { expectedDurationSeconds?: number }) => {
 
 export const StartTimeWidget = (props: { startTime: Date }) => {
   // get the start time date
-  const isToday = moment(props.startTime).isSame(moment(), "day");
+  console.log(props.startTime);
+  const dateDiffFromToday = moment(props.startTime).diff(moment(), "days");
+  const isOverdue = dateDiffFromToday < 0;
+  const isToday = dateDiffFromToday === 0;
+  const lastDayOfWeek = moment().endOf("isoWeek");
+  const lastDayOfNextWeek = moment().add(1, "week").endOf("isoWeek");
+  const isThisWeek = moment(props.startTime).isBefore(lastDayOfWeek);
+  const isNextWeek =
+    moment(props.startTime).isAfter(lastDayOfWeek) &&
+    moment(props.startTime).isBefore(lastDayOfNextWeek);
+  const isTmrw = dateDiffFromToday === 1;
   const dateSection = isToday
     ? ""
-    : moment(props.startTime).format("dddd DD MMM");
+    : isOverdue
+    ? moment(props.startTime).fromNow()
+    : isTmrw
+    ? "Tomorrow"
+    : isThisWeek
+    ? moment(props.startTime).format("dddd")
+    : isNextWeek
+    ? "Next " + moment(props.startTime).format("dddd")
+    : moment(props.startTime).format("MMM D");
 
   return (
     <div className="px-[5px] rounded-[5px] justify-center items-center gap-1 inline-flex">
@@ -127,7 +147,11 @@ export const StartTimeWidget = (props: { startTime: Date }) => {
         height={12}
         alt="Cyan clock"
       />
-      <p className="text-center text-xs font-normal text-cyan-600">
+      <p
+        className={`text-center text-xs font-normal ${
+          isOverdue ? "text-red-600" : "text-cyan-600"
+        }`}
+      >
         {dateSection} {moment(props.startTime).format("h:mma")}
       </p>
     </div>

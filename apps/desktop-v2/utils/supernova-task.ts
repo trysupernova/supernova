@@ -116,18 +116,18 @@ export function extractDate(
   if (match === null) {
     return null;
   }
-  const date = new Date();
+  let date = new Date();
   switch (match[0]) {
     case "tomorrow":
     case "tmr":
     case "tom":
-      date.setDate(date.getDate() + 1);
+      date = moment(date).add(1, "day").toDate();
       break;
     case "today":
       date.setDate(date.getDate());
       break;
     case "next week":
-      date.setDate(date.getDate() + 7);
+      date = moment(date).add(1, "week").toDate();
       break;
     default:
       const days = parseInt(match[1]);

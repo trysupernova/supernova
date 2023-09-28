@@ -13,6 +13,13 @@ import { reorderTaskList } from "@/utils/supernova-task";
 
 export default function useSupernovaTasksUI() {
   const router = useRouter();
+  // get today's date in this format: Tue, 26th Aug
+  const today = new Date().toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+
   const [chosenTaskIndex, setChosenTaskIndex] = useAtom(chosenTaskIndexGlobal);
   const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
   const [taskFetchState, setTaskFetchState] = useState<{
@@ -426,5 +433,6 @@ export default function useSupernovaTasksUI() {
     doneAccordionOpened,
     undoneTasks,
     doneTasks,
+    today,
   };
 }

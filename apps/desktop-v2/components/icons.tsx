@@ -60,7 +60,7 @@ export const clockCyanPath = "/icons/clock-cyan.svg";
 export const ClockCyanIcon = (props: ImageProps) => (
   <Image
     src={clockCyanPath}
-    alt="Play green icon"
+    alt="Clock icon"
     width={13}
     height={13}
     className="ml-[2px]"

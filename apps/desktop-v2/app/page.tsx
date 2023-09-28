@@ -19,13 +19,8 @@ import * as Accordion from "@radix-ui/react-accordion";
 import React from "react";
 
 function Home() {
-  // get today's date in this format: Tue, 26th Aug
-  const today = new Date().toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
   const {
+    today,
     accordionValue,
     setAccordionValue,
     taskFetchState,

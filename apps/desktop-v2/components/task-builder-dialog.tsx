@@ -95,15 +95,18 @@ export const TaskBuilderDialog = (props: {
     }
     // extract the start at time if any
     const extractedStartAt = extractStartAt(newTitle);
-    let startTime: Date | undefined = undefined;
+    let startTime: Date | undefined = props.editingTask.startTime;
     if (extractedStartAt !== null) {
-      startTime = extractedStartAt.value;
+      // set only the interdate part
+      startTime?.setHours(extractedStartAt.value.getHours());
+      startTime?.setMinutes(extractedStartAt.value.getMinutes());
       newTitle =
         newTitle.slice(0, extractedStartAt.match.index) +
         newTitle.slice(
           extractedStartAt.match.index + extractedStartAt.match[0].length
         );
     }
+
     // extract the date if any
     const extractedDate = extractDate(newTitle);
     let date: Date | undefined = undefined;
@@ -118,6 +121,8 @@ export const TaskBuilderDialog = (props: {
     // modify the actual start time with the date
     if (date !== undefined && startTime !== undefined) {
       startTime.setDate(date.getDate());
+      startTime.setMonth(date.getMonth());
+      startTime.setFullYear(date.getFullYear());
     }
 
     // update the task edit
@@ -149,7 +154,20 @@ export const TaskBuilderDialog = (props: {
     if (e.key === "Enter") {
       e.preventDefault(); // prevent newlines into the task builder
       e.stopPropagation(); // so that it doesn't bubble up to the page
-      // submit instead
+      // before submitting remove the date part from the original build text because
+      // we don't want it to be parsed the next time the person opens this task
+      // in the task builder, else would be confusing
+      const extractedDate = extractDate(taskEdit.originalBuildText);
+      let originalBuildText = taskEdit.originalBuildText;
+      if (extractedDate !== null) {
+        originalBuildText =
+          originalBuildText.slice(0, extractedDate.match.index) +
+          originalBuildText.slice(
+            extractedDate.match.index + extractedDate.match[0].length
+          );
+      }
+      taskEdit.originalBuildText = originalBuildText;
+      // submit the edit/create
       handleSubmit();
     }
     if (e.key === "Escape") {
@@ -246,7 +264,7 @@ export const TaskBuilderDialog = (props: {
                 </Slate>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 flex-wrap">
-                    {taskEdit.expectedDurationSeconds !== undefined && (
+                    {taskEdit.expectedDurationSeconds && (
                       <DurationWidget
                         expectedDurationSeconds={
                           taskEdit.expectedDurationSeconds

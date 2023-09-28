@@ -44,8 +44,6 @@ export namespace LocalDB {
   };
 
   export const insertTask = async (db: Database, task: ISupernovaTask) => {
-    console.log(task);
-
     await db.execute(
       `
         INSERT INTO supernova_tasks (id, originalBuildText, title, description, expectedDurationSeconds, isComplete, startTime)
