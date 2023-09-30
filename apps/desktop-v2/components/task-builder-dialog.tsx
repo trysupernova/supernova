@@ -21,7 +21,6 @@ import {
 } from "slate-react";
 import { Descendant } from "slate";
 import { ISupernovaTask } from "../types/supernova-task";
-import { DurationWidget, StartTimeWidget } from "./supernova-task";
 import Image from "next/image";
 import {
   extractExpectedDuration,
@@ -45,6 +44,8 @@ import {
   PlayGreenIcon,
   SupernovaGlobeLogoImage,
 } from "./icons";
+import { DurationWidget } from "./duration-widget";
+import { StartTimeWidget } from "./start-time-widget";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -239,11 +240,13 @@ export const TaskBuilderDialog = (props: {
   return (
     <Dialog.Root open={props.isOpen} onOpenChange={props.onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className={`bg-gray-400 opacity-50 fixed inset-0`} />
+        <Dialog.Overlay
+          className={`dark:bg-zinc-950 bg-gray-400 opacity-70 fixed inset-0`}
+        />
         <Dialog.Content
-          className={`date-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none`}
+          className={`data-[state=open]:animate-contentShow fixed top-[30%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none`}
         >
-          <div className="w-full h-full px-3 py-2.5 bg-white rounded-[10px] shadow border border-gray-300 justify-start items-start gap-2.5 flex">
+          <div className="w-full h-full px-3 py-2.5 bg-white dark:bg-zinc-800 rounded-[10px] shadow border dark:border-gray-800 border-gray-300 justify-start items-start gap-2.5 flex">
             <div className="w-[25px] h-[25px] relative">
               <SupernovaGlobeLogoImage width={25} height={25} />
             </div>
@@ -312,10 +315,11 @@ const Leaf = (props: RenderLeafProps) => {
       {...props.attributes}
       className={
         (props.leaf as any)[START_AT_SLATE_TYPE]
-          ? "text-cyan-600"
+          ? "text-cyan-600 dark:text-cyan-400"
           : (props.leaf as any)[EXP_DUR_SLATE_TYPE]
-          ? "text-green-600"
-          : (props.leaf as any)[DATE_SLATE_TYPE] && "text-yellow-600"
+          ? "text-green-600 dark:text-green-400"
+          : (props.leaf as any)[DATE_SLATE_TYPE] &&
+            "text-yellow-600 dark:text-yellow-400"
       }
     >
       <span className="inline-flex gap-1 items-center">

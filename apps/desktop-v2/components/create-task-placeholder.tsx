@@ -10,7 +10,7 @@ export const CreateTaskPlaceholder = (
     <button
       {...props}
       className={twMerge(
-        "w-full max-w-xl group inline-flex items-center gap-2 hover:bg-gray-100 border-t border-t-gray-200 hover:opacity-80 transition px-2 py-1 rounded-sm",
+        "w-full max-w-xl group inline-flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-zinc-900 border-t border-t-gray-200 hover:opacity-80 transition px-2 py-1 rounded-sm",
         props.className
       )}
     >

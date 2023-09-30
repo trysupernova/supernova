@@ -1,6 +1,10 @@
 "use client";
 
-import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import {
+  ChevronLeftIcon,
+  ExitIcon,
+  GitHubLogoIcon,
+} from "@radix-ui/react-icons";
 import Link from "next/link";
 import { homeRoute } from "../meta";
 import { Button } from "../../components/button";
@@ -13,10 +17,15 @@ import { withAuth } from "@/hocs/withAuth";
 import { authRoute } from "../auth/meta";
 import { AlertDialog } from "../../components/alert-dialog";
 import useSupernovaToast from "@/hooks/useSupernovaToast";
+import { useTheme } from "next-themes";
 
 const SettingsPage = () => {
   const { makeToast } = useSupernovaToast();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
   useEffect(() => {
     Mousetrap.bind("esc", () => {
       router.push(homeRoute);
@@ -25,7 +34,18 @@ const SettingsPage = () => {
       Mousetrap.unbind("esc");
     };
   }, [router]);
-  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    console.log(theme);
+  }, [theme]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
@@ -51,7 +71,7 @@ const SettingsPage = () => {
       </div>
       <h1 className="text-xl font-semibold">Settings</h1>
       <hr className="h-[2px] w-32 bg-gray-300" />
-      <div className="flex flex-col w-full gap-4">
+      <div className="flex flex-col w-full max-w-lg gap-4">
         <div className="flex justify-between">
           <div className="inline-flex gap-2">
             <Image
@@ -81,26 +101,40 @@ const SettingsPage = () => {
           <Button disabled>Coming soon</Button>
         </div>
         <div className="flex justify-between">
-          <div className="inline-flex gap-2">
-            <Image
-              src="/icons/svg/github.png"
-              width={25}
-              height={20}
-              unoptimized
-              alt="Github icon"
-            />
+          <div className="inline-flex gap-2 items-center">
+            <GitHubLogoIcon />
             <p>Pull issues and PRs from Github</p>
           </div>
           <Button disabled>Coming soon</Button>
         </div>
+        <div className="flex justify-between">
+          <div className="inline-flex gap-2">
+            <p>Appearance</p>
+          </div>
+          <select
+            className="border rounded-md p-1 bg-black text-white"
+            name="appearance"
+            value={theme}
+            onChange={(e) => {
+              e.currentTarget.value === "system"
+                ? setTheme("system")
+                : setTheme(e.currentTarget.value);
+            }}
+          >
+            <option value="system">System setting</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
       </div>
       <Button
-        className="mt-auto"
+        className="mt-auto gap-1"
         onClick={() => {
           setOpen(true);
         }}
       >
         Logout
+        <ExitIcon />
       </Button>
     </main>
   );

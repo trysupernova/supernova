@@ -142,8 +142,10 @@ function Home() {
         collapsible
       >
         <Accordion.AccordionItem value="supernova-dones">
-          <Accordion.AccordionTrigger className="flex items-center justify-between w-full hover:bg-gray-100 rounded px-1">
-            <p className="text-xs text-teal-800">Dones ({doneTasks.length})</p>{" "}
+          <Accordion.AccordionTrigger className="flex items-center justify-between w-full hover:bg-gray-100 dark:hover:bg-zinc-800 rounded px-1">
+            <p className="text-xs text-teal-800 dark:text-teal-500">
+              Dones ({doneTasks.length})
+            </p>{" "}
             <ChevronDownIcon className="text-teal-800" />
           </Accordion.AccordionTrigger>
           <Accordion.AccordionContent className="py-2">

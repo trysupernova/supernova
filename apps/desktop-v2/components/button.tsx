@@ -1,11 +1,29 @@
-import { ButtonHTMLAttributes } from "react";
+import useUserSettings from "@/hooks/useUserSettings";
+import { useTheme } from "next-themes";
+import { ButtonHTMLAttributes, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  bgVariant?: "black" | "white";
+  bgVariant?: "black" | "white" | "red";
 };
 
-export const Button = ({ bgVariant = "black", ...props }: Props) => {
+export const Button = ({ bgVariant, ...props }: Props) => {
+  const { theme } = useTheme();
+  const { systemAppearance } = useUserSettings();
+  // if not set, set bgVariant based on theme and system appearance
+  if (bgVariant === undefined) {
+    if (theme === "dark") {
+      bgVariant = "white";
+    } else if (theme === "light") {
+      bgVariant = "black";
+    } else {
+      if (systemAppearance === "dark") {
+        bgVariant = "white";
+      } else {
+        bgVariant = "black";
+      }
+    }
+  }
   return (
     <button
       {...props}

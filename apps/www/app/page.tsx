@@ -11,7 +11,6 @@ import { BsDiscord, BsGithub, BsTwitter } from "react-icons/bs";
 
 import { toast } from "sonner";
 import Link from "next/link";
-import HorizontalLogo from "../components/horizontal-logo";
 import { Navbar } from "./navbar";
 
 export default function Home() {

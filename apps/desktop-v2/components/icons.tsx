@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { twMerge } from "tailwind-merge";
+import { ClockIcon } from "@radix-ui/react-icons";
 
 type ImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
   width?: number;
@@ -61,6 +63,10 @@ export const ClockCyanIcon = (props: ImageProps) => (
   <Image
     src={clockCyanPath}
     alt="Clock icon"
+    style={{
+      stroke: "#0057B7",
+      strokeWidth: 2,
+    }}
     width={13}
     height={13}
     className="ml-[2px]"

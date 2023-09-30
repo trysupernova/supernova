@@ -36,11 +36,13 @@ export const SupernovaCommandCenter = ({
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className={`bg-gray-400 opacity-50 fixed inset-0`} />
+        <Dialog.Overlay
+          className={`bg-gray-400 dark:bg-zinc-950 opacity-70 fixed inset-0`}
+        />
         <Dialog.Content
           className={`data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none`}
         >
-          <Command className="bg-white rounded-lg p-4 flex flex-col gap-2">
+          <Command className="bg-white dark:bg-zinc-800 rounded-lg p-4 flex flex-col gap-2">
             {context.chosenTask !== undefined &&
               context.chosenTask !== null && (
                 <div>
@@ -61,7 +63,7 @@ export const SupernovaCommandCenter = ({
               <SupernovaGlobeLogoImage width={20} height={20} priority />
               <Command.Input
                 placeholder="Find a command..."
-                className="outline-none"
+                className="outline-none bg-transparent"
                 autoFocus
               />
             </div>
@@ -74,7 +76,7 @@ export const SupernovaCommandCenter = ({
               {commands.map((command) => (
                 <Command.Item
                   key={command.label}
-                  className=" data-[selected='true']:bg-slate-100 flex items-center gap-2 justify-between hover:bg-slate-200 rounded-md px-2 py-1"
+                  className=" data-[selected='true']:bg-slate-100 dark:data-[selected='true']:bg-zinc-900 data-[selected='true']:cursor-pointer flex items-center gap-2 justify-between hover:bg-slate-200 rounded-md px-2 py-1"
                   onSelect={() => {
                     setOpen(false);
                     command.cb();

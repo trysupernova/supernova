@@ -3,7 +3,7 @@
 import { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
 
-export const ToastClientWrapper: React.FC<PropsWithChildren> = ({
+export const SupernovaToastProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
   return (

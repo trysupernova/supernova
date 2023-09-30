@@ -29,9 +29,11 @@ export const AlertDialog = ({
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className={`bg-gray-400 opacity-50 fixed inset-0`} />
+        <Dialog.Overlay
+          className={`bg-gray-400 dark:bg-zinc-900 opacity-50 fixed inset-0`}
+        />
         <Dialog.Content
-          className={`bg-white p-3 data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none`}
+          className={`bg-white dark:bg-zinc-800 dark:border dark:border-zinc-600 p-3 data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none`}
         >
           <div className="flex flex-col">{description}</div>
           <div className="flex justify-end">
