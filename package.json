@@ -2,6 +2,7 @@
   "name": "supernova",
   "version": "0.0.0",
   "scripts": {
+    "ci": "npm run format && npm run lint && npm run test && npm run build",
     "test": "turbo run test",
     "build": "turbo run build",
     "db:start": "cd apps/api-v2 && npm run db:start",

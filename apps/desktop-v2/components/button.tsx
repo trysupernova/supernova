@@ -1,6 +1,6 @@
 import useUserSettings from "@/hooks/useUserSettings";
 import { useTheme } from "next-themes";
-import { ButtonHTMLAttributes, useEffect } from "react";
+import { ButtonHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
