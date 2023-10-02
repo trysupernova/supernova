@@ -4,14 +4,7 @@
 // overlay
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  BaseEditor,
-  Editor,
-  Transforms,
-  createEditor,
-  NodeEntry,
-  Element,
-} from "slate";
+import { BaseEditor, Editor, Transforms, createEditor, NodeEntry } from "slate";
 import {
   Slate,
   Editable,
@@ -21,7 +14,6 @@ import {
 } from "slate-react";
 import { Descendant } from "slate";
 import { ISupernovaTask } from "../types/supernova-task";
-import Image from "next/image";
 import {
   extractExpectedDuration,
   START_AT_SLATE_TYPE,
@@ -46,6 +38,7 @@ import {
 } from "./icons";
 import { DurationWidget } from "./duration-widget";
 import { StartTimeWidget } from "./start-time-widget";
+import _ from "lodash";
 
 type CustomElement = { type: "paragraph" | string; children: CustomText[] };
 type CustomText = { text: string };
@@ -73,7 +66,8 @@ export const TaskBuilderDialog = (props: {
       children: [{ text: props.editingTask.originalBuildText }],
     },
   ];
-  const [taskEdit, setTaskEdit] = useState(() => props.editingTask);
+  const cloneEditingTask = _.cloneDeep(props.editingTask);
+  const [taskEdit, setTaskEdit] = useState(() => cloneEditingTask);
 
   const handleEditorChange = (value: Descendant[]) => {
     const content = (value[0] as any).children[0].text as string;
@@ -97,7 +91,7 @@ export const TaskBuilderDialog = (props: {
     // extract the start at time if any
     const extractedStartAt = extractStartAt(newTitle);
     // if the start at time is present, then set the start time to the start at time
-    let startTime: Date | undefined = props.editingTask.startTime;
+    let startTime: Date | undefined = cloneEditingTask.startTime;
     if (extractedStartAt !== null) {
       // start time input is present -> init start time
       // if initially the start time was not set

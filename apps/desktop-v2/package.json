@@ -27,6 +27,7 @@
     "google-auth-library": "^9.0.0",
     "googleapis": "^126.0.1",
     "jotai": "^2.4.2",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "mousetrap": "^1.6.5",
     "next": "13.4.13",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",
+    "@types/lodash": "^4.14.199",
     "@types/mousetrap": "^1.6.11",
     "serve": "^14.2.1"
   }
