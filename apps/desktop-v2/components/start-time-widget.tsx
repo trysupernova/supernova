@@ -1,31 +1,10 @@
 import moment from "moment";
 import { ClockCyanIcon } from "./icons";
+import { getEnglishDay, getUsefulDateBooleans } from "@/utils/date";
 
 export const StartTimeWidget = (props: { startTime: Date }) => {
-  // get the start time date
-  console.log(props.startTime);
-  const dateDiffFromToday = moment(props.startTime).diff(moment(), "days");
-  const isOverdue = dateDiffFromToday < 0;
-  const isToday = dateDiffFromToday === 0;
-  const lastDayOfWeek = moment().endOf("isoWeek");
-  const lastDayOfNextWeek = moment().add(1, "week").endOf("isoWeek");
-  const isThisWeek = moment(props.startTime).isBefore(lastDayOfWeek);
-  const isNextWeek =
-    moment(props.startTime).isAfter(lastDayOfWeek) &&
-    moment(props.startTime).isBefore(lastDayOfNextWeek);
-  const isTmrw = dateDiffFromToday === 1;
-  console.log("datediff:" + dateDiffFromToday);
-  const dateSection = isToday
-    ? ""
-    : isOverdue
-    ? moment(props.startTime).fromNow()
-    : isTmrw
-    ? "Tomorrow"
-    : isThisWeek
-    ? moment(props.startTime).format("dddd")
-    : isNextWeek
-    ? "Next " + moment(props.startTime).format("dddd")
-    : moment(props.startTime).format("MMM D");
+  const { isOverdue } = getUsefulDateBooleans(props.startTime);
+  const dateSection = getEnglishDay(props.startTime);
 
   return (
     <div className="px-[5px] rounded-[5px] justify-center items-center gap-1 inline-flex">
