@@ -1,9 +1,8 @@
 import moment from "moment";
 import { ClockCyanIcon } from "./icons";
-import { getEnglishDay, getUsefulDateBooleans } from "@/utils/date";
+import { getEnglishDay, isOverdue } from "@/utils/date";
 
 export const StartTimeWidget = (props: { startTime: Date }) => {
-  const { isOverdue } = getUsefulDateBooleans(props.startTime);
   const dateSection = getEnglishDay(props.startTime);
 
   return (
@@ -11,7 +10,7 @@ export const StartTimeWidget = (props: { startTime: Date }) => {
       <ClockCyanIcon />
       <p
         className={`text-center text-xs font-normal ${
-          isOverdue
+          isOverdue(props.startTime)
             ? "text-red-600 dark:text-red-400"
             : "text-cyan-600 dark:text-cyan-400"
         }`}
