@@ -13,7 +13,7 @@ import {
   RenderLeafProps,
 } from "slate-react";
 import { Descendant } from "slate";
-import { ISupernovaTask } from "../types/supernova-task";
+import { ISupernovaTask } from "@supernova/types";
 import {
   extractExpectedDuration,
   START_AT_SLATE_TYPE,

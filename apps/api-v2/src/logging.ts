@@ -2,7 +2,7 @@ import config from "./config";
 import pino from "pino";
 
 // only enable logging to axiom in production
-export let loggerOptions: any = {};
+export let loggerOptions: Record<string, any> = {};
 if (process.env.NODE_ENV === "production") {
   loggerOptions = {
     transport: {

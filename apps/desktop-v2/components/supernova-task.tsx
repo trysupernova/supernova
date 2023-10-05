@@ -1,7 +1,7 @@
 "use client";
 import { ArrowRightIcon } from "./icons";
 import * as React from "react";
-import { ISupernovaTask } from "../types/supernova-task";
+import { ISupernovaTask } from "@supernova/types";
 import { CustomCheckbox } from "./checkbox";
 import { DurationWidget } from "./duration-widget";
 import { StartTimeWidget } from "./start-time-widget";

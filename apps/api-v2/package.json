@@ -15,7 +15,8 @@
     "db:migrate": "prisma migrate deploy",
     "schema:generate": "prisma generate",
     "db:start": "docker-compose up -d",
-    "db:setup": "npm run db:start && npm run db:migrate"
+    "db:setup": "npm run db:start && npm run db:migrate",
+    "lint": "eslint --ext .ts src"
   },
   "keywords": [],
   "author": "Vincent Vu <vincent@trysupernova.one>",
@@ -33,6 +34,9 @@
     "@types/passport-google-oauth20": "^2.0.11",
     "@types/response-time": "^2.3.5",
     "@types/supertest": "^2.0.12",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.50.0",
     "jest": "^29.6.4",
     "jest-express": "^1.12.0",
     "prisma": "^5.2.0",

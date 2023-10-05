@@ -1,5 +1,5 @@
 import Database from "tauri-plugin-sql-api";
-import { ISupernovaTask } from "../types/supernova-task";
+import { ISupernovaTask } from "@supernova/types";
 
 export namespace LocalDB {
   // delete the table supernova_tasks if it exists

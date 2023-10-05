@@ -4,7 +4,7 @@ import { Server } from "http";
 import config from "../config";
 
 let httpServer: Server;
-let { app } = createApp();
+const { app } = createApp();
 
 beforeEach(() => {
   // run the server first

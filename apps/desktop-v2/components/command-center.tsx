@@ -4,7 +4,7 @@ import Mousetrap from "mousetrap";
 import React from "react";
 import { Kbd } from "./kbd";
 import { SupernovaCommand } from "../types/command";
-import { ISupernovaTask } from "../types/supernova-task";
+import { ISupernovaTask } from "@supernova/types";
 import { twMerge } from "tailwind-merge";
 import { ibmPlexMono } from "./fonts";
 import { SupernovaGlobeLogoImage } from "./icons";

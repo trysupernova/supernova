@@ -1,7 +1,7 @@
 import { Profile } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
 
-export interface ISupernovaResponse<T extends any> {
+export interface ISupernovaResponse<T> {
   data?: T;
   error?: string;
   message?: string;

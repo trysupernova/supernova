@@ -4,12 +4,11 @@ import config from "../config";
 import jwt from "jsonwebtoken";
 import {
   EncodedProfileTokenClaims,
-  IAuthCtx,
   IAuthPassportCallbackCtx,
   SupernovaResponse,
 } from "../types";
 import { authenticateJWTMiddleware } from "../mws";
-import { prisma, redis } from "../db";
+import { redis } from "../db";
 import { logger } from "../logging";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { getAuthContext } from "../utils";
@@ -143,41 +142,47 @@ export default function buildAuthRouter(): Router {
     );
   });
 
-  router.get("/auth/logout", authenticateJWTMiddleware, async (req, res) => {
-    try {
-      const userAuthCtx = getAuthContext(req);
-      // delete the refresh token from redis (stored as a KV pair of user ID -> refresh token)
-      if (userAuthCtx.sub === undefined) {
-        logger.error(
-          `userAuthCtx.sub is undefined; userAuthCtx=${JSON.stringify(
-            userAuthCtx
-          )}`
-        );
-        return res.status(400).send(
-          new SupernovaResponse({
-            error: "Internal Server Error",
-            message: "Failed to logout user",
-          })
-        );
-      }
-      await redis.connect();
-      const resdel = await redis.del(userAuthCtx.sub);
-      await redis.disconnect();
-      // didn't delete anything
-      if (resdel === 0) {
+  router.get(
+    "/auth/logout",
+    authenticateJWTMiddleware,
+    async (req, res, next) => {
+      try {
+        const userAuthCtx = getAuthContext(req);
+        // delete the refresh token from redis (stored as a KV pair of user ID -> refresh token)
+        if (userAuthCtx.sub === undefined) {
+          logger.error(
+            `userAuthCtx.sub is undefined; userAuthCtx=${JSON.stringify(
+              userAuthCtx
+            )}`
+          );
+          return res.status(400).send(
+            new SupernovaResponse({
+              error: "Internal Server Error",
+              message: "Failed to logout user",
+            })
+          );
+        }
+        await redis.connect();
+        const resdel = await redis.del(userAuthCtx.sub);
+        await redis.disconnect();
+        // didn't delete anything
+        if (resdel === 0) {
+          return res.status(200).send(
+            new SupernovaResponse({
+              message: "User has already been logged out",
+            })
+          );
+        }
         return res.status(200).send(
           new SupernovaResponse({
-            message: "User has already been logged out",
+            message: "User logged out",
           })
         );
+      } catch (err) {
+        return next(err);
       }
-      return res.status(200).send(
-        new SupernovaResponse({
-          message: "User logged out",
-        })
-      );
-    } catch (err) {}
-  });
+    }
+  );
 
   return router;
 }
