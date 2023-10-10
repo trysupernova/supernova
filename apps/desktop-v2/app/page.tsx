@@ -6,7 +6,12 @@ import {
   createBlankTask,
 } from "../components/supernova-task";
 import { TaskBuilderDialog } from "../components/task-builder-dialog";
-import { ChevronDownIcon, GearIcon } from "@radix-ui/react-icons";
+import {
+  CaretLeftIcon,
+  CaretRightIcon,
+  ChevronDownIcon,
+  GearIcon,
+} from "@radix-ui/react-icons";
 import Link from "next/link";
 import { settingsRoute } from "./settings/meta";
 import { SupernovaCommandCenter } from "../components/command-center";
@@ -17,10 +22,19 @@ import { SupernovaGlobeLogoImage } from "@/components/icons";
 import useSupernovaTasksUI from "@/hooks/useSupernovaTasksUI";
 import * as Accordion from "@radix-ui/react-accordion";
 import React from "react";
+import {
+  getDayOfWeek,
+  getFormattedMonthDateFromDate,
+  isEarlierThan,
+  isToday,
+} from "@/utils/date";
+import { filterViewingDateTasks } from "@/utils/supernova-task";
+import { twMerge } from "tailwind-merge";
+import { Button } from "@/components/button";
 
 function Home() {
   const {
-    today,
+    todayDate,
     accordionValue,
     setAccordionValue,
     taskFetchState,
@@ -39,7 +53,16 @@ function Home() {
     handleClickTask,
     doneTasks,
     undoneTasks,
+    viewingDate,
+    goToNextDay,
+    goToPreviousDay,
   } = useSupernovaTasksUI();
+
+  const viewingDateUndoneTasks = filterViewingDateTasks(
+    viewingDate,
+    undoneTasks
+  );
+  const viewingDateDoneTasks = filterViewingDateTasks(viewingDate, doneTasks);
 
   return (
     <main className="flex max-h-screen flex-col items-center pt-5 mb-10 px-5 gap-[10px]">
@@ -85,12 +108,29 @@ function Home() {
           onSubmit={handleCreateOrUpdateTask}
         />
       )}
-      <div>
+      <div className={twMerge(!isToday(viewingDate) && "opacity-60")}>
         <SupernovaGlobeLogoImage width={30} height={30} priority />
       </div>
-      <div className="flex items-center gap-[10px]">
-        <h4 className="text-[20px] font-semibold">Today</h4>
-        <p className="text-slate-400 text-[16px]">{today}</p>
+      <div
+        className={twMerge(
+          "flex items-center justify-between gap-[10px] w-full",
+          isEarlierThan(viewingDate, todayDate) && "opacity-50"
+        )}
+      >
+        <Button onClick={goToPreviousDay} bgVariant="ghost">
+          <CaretLeftIcon />
+        </Button>
+        <div className="flex items-center gap-[10px]">
+          <h4 className="text-[20px] font-semibold">
+            {isToday(viewingDate) ? "Today" : getDayOfWeek(viewingDate)}
+          </h4>
+          <p className="text-slate-400 text-[16px]">
+            {getFormattedMonthDateFromDate(viewingDate)}
+          </p>
+        </div>
+        <Button onClick={goToNextDay} bgVariant="ghost">
+          <CaretRightIcon />
+        </Button>
       </div>
       {taskFetchState.status === "loading" ? (
         <div className="flex items-center gap-[10px]">
@@ -102,7 +142,7 @@ function Home() {
           ref={taskListRef}
         >
           <hr className="w-64" />
-          {undoneTasks.length === 0 && (
+          {viewingDateUndoneTasks.length === 0 && (
             <div className="w-64">
               <p className="text-slate-400 text-[16px] text-center">
                 No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
@@ -110,7 +150,7 @@ function Home() {
               </p>
             </div>
           )}
-          {undoneTasks.map((task, undoneIndex) => (
+          {viewingDateUndoneTasks.map((task, undoneIndex) => (
             <SupernovaTaskComponent
               key={task.id}
               task={task}
@@ -144,7 +184,7 @@ function Home() {
         <Accordion.AccordionItem value="supernova-dones">
           <Accordion.AccordionTrigger className="flex items-center justify-between w-full hover:bg-gray-100 dark:hover:bg-zinc-800 rounded px-1">
             <p className="text-xs text-teal-800 dark:text-teal-500">
-              Dones ({doneTasks.length})
+              Dones ({viewingDateDoneTasks.length})
             </p>{" "}
             <ChevronDownIcon className="text-teal-800" />
           </Accordion.AccordionTrigger>
@@ -153,7 +193,7 @@ function Home() {
               className="flex flex-col items-center w-full max-h-full gap-2 overflow-scroll"
               ref={taskListRef}
             >
-              {doneTasks.map((task, doneIndex) => (
+              {viewingDateDoneTasks.map((task, doneIndex) => (
                 <SupernovaTaskComponent
                   key={task.id}
                   task={task}

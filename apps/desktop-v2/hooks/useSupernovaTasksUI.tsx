@@ -14,12 +14,9 @@ import { reorderTaskList } from "@/utils/supernova-task";
 export default function useSupernovaTasksUI() {
   const router = useRouter();
   // get today's date in this format: Tue, 26th Aug
-  const today = new Date().toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  const todayDate = useMemo(() => new Date(), []);
 
+  const [viewingDate, setViewingDate] = useState<Date>(todayDate);
   const [chosenTaskIndex, setChosenTaskIndex] = useAtom(chosenTaskIndexGlobal);
   const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
   const [taskFetchState, setTaskFetchState] = useState<{
@@ -136,6 +133,11 @@ export default function useSupernovaTasksUI() {
           title: newTask.title,
           originalBuildText: newTask.originalBuildText,
           description: newTask.description,
+          startDate:
+            chosenTask.startDate !== undefined &&
+            newTask.startDate === undefined
+              ? null
+              : newTask.startDate?.toISOString(),
           startAt:
             chosenTask.startTime !== undefined &&
             newTask.startTime === undefined
@@ -210,6 +212,7 @@ export default function useSupernovaTasksUI() {
               description: newTask.description,
               startAt: newTask.startTime?.toISOString(),
               expectedDurationSeconds: newTask.expectedDurationSeconds,
+              startDate: newTask.startDate?.toISOString(),
             },
           });
           console.log("inserted successfully");
@@ -232,6 +235,26 @@ export default function useSupernovaTasksUI() {
     },
     [setChosenTaskIndex]
   );
+
+  const goToNextDay = useCallback(() => {
+    setViewingDate((prev) => {
+      const nextDate = new Date(prev);
+      nextDate.setDate(nextDate.getDate() + 1);
+      return nextDate;
+    });
+  }, []);
+
+  const goToPreviousDay = useCallback(() => {
+    setViewingDate((prev) => {
+      const nextDate = new Date(prev);
+      nextDate.setDate(nextDate.getDate() - 1);
+      return nextDate;
+    });
+  }, []);
+
+  const goToToday = useCallback(() => {
+    setViewingDate(todayDate);
+  }, [todayDate]);
 
   const commands: SupernovaCommand[] = useMemo(
     () => [
@@ -278,6 +301,21 @@ export default function useSupernovaTasksUI() {
         },
       },
       {
+        label: "Go back to today",
+        shortcut: "t",
+        cb: goToToday,
+      },
+      {
+        label: "Go to the day after",
+        shortcut: ["right", "n"],
+        cb: goToNextDay,
+      },
+      {
+        label: "Go to the day before",
+        shortcut: ["left", "b"],
+        cb: goToPreviousDay,
+      },
+      {
         label: "Go to settings",
         shortcut: "Cmd+,",
         cb: () => {
@@ -287,6 +325,9 @@ export default function useSupernovaTasksUI() {
     ],
     [
       openTaskBuilder,
+      goToToday,
+      goToNextDay,
+      goToPreviousDay,
       chosenTaskIndex,
       anyModalOpen,
       handleCheckTask,
@@ -433,6 +474,10 @@ export default function useSupernovaTasksUI() {
     doneAccordionOpened,
     undoneTasks,
     doneTasks,
-    today,
+    todayDate,
+    viewingDate,
+    goToNextDay,
+    goToPreviousDay,
+    goToToday,
   };
 }

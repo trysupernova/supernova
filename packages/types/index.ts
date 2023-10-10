@@ -5,7 +5,9 @@ export interface ISupernovaTask {
   description?: string;
   expectedDurationSeconds?: number; // in seconds
   startTime?: Date;
+  startDate?: Date;
   isComplete: boolean;
+  createdAt: Date;
 }
 
 type TErrorResponse = {

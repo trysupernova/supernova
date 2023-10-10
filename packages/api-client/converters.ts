@@ -37,6 +37,8 @@ export const supernovaTaskConverter: Converter<any, ISupernovaTask> = {
     description: nullToUndefined(t.description),
     expectedDurationSeconds: nullToUndefined(t.expectedDurationSeconds),
     startTime: t.startAt ? new Date(t.startAt) : undefined,
+    startDate: t.startDate ? new Date(t.startDate) : undefined,
     isComplete: t.done,
+    createdAt: new Date(t.createdAt),
   }),
 };
