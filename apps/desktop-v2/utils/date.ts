@@ -60,10 +60,18 @@ export function getFormattedMonthDateFromDate(date: Date): string {
   return moment(date).format("MMM D");
 }
 
-export function isLaterThan(d1: Date, d2: Date) {
-  return moment(d1).isAfter(d2);
+export function isLaterThan(
+  d1: Date,
+  d2: Date,
+  granularity?: moment.unitOfTime.StartOf
+) {
+  return moment(d1).isAfter(d2, granularity);
 }
 
-export function isEarlierThan(d1: Date, d2: Date) {
-  return moment(d1).isBefore(d2);
+export function isEarlierThan(
+  d1: Date,
+  d2: Date,
+  granularity?: moment.unitOfTime.StartOf
+) {
+  return moment(d1).isBefore(d2, granularity);
 }

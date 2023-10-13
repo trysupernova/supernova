@@ -15,10 +15,8 @@ export const StartTimeWidget = (props: {
   let overdue = false;
   if (props.startTime) {
     overdue = isOverdue(props.startTime);
-  } else {
-    if (props.startDate) {
-      overdue = isEarlierThan(props.startDate, today);
-    }
+  } else if (props.startDate) {
+    overdue = isEarlierThan(props.startDate, today, "day");
   }
 
   return (

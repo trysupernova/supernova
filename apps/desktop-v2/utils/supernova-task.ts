@@ -206,3 +206,11 @@ export function filterViewingDateTasks(
     return false;
   });
 }
+
+export function filterUnplannedTasks(
+  tasks: ISupernovaTask[]
+): ISupernovaTask[] {
+  return tasks.filter((task) => {
+    return task.startTime === undefined && task.startDate === undefined;
+  });
+}

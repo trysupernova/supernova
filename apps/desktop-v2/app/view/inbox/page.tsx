@@ -4,8 +4,8 @@ import { withAuth } from "@/hocs/withAuth";
 import {
   SupernovaTaskComponent,
   createBlankTask,
-} from "../components/supernova-task";
-import { TaskBuilderDialog } from "../components/task-builder-dialog";
+} from "@/components/supernova-task";
+import { TaskBuilderDialog } from "@/components/task-builder-dialog";
 import {
   CaretLeftIcon,
   CaretRightIcon,
@@ -13,10 +13,10 @@ import {
   GearIcon,
 } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { settingsRoute } from "./settings/meta";
-import { SupernovaCommandCenter } from "../components/command-center";
-import { AlertDialog } from "../components/alert-dialog";
-import { Kbd } from "../components/kbd";
+import { settingsRoute } from "@/app/settings/meta";
+import { SupernovaCommandCenter } from "@/components/command-center";
+import { AlertDialog } from "@/components/alert-dialog";
+import { Kbd } from "@/components/kbd";
 import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
 import { SupernovaGlobeLogoImage } from "@/components/icons";
 import useSupernovaTasksUI from "@/hooks/useSupernovaTasksUI";
@@ -28,15 +28,16 @@ import {
   isEarlierThan,
   isToday,
 } from "@/utils/date";
-import { filterViewingDateTasks } from "@/utils/supernova-task";
+import {
+  filterUnplannedTasks,
+  filterViewingDateTasks,
+} from "@/utils/supernova-task";
 import { twMerge } from "tailwind-merge";
-import { Button } from "@/components/button";
 import useShortcuts from "@/hooks/useShortcuts";
 import { SupernovaCommand } from "@/types/command";
 
-function Home() {
+function Inbox() {
   const {
-    todayDate,
     accordionValue,
     setAccordionValue,
     taskFetchState,
@@ -51,29 +52,22 @@ function Home() {
     handleCreateOrUpdateTask,
     handleCheckTask,
     taskListRef,
+    crudTaskCommandsList,
+    pageNavigationCommandList,
     handleClickTask,
     doneTasks,
+    taskListMovementCommandList,
     undoneTasks,
     viewingDate,
-    goToNextDay,
-    goToPreviousDay,
-    taskListMovementCommandList,
-    pageNavigationCommandList,
-    crudTaskCommandsList,
-    viewingDateCommandList,
   } = useSupernovaTasksUI();
 
-  const viewingDateUndoneTasks = filterViewingDateTasks(
-    viewingDate,
-    undoneTasks
-  );
-  const viewingDateDoneTasks = filterViewingDateTasks(viewingDate, doneTasks);
+  const inboxUndones = filterUnplannedTasks(undoneTasks);
+  const inboxDones = filterUnplannedTasks(doneTasks);
 
   // register the appropriate shortcuts
   const commands: SupernovaCommand[] = useMemo(
     () => [
       ...crudTaskCommandsList,
-      ...viewingDateCommandList,
       ...pageNavigationCommandList,
       ...taskListMovementCommandList,
     ],
@@ -81,7 +75,6 @@ function Home() {
       crudTaskCommandsList,
       pageNavigationCommandList,
       taskListMovementCommandList,
-      viewingDateCommandList,
     ]
   );
 
@@ -134,26 +127,8 @@ function Home() {
       <div className={twMerge(!isToday(viewingDate) && "opacity-60")}>
         <SupernovaGlobeLogoImage width={30} height={30} priority />
       </div>
-      <div
-        className={twMerge(
-          "flex items-center justify-between gap-[10px] w-full",
-          isEarlierThan(viewingDate, todayDate) && "opacity-50"
-        )}
-      >
-        <Button onClick={goToPreviousDay} bgVariant="ghost">
-          <CaretLeftIcon />
-        </Button>
-        <div className="flex items-center gap-[10px]">
-          <h4 className="text-[20px] font-semibold">
-            {isToday(viewingDate) ? "Today" : getDayOfWeek(viewingDate)}
-          </h4>
-          <p className="text-slate-400 text-[16px]">
-            {getFormattedMonthDateFromDate(viewingDate)}
-          </p>
-        </div>
-        <Button onClick={goToNextDay} bgVariant="ghost">
-          <CaretRightIcon />
-        </Button>
+      <div className="flex items-center justify-center w-full">
+        <h4 className="text-[20px] font-semibold">Inbox</h4>
       </div>
       {taskFetchState.status === "loading" ? (
         <div className="flex items-center gap-[10px]">
@@ -165,7 +140,7 @@ function Home() {
           ref={taskListRef}
         >
           <hr className="w-64" />
-          {viewingDateUndoneTasks.length === 0 && (
+          {inboxUndones.length === 0 && (
             <div className="w-64">
               <p className="text-slate-400 text-[16px] text-center">
                 No tasks yet. Press <Kbd>c</Kbd> to create a task, or go to the
@@ -173,7 +148,7 @@ function Home() {
               </p>
             </div>
           )}
-          {viewingDateUndoneTasks.map((task, undoneIndex) => (
+          {inboxUndones.map((task, undoneIndex) => (
             <SupernovaTaskComponent
               key={task.id}
               task={task}
@@ -207,7 +182,7 @@ function Home() {
         <Accordion.AccordionItem value="supernova-dones">
           <Accordion.AccordionTrigger className="flex items-center justify-between w-full hover:bg-gray-100 dark:hover:bg-zinc-800 rounded px-1">
             <p className="text-xs text-teal-800 dark:text-teal-500">
-              Dones ({viewingDateDoneTasks.length})
+              Dones ({inboxDones.length})
             </p>{" "}
             <ChevronDownIcon className="text-teal-800" />
           </Accordion.AccordionTrigger>
@@ -216,7 +191,7 @@ function Home() {
               className="flex flex-col items-center w-full max-h-full gap-2 overflow-scroll"
               ref={taskListRef}
             >
-              {viewingDateDoneTasks.map((task, doneIndex) => (
+              {inboxDones.map((task, doneIndex) => (
                 <SupernovaTaskComponent
                   key={task.id}
                   task={task}
@@ -236,4 +211,4 @@ function Home() {
   );
 }
 
-export default withAuth(Home);
+export default withAuth(Inbox);
