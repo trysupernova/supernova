@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import Mousetrap from "mousetrap";
+import Mousetrap, { trigger } from "mousetrap";
 import { ISupernovaTask } from "@supernova/types";
 import { settingsRoute } from "../app/settings/meta";
 import { AllAppCommandsEnum, SupernovaCommand } from "../types/command";
@@ -11,21 +11,24 @@ import { chosenTaskIndexGlobal } from "@/store/ui";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import { reorderTaskList } from "@/utils/supernova-task";
 import { inboxRoute } from "@/app/view/inbox/meta";
+import { homeRoute } from "@/app/meta";
+import { FetchState } from "@/types/fetching";
+import useViewingDateUI from "./useViewingDate";
 
-export default function useSupernovaTasksUI(args?: {
+export default function useSupernovaTasksUI(args: {
   tasks: ISupernovaTask[];
+  setTasks: React.Dispatch<React.SetStateAction<ISupernovaTask[]>>;
+  taskFetchState: FetchState;
+  triggerRefetchTasks: () => void;
 }) {
   const router = useRouter();
   // get today's date in this format: Tue, 26th Aug
   const todayDate = useMemo(() => new Date(), []);
 
-  const [viewingDate, setViewingDate] = useState<Date>(todayDate);
+  const { tasks, setTasks, taskFetchState, triggerRefetchTasks } = args;
+
+  const { viewingDate, setViewingDate } = useViewingDateUI();
   const [chosenTaskIndex, setChosenTaskIndex] = useAtom(chosenTaskIndexGlobal);
-  const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
-  const [taskFetchState, setTaskFetchState] = useState<{
-    status: "loading" | "error" | "success";
-    error?: string;
-  }>({ status: "loading" });
   const [showAreYouSureDialog, setShowAreYouSureDialog] =
     useState<boolean>(false);
   const { makeToast } = useSupernovaToast();
@@ -35,7 +38,6 @@ export default function useSupernovaTasksUI(args?: {
   const taskListRef = useRef<HTMLDivElement>(null);
 
   const [taskBuilderIsOpen, setTaskBuilderIsOpen] = useState<boolean>(false);
-  const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
   const [accordionValue, setAccordionValue] = useState<string | undefined>(
     undefined
   );
@@ -92,10 +94,10 @@ export default function useSupernovaTasksUI(args?: {
           description: `This is something on our side.`,
         });
       } finally {
-        setRefetchTasks(true); // refetch the tasks
+        triggerRefetchTasks();
       }
     },
-    [makeToast, tasks]
+    [makeToast, setTasks, tasks, triggerRefetchTasks]
   );
 
   const handleClickTask = (taskIndex: number) => () => {
@@ -116,7 +118,7 @@ export default function useSupernovaTasksUI(args?: {
           throw new Error(res.message);
         }
         console.log("deleted successfully");
-        setRefetchTasks(true); // refetch the tasks
+        triggerRefetchTasks();
       } catch (e: any) {
         console.error(e);
         // TODO: show error toast
@@ -125,7 +127,7 @@ export default function useSupernovaTasksUI(args?: {
         });
       }
     },
-    [makeToast, tasks]
+    [makeToast, setTasks, tasks, triggerRefetchTasks]
   );
 
   const handleCreateOrUpdateTask = useCallback(
@@ -197,7 +199,7 @@ export default function useSupernovaTasksUI(args?: {
             throw new Error(res.message);
           }
           console.log("updated successfully");
-          setRefetchTasks(true); // refetch the tasks
+          triggerRefetchTasks();
         } catch (e: any) {
           console.error(e);
         }
@@ -207,7 +209,7 @@ export default function useSupernovaTasksUI(args?: {
         setTasks(reorderTaskList([...tasks, newTask]));
         makeToast("Task created successfully", "success");
         try {
-          console.log("inserting task to backend...");
+          console.debug("inserting task to backend...");
           await supernovaAPI.addTask({
             body: {
               title: newTask.title,
@@ -218,15 +220,15 @@ export default function useSupernovaTasksUI(args?: {
               startDate: newTask.startDate?.toISOString(),
             },
           });
-          console.log("inserted successfully");
-          setRefetchTasks(true); // refetch the tasks
+          console.debug("inserted successfully");
+          triggerRefetchTasks();
         } catch (e: any) {
           console.error(e);
           // TODO: show error toast
         }
       }
     },
-    [chosenTaskIndex, makeToast, tasks]
+    [chosenTaskIndex, makeToast, setTasks, tasks, triggerRefetchTasks]
   );
 
   const openTaskBuilder = useCallback(
@@ -245,7 +247,7 @@ export default function useSupernovaTasksUI(args?: {
       nextDate.setDate(nextDate.getDate() + 1);
       return nextDate;
     });
-  }, []);
+  }, [setViewingDate]);
 
   const goToPreviousDayUI = useCallback(() => {
     setViewingDate((prev) => {
@@ -253,11 +255,11 @@ export default function useSupernovaTasksUI(args?: {
       nextDate.setDate(nextDate.getDate() - 1);
       return nextDate;
     });
-  }, []);
+  }, [setViewingDate]);
 
   const goToToday = useCallback(() => {
     setViewingDate(todayDate);
-  }, [todayDate]);
+  }, [setViewingDate, todayDate]);
 
   const handleEditTaskUI = useCallback(
     (e: any) => {
@@ -338,6 +340,10 @@ export default function useSupernovaTasksUI(args?: {
     tasks.length,
     undoneTasks.length,
   ]);
+
+  const navigateToTodayPage = useCallback(() => {
+    router.push(homeRoute);
+  }, [router]);
 
   const crudTaskCommandMappings = useMemo(() => {
     return {
@@ -428,6 +434,11 @@ export default function useSupernovaTasksUI(args?: {
 
   const pageNavigationCommandMappings = useMemo(
     () => ({
+      [AllAppCommandsEnum.NAVIGATE_TO_TODAY_PAGE]: {
+        label: "Go to Today page",
+        shortcut: "g+t",
+        cb: navigateToTodayPage,
+      },
       [AllAppCommandsEnum.NAVIGATE_TO_SETTINGS_PAGE]: {
         label: "Go to settings",
         shortcut: "Cmd+,",
@@ -439,7 +450,7 @@ export default function useSupernovaTasksUI(args?: {
         cb: goToInboxPage,
       },
     }),
-    [goToSettingsPage, goToInboxPage]
+    [navigateToTodayPage, goToSettingsPage, goToInboxPage]
   );
 
   const pageNavigationCommandList = useMemo(
@@ -454,46 +465,6 @@ export default function useSupernovaTasksUI(args?: {
     setChosenTaskIndex(-1); // deselect
     setShowAreYouSureDialog(false); // close this alert dialog
   };
-
-  // fetch the task in the beginning
-  useEffect(() => {
-    // save to db
-    (async () => {
-      try {
-        const res = await supernovaAPI.getTasks();
-        if (res.type === "error") {
-          setTaskFetchState({ status: "error", error: res.message });
-        } else {
-          setTasks(res.data);
-          setTaskFetchState({ status: "success" });
-        }
-      } catch (e: any) {
-        setTaskFetchState({ status: "error", error: e.message });
-      }
-    })();
-  }, []);
-
-  // refetch the tasks whenever there's a task update
-  useEffect(() => {
-    if (!refetchTasks) {
-      return;
-    }
-    (async () => {
-      try {
-        console.log("refetching tasks...");
-        const res = await supernovaAPI.getTasks();
-        if (res.type === "error") {
-          throw new Error(res.message);
-        }
-        console.log("refetched successfully");
-        setTasks(res.data);
-        setTaskFetchState({ status: "success" });
-        setRefetchTasks(false);
-      } catch (e: any) {
-        console.error(e);
-      }
-    })();
-  }, [refetchTasks]);
 
   // if the user press outside of the task list (i.e the task builder), then unselect the task
   useOutsideClick(taskListRef, () => {
@@ -523,7 +494,6 @@ export default function useSupernovaTasksUI(args?: {
     undoneTasks,
     doneTasks,
     todayDate,
-    viewingDate,
     goToNextDay: goToNextDayUI,
     goToPreviousDay: goToPreviousDayUI,
     goDownTaskListUI,
@@ -539,5 +509,6 @@ export default function useSupernovaTasksUI(args?: {
     crudTaskCommandMappings,
     taskListMovementCommandMappings,
     taskListMovementCommandList,
+    navigateToTodayPage,
   };
 }

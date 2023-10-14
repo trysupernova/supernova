@@ -1,46 +1,34 @@
 "use client";
 
-import { withAuth } from "@/hocs/withAuth";
+import { settingsRoute } from "@/app/settings/meta";
+import { AlertDialog } from "@/components/alert-dialog";
+import { SupernovaCommandCenter } from "@/components/command-center";
+import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
+import { SupernovaGlobeLogoImage } from "@/components/icons";
+import { Kbd } from "@/components/kbd";
 import {
   SupernovaTaskComponent,
   createBlankTask,
 } from "@/components/supernova-task";
 import { TaskBuilderDialog } from "@/components/task-builder-dialog";
-import {
-  CaretLeftIcon,
-  CaretRightIcon,
-  ChevronDownIcon,
-  GearIcon,
-} from "@radix-ui/react-icons";
-import Link from "next/link";
-import { settingsRoute } from "@/app/settings/meta";
-import { SupernovaCommandCenter } from "@/components/command-center";
-import { AlertDialog } from "@/components/alert-dialog";
-import { Kbd } from "@/components/kbd";
-import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
-import { SupernovaGlobeLogoImage } from "@/components/icons";
-import useSupernovaTasksUI from "@/hooks/useSupernovaTasksUI";
-import * as Accordion from "@radix-ui/react-accordion";
-import React, { useMemo } from "react";
-import {
-  getDayOfWeek,
-  getFormattedMonthDateFromDate,
-  isEarlierThan,
-  isToday,
-} from "@/utils/date";
-import {
-  filterUnplannedTasks,
-  filterViewingDateTasks,
-} from "@/utils/supernova-task";
-import { twMerge } from "tailwind-merge";
+import { withAuth } from "@/hocs/withAuth";
+import useFetchTasks from "@/hooks/useFetchTasks";
 import useShortcuts from "@/hooks/useShortcuts";
+import useSupernovaTasksUI from "@/hooks/useSupernovaTasksUI";
 import { SupernovaCommand } from "@/types/command";
+import { filterUnplannedTasks } from "@/utils/supernova-task";
+import * as Accordion from "@radix-ui/react-accordion";
+import { ChevronDownIcon, GearIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
+import { useMemo } from "react";
 
 function Inbox() {
+  const { tasks, setTasks, taskFetchState, triggerRefetchTasks } =
+    useFetchTasks();
+
   const {
     accordionValue,
     setAccordionValue,
-    taskFetchState,
     taskBuilderIsOpen,
     setTaskBuilderIsOpen,
     chosenTaskIndex,
@@ -58,8 +46,12 @@ function Inbox() {
     doneTasks,
     taskListMovementCommandList,
     undoneTasks,
-    viewingDate,
-  } = useSupernovaTasksUI();
+  } = useSupernovaTasksUI({
+    tasks: filterUnplannedTasks(tasks),
+    setTasks,
+    triggerRefetchTasks,
+    taskFetchState,
+  });
 
   const inboxUndones = filterUnplannedTasks(undoneTasks);
   const inboxDones = filterUnplannedTasks(doneTasks);
@@ -124,9 +116,7 @@ function Inbox() {
           onSubmit={handleCreateOrUpdateTask}
         />
       )}
-      <div className={twMerge(!isToday(viewingDate) && "opacity-60")}>
-        <SupernovaGlobeLogoImage width={30} height={30} priority />
-      </div>
+      <SupernovaGlobeLogoImage width={30} height={30} priority />
       <div className="flex items-center justify-center w-full">
         <h4 className="text-[20px] font-semibold">Inbox</h4>
       </div>

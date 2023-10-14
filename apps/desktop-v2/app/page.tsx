@@ -33,13 +33,17 @@ import { twMerge } from "tailwind-merge";
 import { Button } from "@/components/button";
 import useShortcuts from "@/hooks/useShortcuts";
 import { SupernovaCommand } from "@/types/command";
+import useFetchTasks from "@/hooks/useFetchTasks";
+import useViewingDateUI from "@/hooks/useViewingDate";
 
 function Home() {
+  const { tasks, setTasks, taskFetchState, triggerRefetchTasks } =
+    useFetchTasks();
+  const { viewingDate } = useViewingDateUI();
   const {
     todayDate,
     accordionValue,
     setAccordionValue,
-    taskFetchState,
     taskBuilderIsOpen,
     setTaskBuilderIsOpen,
     chosenTaskIndex,
@@ -54,14 +58,18 @@ function Home() {
     handleClickTask,
     doneTasks,
     undoneTasks,
-    viewingDate,
     goToNextDay,
     goToPreviousDay,
     taskListMovementCommandList,
     pageNavigationCommandList,
     crudTaskCommandsList,
     viewingDateCommandList,
-  } = useSupernovaTasksUI();
+  } = useSupernovaTasksUI({
+    tasks: filterViewingDateTasks(viewingDate, tasks),
+    taskFetchState,
+    setTasks,
+    triggerRefetchTasks,
+  });
 
   const viewingDateUndoneTasks = filterViewingDateTasks(
     viewingDate,
