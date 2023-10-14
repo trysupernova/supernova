@@ -34,6 +34,7 @@ import useShortcuts from "@/hooks/useShortcuts";
 import { SupernovaCommand } from "@/types/command";
 import useFetchTasks from "@/hooks/useFetchTasks";
 import useViewingDateUI from "@/hooks/useViewingDate";
+import TopNavigator from "@/components/top-navigator";
 
 function Home() {
   const { tasks, setTasks, taskFetchState, triggerRefetchTasks } =
@@ -119,7 +120,8 @@ function Home() {
             chosenTaskIndex !== -1 ? memoizedTasksView[chosenTaskIndex] : null,
         }}
       />
-      <div className="flex items-center justify-end w-full">
+      <div className="flex items-center justify-between w-full">
+        <TopNavigator />
         <Link href={settingsRoute}>
           <GearIcon width={20} height={20} />
         </Link>

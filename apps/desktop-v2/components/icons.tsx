@@ -85,3 +85,21 @@ export const CalendarYellowIcon = (props: ImageProps) => (
     {...props}
   />
 );
+
+export const hexagonPath = "/icons/hexagon.svg";
+
+export const HexagonIcon = (props: ImageProps) => (
+  <Image
+    src={hexagonPath}
+    width={13}
+    height={13}
+    alt="Hexagon icon"
+    {...props}
+  />
+);
+
+export const inboxPath = "/icons/inbox.svg";
+
+export const InboxIcon = (props: ImageProps) => (
+  <Image src={inboxPath} width={13} height={13} alt="Inbox icon" {...props} />
+);

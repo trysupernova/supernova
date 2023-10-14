@@ -11,6 +11,7 @@ import {
   createBlankTask,
 } from "@/components/supernova-task";
 import { TaskBuilderDialog } from "@/components/task-builder-dialog";
+import TopNavigator from "@/components/top-navigator";
 import { withAuth } from "@/hocs/withAuth";
 import useFetchTasks from "@/hooks/useFetchTasks";
 import useShortcuts from "@/hooks/useShortcuts";
@@ -98,7 +99,8 @@ function Inbox() {
             chosenTaskIndex !== -1 ? memoizedTasksView[chosenTaskIndex] : null,
         }}
       />
-      <div className="flex items-center justify-end w-full">
+      <div className="flex items-center justify-between w-full">
+        <TopNavigator />
         <Link href={settingsRoute}>
           <GearIcon width={20} height={20} />
         </Link>
