@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import Mousetrap from "mousetrap";
+import Mousetrap, { trigger } from "mousetrap";
 import { ISupernovaTask } from "@supernova/types";
 import { settingsRoute } from "../app/settings/meta";
-import { SupernovaCommand } from "../types/command";
+import { AllAppCommandsEnum, SupernovaCommand } from "../types/command";
 import { useRouter } from "next/navigation";
 import { supernovaAPI } from "@/services/supernova-api";
 import useSupernovaToast from "@/hooks/useSupernovaToast";
@@ -10,22 +10,25 @@ import { useAtom } from "jotai";
 import { chosenTaskIndexGlobal } from "@/store/ui";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import { reorderTaskList } from "@/utils/supernova-task";
+import { inboxRoute } from "@/app/view/inbox/meta";
+import { homeRoute } from "@/app/meta";
+import { FetchState } from "@/types/fetching";
+import useViewingDateUI from "./useViewingDate";
 
-export default function useSupernovaTasksUI() {
+export default function useSupernovaTasksUI(args: {
+  tasks: ISupernovaTask[];
+  setTasks: React.Dispatch<React.SetStateAction<ISupernovaTask[]>>;
+  taskFetchState: FetchState;
+  triggerRefetchTasks: () => void;
+}) {
   const router = useRouter();
   // get today's date in this format: Tue, 26th Aug
-  const today = new Date().toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  const todayDate = useMemo(() => new Date(), []);
 
+  const { tasks, setTasks, taskFetchState, triggerRefetchTasks } = args;
+
+  const { viewingDate, setViewingDate } = useViewingDateUI();
   const [chosenTaskIndex, setChosenTaskIndex] = useAtom(chosenTaskIndexGlobal);
-  const [tasks, setTasks] = useState<ISupernovaTask[]>([]);
-  const [taskFetchState, setTaskFetchState] = useState<{
-    status: "loading" | "error" | "success";
-    error?: string;
-  }>({ status: "loading" });
   const [showAreYouSureDialog, setShowAreYouSureDialog] =
     useState<boolean>(false);
   const { makeToast } = useSupernovaToast();
@@ -35,7 +38,6 @@ export default function useSupernovaTasksUI() {
   const taskListRef = useRef<HTMLDivElement>(null);
 
   const [taskBuilderIsOpen, setTaskBuilderIsOpen] = useState<boolean>(false);
-  const [refetchTasks, setRefetchTasks] = useState<boolean>(false); // refetch the tasks from the backend for consistency and sorting
   const [accordionValue, setAccordionValue] = useState<string | undefined>(
     undefined
   );
@@ -92,10 +94,10 @@ export default function useSupernovaTasksUI() {
           description: `This is something on our side.`,
         });
       } finally {
-        setRefetchTasks(true); // refetch the tasks
+        triggerRefetchTasks();
       }
     },
-    [makeToast, tasks]
+    [makeToast, setTasks, tasks, triggerRefetchTasks]
   );
 
   const handleClickTask = (taskIndex: number) => () => {
@@ -116,7 +118,7 @@ export default function useSupernovaTasksUI() {
           throw new Error(res.message);
         }
         console.log("deleted successfully");
-        setRefetchTasks(true); // refetch the tasks
+        triggerRefetchTasks();
       } catch (e: any) {
         console.error(e);
         // TODO: show error toast
@@ -125,7 +127,7 @@ export default function useSupernovaTasksUI() {
         });
       }
     },
-    [makeToast, tasks]
+    [makeToast, setTasks, tasks, triggerRefetchTasks]
   );
 
   const handleCreateOrUpdateTask = useCallback(
@@ -136,6 +138,11 @@ export default function useSupernovaTasksUI() {
           title: newTask.title,
           originalBuildText: newTask.originalBuildText,
           description: newTask.description,
+          startDate:
+            chosenTask.startDate !== undefined &&
+            newTask.startDate === undefined
+              ? null
+              : newTask.startDate?.toISOString(),
           startAt:
             chosenTask.startTime !== undefined &&
             newTask.startTime === undefined
@@ -192,7 +199,7 @@ export default function useSupernovaTasksUI() {
             throw new Error(res.message);
           }
           console.log("updated successfully");
-          setRefetchTasks(true); // refetch the tasks
+          triggerRefetchTasks();
         } catch (e: any) {
           console.error(e);
         }
@@ -202,7 +209,7 @@ export default function useSupernovaTasksUI() {
         setTasks(reorderTaskList([...tasks, newTask]));
         makeToast("Task created successfully", "success");
         try {
-          console.log("inserting task to backend...");
+          console.debug("inserting task to backend...");
           await supernovaAPI.addTask({
             body: {
               title: newTask.title,
@@ -210,17 +217,18 @@ export default function useSupernovaTasksUI() {
               description: newTask.description,
               startAt: newTask.startTime?.toISOString(),
               expectedDurationSeconds: newTask.expectedDurationSeconds,
+              startDate: newTask.startDate?.toISOString(),
             },
           });
-          console.log("inserted successfully");
-          setRefetchTasks(true); // refetch the tasks
+          console.debug("inserted successfully");
+          triggerRefetchTasks();
         } catch (e: any) {
           console.error(e);
           // TODO: show error toast
         }
       }
     },
-    [chosenTaskIndex, makeToast, tasks]
+    [chosenTaskIndex, makeToast, setTasks, tasks, triggerRefetchTasks]
   );
 
   const openTaskBuilder = useCallback(
@@ -233,66 +241,221 @@ export default function useSupernovaTasksUI() {
     [setChosenTaskIndex]
   );
 
-  const commands: SupernovaCommand[] = useMemo(
-    () => [
-      {
+  const goToNextDayUI = useCallback(() => {
+    setViewingDate((prev) => {
+      const nextDate = new Date(prev);
+      nextDate.setDate(nextDate.getDate() + 1);
+      return nextDate;
+    });
+  }, [setViewingDate]);
+
+  const goToPreviousDayUI = useCallback(() => {
+    setViewingDate((prev) => {
+      const nextDate = new Date(prev);
+      nextDate.setDate(nextDate.getDate() - 1);
+      return nextDate;
+    });
+  }, [setViewingDate]);
+
+  const goToToday = useCallback(() => {
+    setViewingDate(todayDate);
+  }, [setViewingDate, todayDate]);
+
+  const handleEditTaskUI = useCallback(
+    (e: any) => {
+      // if the alert dialog is open, then don't open another one
+      if (anyModalOpen) {
+        return;
+      }
+      e?.preventDefault(); // prevent typing into the task builder
+
+      if (chosenTaskIndex !== -1) {
+        setTaskBuilderIsOpen(true);
+      }
+    },
+    [anyModalOpen, chosenTaskIndex, setTaskBuilderIsOpen]
+  );
+
+  const handleToggleDoneTaskUI = useCallback(() => {
+    if (chosenTaskIndex !== -1) {
+      handleCheckTask(tasks[chosenTaskIndex].id)(
+        !tasks[chosenTaskIndex].isComplete
+      );
+    }
+  }, [chosenTaskIndex, handleCheckTask, tasks]);
+
+  const goToSettingsPage = useCallback(() => {
+    router.push(settingsRoute);
+  }, [router]);
+
+  const handleDeleteTaskUI = useCallback(
+    (e: any) => {
+      e.preventDefault(); // prevent backspace from going back in history
+      if (chosenTaskIndex !== -1) {
+        setShowAreYouSureDialog(true);
+      }
+    },
+    [chosenTaskIndex]
+  );
+
+  const goToInboxPage = useCallback(() => {
+    router.push(inboxRoute);
+  }, [router]);
+
+  const goUpTaskListUI = useCallback(() => {
+    if (chosenTaskIndex > 0) {
+      setChosenTaskIndex(chosenTaskIndex - 1);
+    }
+  }, [chosenTaskIndex, setChosenTaskIndex]);
+
+  const unselectTaskUI = useCallback(() => {
+    // if any modal is open, then don't unselect
+    const modalOpen = taskBuilderIsOpen || showAreYouSureDialog;
+    if (modalOpen) {
+      return;
+    }
+    if (chosenTaskIndex !== -1) {
+      setChosenTaskIndex(-1);
+    }
+  }, [
+    chosenTaskIndex,
+    setChosenTaskIndex,
+    showAreYouSureDialog,
+    taskBuilderIsOpen,
+  ]);
+
+  const goDownTaskListUI = useCallback(() => {
+    // if modal isn't opened and it's at the last undone task,
+    // then don't go down more (will go into the done tasks)
+    if (chosenTaskIndex === undoneTasks.length - 1 && !doneAccordionOpened) {
+      return;
+    }
+    if (chosenTaskIndex < tasks.length - 1) {
+      setChosenTaskIndex(chosenTaskIndex + 1);
+    }
+  }, [
+    chosenTaskIndex,
+    doneAccordionOpened,
+    setChosenTaskIndex,
+    tasks.length,
+    undoneTasks.length,
+  ]);
+
+  const navigateToTodayPage = useCallback(() => {
+    router.push(homeRoute);
+  }, [router]);
+
+  const crudTaskCommandMappings = useMemo(() => {
+    return {
+      [AllAppCommandsEnum.CREATE_TASK]: {
         label: "Create a task",
         shortcut: ["c"],
         cb: openTaskBuilder,
       },
-      {
+      [AllAppCommandsEnum.DELETE_TASK]: {
         label: "Delete task",
         shortcut: "backspace",
-        cb: (e) => {
-          e?.preventDefault(); // prevent backspace from going back in history
-          if (chosenTaskIndex !== -1) {
-            setShowAreYouSureDialog(true);
-          }
-        },
+        cb: handleDeleteTaskUI,
       },
-      {
+      [AllAppCommandsEnum.EDIT_TASK]: {
         label: "Edit task",
         shortcut: "enter",
-        cb: (e) => {
-          // if the alert dialog is open, then don't open another one
-          if (anyModalOpen) {
-            return;
-          }
-
-          e?.preventDefault(); // prevent typing into the task builder
-
-          if (chosenTaskIndex !== -1) {
-            setTaskBuilderIsOpen(true);
-          }
-        },
+        cb: handleEditTaskUI,
       },
-      {
+      [AllAppCommandsEnum.TOGGLE_DONE_TASK]: {
         label: "Mark done/undone",
         shortcut: ["d", "e"],
-        cb: () => {
-          if (chosenTaskIndex !== -1) {
-            handleCheckTask(tasks[chosenTaskIndex].id)(
-              !tasks[chosenTaskIndex].isComplete
-            );
-          }
-        },
+        cb: handleToggleDoneTaskUI,
       },
-      {
+    };
+  }, [
+    handleDeleteTaskUI,
+    handleEditTaskUI,
+    handleToggleDoneTaskUI,
+    openTaskBuilder,
+  ]);
+
+  const crudTaskCommandsList: SupernovaCommand[] = useMemo(
+    () => Object.values(crudTaskCommandMappings),
+    [crudTaskCommandMappings]
+  );
+
+  const taskListMovementCommandMappings = useMemo(
+    () => ({
+      [AllAppCommandsEnum.GO_UP_TASK_LIST]: {
+        label: "Go up task list",
+        shortcut: ["k", "up"],
+        cb: goUpTaskListUI,
+      },
+      [AllAppCommandsEnum.GO_DOWN_TASK_LIST]: {
+        label: "Go down task list",
+        shortcut: ["j", "down"],
+        cb: goDownTaskListUI,
+      },
+      [AllAppCommandsEnum.UNSELECT_TASK]: {
+        label: "Unselect task",
+        shortcut: "esc",
+        cb: unselectTaskUI,
+      },
+    }),
+    [goDownTaskListUI, goUpTaskListUI, unselectTaskUI]
+  );
+
+  const taskListMovementCommandList: SupernovaCommand[] = useMemo(
+    () => Object.values(taskListMovementCommandMappings),
+    [taskListMovementCommandMappings]
+  );
+
+  const viewingDateCommandMappings = useMemo(
+    () => ({
+      [AllAppCommandsEnum.JUMP_TO_TODAY]: {
+        label: "Go back to today",
+        shortcut: "t",
+        cb: goToToday,
+      },
+      [AllAppCommandsEnum.GO_TO_NEXT_DAY]: {
+        label: "Go to the day after",
+        shortcut: ["right", "n"],
+        cb: goToNextDayUI,
+      },
+      [AllAppCommandsEnum.GO_TO_PREVIOUS_DAY]: {
+        label: "Go to the day before",
+        shortcut: ["left", "b"],
+        cb: goToPreviousDayUI,
+      },
+    }),
+    [goToNextDayUI, goToPreviousDayUI, goToToday]
+  );
+
+  const viewingDateCommandList = useMemo(
+    () => Object.values(viewingDateCommandMappings),
+    [viewingDateCommandMappings]
+  );
+
+  const pageNavigationCommandMappings = useMemo(
+    () => ({
+      [AllAppCommandsEnum.NAVIGATE_TO_TODAY_PAGE]: {
+        label: "Go to Today page",
+        shortcut: "g+t",
+        cb: navigateToTodayPage,
+      },
+      [AllAppCommandsEnum.NAVIGATE_TO_SETTINGS_PAGE]: {
         label: "Go to settings",
         shortcut: "Cmd+,",
-        cb: () => {
-          router.push(settingsRoute);
-        },
+        cb: goToSettingsPage,
       },
-    ],
-    [
-      openTaskBuilder,
-      chosenTaskIndex,
-      anyModalOpen,
-      handleCheckTask,
-      tasks,
-      router,
-    ]
+      [AllAppCommandsEnum.NAVIGATE_TO_INBOX_PAGE]: {
+        label: "Go to Inbox",
+        shortcut: "g+i",
+        cb: goToInboxPage,
+      },
+    }),
+    [navigateToTodayPage, goToSettingsPage, goToInboxPage]
+  );
+
+  const pageNavigationCommandList = useMemo(
+    () => Object.values(pageNavigationCommandMappings),
+    [pageNavigationCommandMappings]
   );
 
   const handleSubmitAreYouSure = () => {
@@ -303,111 +466,9 @@ export default function useSupernovaTasksUI() {
     setShowAreYouSureDialog(false); // close this alert dialog
   };
 
-  // register mousetraps
-  useEffect(() => {
-    // go up
-    Mousetrap.bind(["k", "up"], () => {
-      if (chosenTaskIndex > 0) {
-        setChosenTaskIndex(chosenTaskIndex - 1);
-      }
-    });
-    // go down
-    Mousetrap.bind(["j", "down"], () => {
-      // if modal isn't opened and it's at the last undone task,
-      // then don't go down more (will go into the done tasks)
-      if (chosenTaskIndex === undoneTasks.length - 1 && !doneAccordionOpened) {
-        return;
-      }
-      if (chosenTaskIndex < tasks.length - 1) {
-        setChosenTaskIndex(chosenTaskIndex + 1);
-      }
-    });
-
-    // regiser the shortcuts above
-    commands.forEach((command) => {
-      Mousetrap.bind(command.shortcut, command.cb);
-    });
-
-    // unselect task (if task is selected)
-    Mousetrap.bind("esc", () => {
-      // if any modal is open, then don't unselect
-      const modalOpen = taskBuilderIsOpen || showAreYouSureDialog;
-      if (modalOpen) {
-        return;
-      }
-      if (chosenTaskIndex !== -1) {
-        setChosenTaskIndex(-1);
-      }
-    });
-
-    return () => {
-      Mousetrap.unbind(["k", "up"]);
-      Mousetrap.unbind(["j", "down"]);
-      Mousetrap.unbind("esc");
-      commands.forEach((command) => {
-        Mousetrap.unbind(command.shortcut);
-      });
-    };
-  }, [
-    chosenTaskIndex,
-    commands,
-    doneAccordionOpened,
-    handleCheckTask,
-    handleDeleteTask,
-    setChosenTaskIndex,
-    showAreYouSureDialog,
-    taskBuilderIsOpen,
-    tasks,
-    undoneTasks.length,
-  ]);
-
-  // fetch the task in the beginning
-  useEffect(() => {
-    // save to db
-    (async () => {
-      try {
-        const res = await supernovaAPI.getTasks();
-        if (res.type === "error") {
-          setTaskFetchState({ status: "error", error: res.message });
-        } else {
-          setTasks(res.data);
-          setTaskFetchState({ status: "success" });
-        }
-      } catch (e: any) {
-        setTaskFetchState({ status: "error", error: e.message });
-      }
-    })();
-  }, []);
-
-  // refetch the tasks whenever there's a task update
-  useEffect(() => {
-    if (!refetchTasks) {
-      return;
-    }
-    (async () => {
-      try {
-        console.log("refetching tasks...");
-        const res = await supernovaAPI.getTasks();
-        if (res.type === "error") {
-          throw new Error(res.message);
-        }
-        console.log("refetched successfully");
-        setTasks(res.data);
-        setTaskFetchState({ status: "success" });
-        setRefetchTasks(false);
-      } catch (e: any) {
-        console.error(e);
-      }
-    })();
-  }, [refetchTasks]);
-
   // if the user press outside of the task list (i.e the task builder), then unselect the task
-  // only unselect if no modal is open since we don't want to unselect when the user clicks into any modal
   useOutsideClick(taskListRef, () => {
-    if (anyModalOpen) {
-      return;
-    }
-    setChosenTaskIndex(-1);
+    unselectTaskUI();
   });
 
   return {
@@ -422,7 +483,6 @@ export default function useSupernovaTasksUI() {
     handleCreateOrUpdateTask,
     taskBuilderIsOpen,
     setTaskBuilderIsOpen,
-    commands,
     showAreYouSureDialog,
     setShowAreYouSureDialog,
     handleSubmitAreYouSure,
@@ -433,6 +493,22 @@ export default function useSupernovaTasksUI() {
     doneAccordionOpened,
     undoneTasks,
     doneTasks,
-    today,
+    todayDate,
+    goToNextDay: goToNextDayUI,
+    goToPreviousDay: goToPreviousDayUI,
+    goDownTaskListUI,
+    goUpTaskListUI,
+    goToToday,
+    unselectTaskUI,
+    anyModalOpen,
+    pageNavigationCommandList,
+    pageNavigationCommandMappings,
+    viewingDateCommandList,
+    viewingDateCommandMappings,
+    crudTaskCommandsList,
+    crudTaskCommandMappings,
+    taskListMovementCommandMappings,
+    taskListMovementCommandList,
+    navigateToTodayPage,
   };
 }

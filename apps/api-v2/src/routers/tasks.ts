@@ -68,6 +68,7 @@ export default function buildTasksRouter(): Router {
             originalBuildText: req.body.originalBuildText,
             description: req.body.description,
             startAt: req.body.startAt,
+            startDate: req.body.startDate,
             expectedDurationSeconds: req.body.expectedDurationSeconds,
             userId: authCtx.sub,
           },
@@ -109,6 +110,7 @@ export default function buildTasksRouter(): Router {
             originalBuildText: req.body.originalBuildText,
             description: req.body.description,
             startAt: req.body.startAt,
+            startDate: req.body.startDate,
             expectedDurationSeconds: req.body.expectedDurationSeconds,
           },
         });

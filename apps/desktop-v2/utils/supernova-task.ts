@@ -1,6 +1,7 @@
 import { NodeEntry, Text } from "slate";
 import moment from "moment";
 import { ISupernovaTask } from "@supernova/types";
+import { isSameDay } from "./date";
 
 export const START_AT_SLATE_TYPE = "startAt";
 export const EXP_DUR_SLATE_TYPE = "expectedDuration";
@@ -28,7 +29,7 @@ export function getStartAtRegex(): RegExp {
 
 export function getDateRegex(): RegExp {
   return new RegExp(
-    /\b(?:tmr|tom|today|in (\d+) days|next week|in (\d+) weeks|tomorrow)\b/gi
+    /\b(?:tmr|tom|today|tod|in (\d+) days|next week|in (\d+) weeks|tomorrow)\b/gi
   );
 }
 
@@ -124,6 +125,7 @@ export function extractDate(
       date = moment(date).add(1, "day").toDate();
       break;
     case "today":
+    case "tod":
       date.setDate(date.getDate());
       break;
     case "next week":
@@ -188,5 +190,27 @@ export function reorderTaskList(tasks: ISupernovaTask[]) {
       return moment(a.startTime).diff(moment(b.startTime));
     }
     return 0;
+  });
+}
+
+export function filterViewingDateTasks(
+  viewingDate: Date,
+  tasks: ISupernovaTask[]
+): ISupernovaTask[] {
+  return tasks.filter((task) => {
+    if (task.startTime !== undefined) {
+      return isSameDay(task.startTime, viewingDate);
+    } else if (task.startDate !== undefined) {
+      return isSameDay(task.startDate, viewingDate);
+    }
+    return false;
+  });
+}
+
+export function filterUnplannedTasks(
+  tasks: ISupernovaTask[]
+): ISupernovaTask[] {
+  return tasks.filter((task) => {
+    return task.startTime === undefined && task.startDate === undefined;
   });
 }

@@ -18,6 +18,7 @@ export const createTaskRequestSchema = z.object({
     originalBuildText: z.string(),
     description: z.string().optional(),
     startAt: dateString().optional(),
+    startDate: dateString().optional(),
     expectedDurationSeconds: z.number().positive().int().optional(),
   }),
 });
@@ -30,6 +31,7 @@ export const updateTaskRequestSchema = z.object({
     originalBuildText: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     startAt: dateString().nullable().optional(),
+    startDate: dateString().nullable().optional(),
     expectedDurationSeconds: z.number().positive().int().nullable().optional(),
   }),
   params: z.object({

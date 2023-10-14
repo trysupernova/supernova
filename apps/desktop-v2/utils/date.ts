@@ -6,6 +6,10 @@ export function isTomorrow(date: Date) {
   return moment(date).isBetween(beginningOfTmr, endOfTmr);
 }
 
+export function isSameDay(d1: Date, d2: Date) {
+  return moment(d1).isSame(d2, "day");
+}
+
 export function isToday(date: Date) {
   return moment(date).isBetween(moment().startOf("day"), moment().endOf("day"));
 }
@@ -46,4 +50,28 @@ export function getEnglishDay(date: Date): string {
     ? "Next " + moment(date).format("dddd")
     : moment(date).format("MMM D");
   return dateSection;
+}
+
+export function getDayOfWeek(date: Date): string {
+  return moment(date).format("dddd");
+}
+
+export function getFormattedMonthDateFromDate(date: Date): string {
+  return moment(date).format("MMM D");
+}
+
+export function isLaterThan(
+  d1: Date,
+  d2: Date,
+  granularity?: moment.unitOfTime.StartOf
+) {
+  return moment(d1).isAfter(d2, granularity);
+}
+
+export function isEarlierThan(
+  d1: Date,
+  d2: Date,
+  granularity?: moment.unitOfTime.StartOf
+) {
+  return moment(d1).isBefore(d2, granularity);
 }

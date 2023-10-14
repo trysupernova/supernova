@@ -113,7 +113,7 @@ export const TaskBuilderDialog = (props: {
 
     // extract the date if any
     const extractedDate = extractDate(newTitle);
-    let date: Date | undefined = undefined;
+    let date: Date | undefined = cloneEditingTask.startDate;
     if (extractedDate !== null) {
       date = extractedDate.value;
       newTitle =
@@ -136,6 +136,7 @@ export const TaskBuilderDialog = (props: {
       originalBuildText: content,
       title: newTitle,
       startTime,
+      startDate: date,
     }));
     // clear any current errors until the submission is wrong again
     setError(undefined);
@@ -277,9 +278,10 @@ export const TaskBuilderDialog = (props: {
                         }
                       />
                     )}
-                    {taskEdit.startTime !== undefined && (
-                      <StartTimeWidget startTime={taskEdit.startTime} />
-                    )}
+                    <StartTimeWidget
+                      startDate={taskEdit.startDate}
+                      startTime={taskEdit.startTime}
+                    />
                   </div>
                   <div>
                     <Button className="gap-1 pb-2" onClick={handleSubmit}>

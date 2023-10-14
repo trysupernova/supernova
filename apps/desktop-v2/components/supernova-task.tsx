@@ -23,6 +23,7 @@ export const createBlankTask = (): ISupernovaTask => {
     title: "",
     isComplete: false,
     originalBuildText: "",
+    createdAt: new Date(), // this is ignored in the backend, but for now just to satisfy the return arg
   };
 };
 
@@ -74,9 +75,10 @@ export const SupernovaTaskComponent = (props: {
           </div>
         )}
         <div className="self-stretch justify-start items-center inline-flex gap-1">
-          {props.task.startTime && (
-            <StartTimeWidget startTime={props.task.startTime} />
-          )}
+          <StartTimeWidget
+            startTime={props.task.startTime}
+            startDate={props.task.startDate}
+          />
           {props.task.expectedDurationSeconds && (
             <DurationWidget
               expectedDurationSeconds={props.task.expectedDurationSeconds}

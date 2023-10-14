@@ -26,6 +26,7 @@ model Task {
   description String?
   done Boolean @default(false)
   startAt DateTime?
+  startDate DateTime?
   expectedDurationSeconds Int?
   userId String
   createdAt DateTime @default(now())
