@@ -25,7 +25,6 @@ import React, { useMemo } from "react";
 import {
   getDayOfWeek,
   getFormattedMonthDateFromDate,
-  isEarlierThan,
   isToday,
 } from "@/utils/date";
 import { filterViewingDateTasks } from "@/utils/supernova-task";
@@ -41,7 +40,6 @@ function Home() {
     useFetchTasks();
   const { viewingDate } = useViewingDateUI();
   const {
-    todayDate,
     accordionValue,
     setAccordionValue,
     taskBuilderIsOpen,
@@ -145,7 +143,7 @@ function Home() {
       <div
         className={twMerge(
           "flex items-center justify-between gap-[10px] w-full",
-          isEarlierThan(viewingDate, todayDate) && "opacity-50"
+          !isToday(viewingDate) && "opacity-50"
         )}
       >
         <Button onClick={goToPreviousDay} bgVariant="ghost">

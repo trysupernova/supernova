@@ -57,7 +57,7 @@ export function getDayOfWeek(date: Date): string {
 }
 
 export function getFormattedMonthDateFromDate(date: Date): string {
-  return moment(date).format("MMM D");
+  return moment(date).format("ddd MMM D");
 }
 
 export function isLaterThan(

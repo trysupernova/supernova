@@ -22,7 +22,6 @@ export default function useSupernovaTasksUI(args: {
   triggerRefetchTasks: () => void;
 }) {
   const router = useRouter();
-  // get today's date in this format: Tue, 26th Aug
   const todayDate = useMemo(() => new Date(), []);
 
   const { tasks, setTasks, taskFetchState, triggerRefetchTasks } = args;
