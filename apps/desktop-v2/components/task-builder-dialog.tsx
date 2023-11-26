@@ -2,7 +2,7 @@
 
 // this is a task builder dialog which pops up in the center of the screen with an
 // overlay
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { BaseEditor, Editor, Transforms, createEditor, NodeEntry } from "slate";
 import {

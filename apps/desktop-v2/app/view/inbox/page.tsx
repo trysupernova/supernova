@@ -4,7 +4,7 @@ import { settingsRoute } from "@/app/settings/meta";
 import { AlertDialog } from "@/components/alert-dialog";
 import { SupernovaCommandCenter } from "@/components/command-center";
 import { CreateTaskPlaceholder } from "@/components/create-task-placeholder";
-import { SupernovaGlobeLogoImage } from "@/components/icons";
+import { InboxIcon, SupernovaGlobeLogoImage } from "@/components/icons";
 import { Kbd } from "@/components/kbd";
 import {
   SupernovaTaskComponent,
@@ -16,6 +16,7 @@ import { withAuth } from "@/hocs/withAuth";
 import useFetchTasks from "@/hooks/useFetchTasks";
 import useShortcuts from "@/hooks/useShortcuts";
 import useSupernovaTasksUI from "@/hooks/useSupernovaTasksUI";
+import useViewingDateUI from "@/hooks/useViewingDate";
 import { SupernovaCommand } from "@/types/command";
 import { filterUnplannedTasks } from "@/utils/supernova-task";
 import * as Accordion from "@radix-ui/react-accordion";
@@ -26,6 +27,7 @@ import { useMemo } from "react";
 function Inbox() {
   const { tasks, setTasks, taskFetchState, triggerRefetchTasks } =
     useFetchTasks();
+  const { viewingDate } = useViewingDateUI();
 
   const {
     accordionValue,
@@ -120,7 +122,10 @@ function Inbox() {
       )}
       <SupernovaGlobeLogoImage width={30} height={30} priority />
       <div className="flex items-center justify-center w-full">
-        <h4 className="text-[20px] font-semibold">Inbox</h4>
+        <h4 className="text-[20px] font-semibold inline-flex items-center gap-2">
+          <InboxIcon width={20} height={20} />
+          Inbox
+        </h4>
       </div>
       {taskFetchState.status === "loading" ? (
         <div className="flex items-center gap-[10px]">

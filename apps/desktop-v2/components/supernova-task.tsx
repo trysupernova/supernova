@@ -17,13 +17,16 @@ const generateRandomID = () => {
 /*
  * Creates a blank task with a random ID
  */
-export const createBlankTask = (): ISupernovaTask => {
+export const createBlankTask = (args?: {
+  startDate?: Date;
+}): ISupernovaTask => {
   return {
     id: generateRandomID(),
     title: "",
     isComplete: false,
     originalBuildText: "",
     createdAt: new Date(), // this is ignored in the backend, but for now just to satisfy the return arg
+    startDate: args?.startDate,
   };
 };
 

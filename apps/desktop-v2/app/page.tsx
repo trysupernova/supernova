@@ -133,7 +133,9 @@ function Home() {
           editingTask={
             chosenTaskIndex !== -1
               ? memoizedTasksView[chosenTaskIndex]
-              : createBlankTask()
+              : createBlankTask({
+                  startDate: viewingDate,
+                })
           }
           mode={chosenTaskIndex !== -1 ? "edit" : "create"}
           onSubmit={handleCreateOrUpdateTask}

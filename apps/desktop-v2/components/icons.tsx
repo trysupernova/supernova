@@ -17,6 +17,7 @@ export const ArrowRightIcon = (props: ImageProps) => (
     width={20}
     height={20}
     alt="Arrow Right"
+    priority
     {...props}
   />
 );
@@ -54,6 +55,7 @@ export const PlayGreenIcon = (props: ImageProps) => (
     width={13}
     height={13}
     className="ml-[2px]"
+    priority
     {...props}
   />
 );
@@ -70,6 +72,7 @@ export const ClockCyanIcon = (props: ImageProps) => (
     width={13}
     height={13}
     className="ml-[2px]"
+    priority
     {...props}
   />
 );
@@ -82,6 +85,7 @@ export const CalendarYellowIcon = (props: ImageProps) => (
     width={13}
     height={13}
     alt="Calendar icon"
+    priority
     {...props}
   />
 );
