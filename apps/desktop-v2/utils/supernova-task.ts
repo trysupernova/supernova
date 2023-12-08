@@ -29,7 +29,7 @@ export function getStartAtRegex(): RegExp {
 
 export function getDateRegex(): RegExp {
   return new RegExp(
-    /\b(?:tmr|tom|today|tod|in (\d+) days|next week|in (\d+) weeks|tomorrow)\b/gi
+    /\b(?:tmr|tom(orrow)?|today?|in (\d+) days?|next week|in (\d+) weeks?|wed(nesday)?|mon(day)?|tue(s(day)?)?)|thu(rs(day)?)?|fri(day)?|sat(urday)?|sun(day)?\b/gi
   );
 }
 
@@ -109,34 +109,77 @@ export function extractStartAt(
   return { value: date, match };
 }
 
-export function extractDate(
-  text: string
-): { value: Date; match: RegExpExecArray } | null {
+export function extractDate(text: string): {
+  value: Date;
+  startIndex: number;
+  endIndex: number;
+} | null {
   const dateRegex = getDateRegex();
-  const match = dateRegex.exec(text);
-  if (match === null) {
+  let matches: { match: RegExpExecArray }[] = [];
+  let match;
+  let date = new Date();
+  while ((match = dateRegex.exec(text)) !== null) {
+    switch (match[0].toLowerCase()) {
+      case "tomorrow":
+      case "tmr":
+      case "tom":
+        date = moment(date).add(1, "day").toDate();
+        break;
+      case "today":
+      case "tod":
+        date.setDate(date.getDate());
+        break;
+      case "next week":
+        date = moment(date).add(1, "week").toDate();
+        break;
+      case "mon":
+      case "monday":
+        date = moment(date).day(1).toDate();
+        break;
+      case "tue":
+      case "tuesday":
+        date = moment(date).day(2).toDate();
+        break;
+      case "wed":
+      case "wednesday":
+        date = moment(date).day(3).toDate();
+        break;
+      case "thu":
+      case "thurs":
+      case "thursday":
+        date = moment(date).day(4).toDate();
+        break;
+      case "fri":
+      case "friday":
+        date = moment(date).day(5).toDate();
+        break;
+      case "sat":
+      case "saturday":
+        date = moment(date).day(6).toDate();
+        break;
+      case "sun":
+      case "sunday":
+        date = moment(date).day(7).toDate();
+        break;
+      default:
+        const days = parseInt(match[1]);
+        date.setDate(date.getDate() + days);
+        break;
+    }
+    matches.push({ match });
+  }
+  if (matches.length === 0) {
     return null;
   }
-  let date = new Date();
-  switch (match[0]) {
-    case "tomorrow":
-    case "tmr":
-    case "tom":
-      date = moment(date).add(1, "day").toDate();
-      break;
-    case "today":
-    case "tod":
-      date.setDate(date.getDate());
-      break;
-    case "next week":
-      date = moment(date).add(1, "week").toDate();
-      break;
-    default:
-      const days = parseInt(match[1]);
-      date.setDate(date.getDate() + days);
-      break;
-  }
-  return { value: date, match };
+  const startIndex = matches[0].match.index;
+  const endIndex =
+    matches[matches.length - 1].match.index +
+    matches[matches.length - 1].match[0].length;
+  return {
+    value: date,
+    startIndex,
+    endIndex,
+  };
 }
 
 /**
@@ -151,16 +194,21 @@ export function getCbRangesFromRegex(regex: RegExp, type: string) {
     let match: RegExpExecArray | null = null;
     if (Text.isText(node)) {
       const { text } = node;
-      match = regex.exec(text);
+      const matches: RegExpExecArray[] = [];
+      while ((match = regex.exec(text)) !== null) {
+        matches.push(match);
+      }
       // need a match to continue
-      if (!match) {
+      if (matches.length === 0) {
         return [];
       }
-      const matchedSubstr = match[0];
-      ranges.push({
-        anchor: { path, offset: match.index },
-        focus: { path, offset: match.index + matchedSubstr.length },
-        [type]: true,
+      matches.forEach((match) => {
+        const matchedSubstr = match[0];
+        ranges.push({
+          anchor: { path, offset: match.index },
+          focus: { path, offset: match.index + matchedSubstr.length },
+          [type]: true,
+        });
       });
     }
 

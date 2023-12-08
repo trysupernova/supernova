@@ -117,10 +117,8 @@ export const TaskBuilderDialog = (props: {
     if (extractedDate !== null) {
       date = extractedDate.value;
       newTitle =
-        newTitle.slice(0, extractedDate.match.index) +
-        newTitle.slice(
-          extractedDate.match.index + extractedDate.match[0].length
-        );
+        newTitle.slice(0, extractedDate.startIndex) +
+        newTitle.slice(extractedDate.startIndex + extractedDate.endIndex);
     }
     // modify the actual start time with the date
     if (date !== undefined && startTime !== undefined) {
@@ -166,9 +164,9 @@ export const TaskBuilderDialog = (props: {
       let originalBuildText = taskEdit.originalBuildText;
       if (extractedDate !== null) {
         originalBuildText =
-          originalBuildText.slice(0, extractedDate.match.index) +
+          originalBuildText.slice(0, extractedDate.startIndex) +
           originalBuildText.slice(
-            extractedDate.match.index + extractedDate.match[0].length
+            extractedDate.startIndex + extractedDate.endIndex
           );
       }
       taskEdit.originalBuildText = originalBuildText;
